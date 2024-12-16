@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  landing_app:
+    container_name: landing_app
+    build:
+      context: ./landing_page
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_BASE_URL: "http://backend:8000"
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_BASE_URL=http://backend:8000
+    restart: always
+    networks:
+      - app-network
+  evaluate_app:
+    container_name: evaluate_app
+    build:
+      context: ./evaluate
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_BASE_URL: "http://backend:8000"
+    ports:
+      - "3001:3001"
+    environment:
+      - REACT_APP_API_BASE_URL=http://backend:8000
+    restart: always
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./HRM-system-ZERNO-/backend
+      dockerfile: Dockerfile
+    environment:
+      - CONNECTION_STRING=${CONNECTION_STRING}
+    ports:
+      - "8000:8000"
+    restart: always
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+      - landing_app
+      - evaluate_app
+    restart: always
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+
+networks:
+  app-network:
+    driver: bridge

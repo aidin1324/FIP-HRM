@@ -1,0 +1,205 @@
+@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+}
+body{
+    width: 100%;
+    height: 200vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #575656;
+}
+.main-block{
+    width: 430px;
+    height: 900px;
+}
+.first-block{
+    width: 100%;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+.back{
+    position: absolute;
+    display: inline-block;
+    width: 10px; 
+    height: 10px; 
+    border-top: 2px solid white;
+    border-left: 2px solid white; 
+    transform: rotate(315deg); 
+    left: 30px;
+}
+
+.second-block{
+    margin-top: 40px;
+    width: 100%;
+    height: 780px;
+    background-color: white;
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+.grade-item{
+    width: 360px;
+    height: 90px;
+    background-color: white;
+    border-radius: 30px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+}
+.submit-btn{
+    margin-top: 10px;
+    width: 200px;
+    height: 50px;
+    background-color: #575656;
+    color: white;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+}
+.text-area{
+    display: block;
+    width: 360px;
+    height: 80px;
+    border: none;
+    resize: none;
+    border: 1px solid #ccc;
+    border-radius: 30px;
+    color: #575656;
+    padding: 12px;
+}
+.stars {
+    display: flex;
+    gap: 5px;
+    justify-content: flex-start;
+    margin-left: 40px;
+    margin-top: 10px;
+}
+.star {
+    font-size: 20px;
+    color: #ccc;
+    cursor: pointer;
+}
+.star.checked {
+    color: #f8b500;
+}
+.grade-p {
+    font-size: 18px;
+    font-weight: bold;
+    color: #575656;
+}
+.grade-item p {
+    text-align: left;
+    font-size: 16px;
+    color: #575656;
+    margin-top: 15px;
+    margin-left: 25px;
+}
+
+
+
+/* Стили переключателей и инпутов */
+.grade-contact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-family: Arial, sans-serif;
+  width: 360px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.switch {
+  position: relative;
+  display: block;
+  width: 50px;
+  height: 25px;
+  align-self: flex-end;
+  margin-right: 10px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 25px;
+}
+
+.slider:before {
+  position: absolute;
+  content: '';
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 2.5px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4caf50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+.phone-input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  width: 300px;
+  max-width: 300px;
+}
+.phone-input-block {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  opacity: 0;
+  visibility: hidden; 
+  transition: opacity 0.3s ease, visibility 0s ease 0.3s; 
+}
+
+.phone-input-block.visible {
+  opacity: 1; 
+  visibility: visible; 
+  transition: opacity 0.3s ease, visibility 0s ease 0s; 
+}
+
+.name-input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  width: 300px;
+  max-width: 300px;
+}
+.name-client{
+  display: block;
+}
+.name-label{
+  position: absolute;
+}
