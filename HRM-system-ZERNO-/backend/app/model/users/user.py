@@ -12,9 +12,12 @@ class User(Base):
     second_name = Column(String(50), nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
-    status = Column(String(20), default='pending')
-    
+
     role_id = Column(Integer, ForeignKey("private.roles.id"))
     
     role = relationship('Role', back_populates='users')
+    registration_requests = relationship('RegistrationRequest', back_populates='admin', uselist=False)
+    
+    def __repr__(self):
+        return f"<User {self.email}>"
     

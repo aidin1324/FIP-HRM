@@ -11,3 +11,4 @@ class Role(Base):
     role = Column(String(20), unique=True, nullable=False)
     
     users = relationship('User', back_populates='role')
+    registration_requests = relationship('RegistrationRequest', back_populates='role')

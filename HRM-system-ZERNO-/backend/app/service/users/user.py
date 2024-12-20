@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from schema.users.user import UserCreate, UserUpdate, UserResponse
 from passlib.context import CryptContext
-from repository.users import UserRepository
+from repository.users.user import UserRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -12,30 +12,45 @@ class UserService:
         self.session = session
         self.user_repo = user_repo
         
-    async def register_user(self, user_create: UserCreate):
+    async def register_user(
+        self, 
+        user_create: UserCreate,
+        hash=False,
+        nested=False
+    ):
         """
-        register a user
+        send request to register a user
+        default status is pending 
 
         Args:
             user_create (UserCreate)
         """
         try:
-            hashed_password = pwd_context.hash(user_create.password)
-            user_create.password = hashed_password
+            if hash:
+                hashed_password = pwd_context.hash(user_create.hashed_password)
+                user_create.hashed_password = hashed_password
             
-            async with self.session.begin():
-                user = await self.user_repo.create_user(user_create)
-            # return user if needed 
+            if nested:
+                user = await self.user_repo.create_user(user_create) # flush
+                # return user if needed
+            else:
+                async with self.session.begin():
+                    user = await self.user_repo.create_user(user_create)
+                # return user if needed 
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
     
-    async def get_all_users(self) -> list[UserResponse]:
+    async def get_users_by_cursor(self) -> list[UserResponse]:
         """
         get all users
         
         soon will be released with pagination!!!
         """
-        pass
+        try:
+            users = await self.user_repo.get_all_users()
+            return users
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
     
     async def get_user_by_id(self, user_id: int) -> UserResponse:
         """

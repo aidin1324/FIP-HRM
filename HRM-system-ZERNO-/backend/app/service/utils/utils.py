@@ -1,3 +1,4 @@
+from typing import Annotated
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt
@@ -20,7 +21,8 @@ def verify_password(plain_password, hashed_password):
 
 def jwt_decode(token: str):
     try:
-        jwt = jwt.decode(token, secret_key, algorithms=[algorithm])
-        return jwt
+        jwt_data = jwt.decode(token, secret_key, algorithms=[algorithm])
+        return jwt_data
     except ExpiredSignatureError:
         raise Exception("Token expired")
+    

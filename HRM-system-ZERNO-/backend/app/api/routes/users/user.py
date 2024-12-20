@@ -1,31 +1,35 @@
-from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordRequestForm
+from api.dependencies import get_user_service
 
+from fastapi import APIRouter, Depends, HTTPException
+
+from schema.users.user import UserResponse, UserUpdate, UserCreate
 from service.users.user import UserService
-
-from dependencies import get_user_service
-
-from typing import Annotated
-
 
 router = APIRouter()
 
 
-CommonUserService = Annotated[
-    UserService,
-    Depends(get_user_service)
-]
+@router.get(
+    "/get_all",
+    response_model=list[UserResponse],
+    summary="Get all users",
+    description="Get all users with pagination",
+)
+async def get_all_users(
+    user_service: UserService = Depends(get_user_service)
+) -> dict:
+    users = await user_service.get_users_by_cursor()
+    return users
 
 
 @router.post(
-    "/register",
+    "/create_user",
     response_model=dict,
-    summary="Send user registration request",
-    description="Send user registration request to the admin, filling in the user's email, password, and role",
+    summary="Create a user",
+    description="Create a user with email, password, and role strait without registration request",
 )
-async def register_user(
-    user_create: OAuth2PasswordRequestForm,
-    user_service: CommonUserService = CommonUserService
+async def create_user(
+    request: UserCreate,
+    user_service: UserService = Depends(get_user_service)
 ) -> dict:
-    await user_service.register_user(user_create)
-    return {"status": "User registered successfully"}
+    await user_service.register_user(request, hash=True)
+    return {"status": "User created successfully"}

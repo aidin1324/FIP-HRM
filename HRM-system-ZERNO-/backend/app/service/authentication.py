@@ -1,18 +1,27 @@
 from fastapi import HTTPException
-from .users import UserService
+from .users.user import UserService
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils.utils import create_access_token, verify_password, jwt_decode
+from .utils.utils import create_access_token, verify_password, jwt_decode
 from model import User
+from schema.authentication import TokenCreate, TokenResponse
+from service.users.role import RoleService
+from schema.users.user import UserResponse 
 
 
 class AuthenticationService:
     
-    def __init__(self, session: AsyncSession, user_service: UserService):
+    def __init__(
+        self, 
+        session: AsyncSession, 
+        user_service: UserService,
+        role_service: RoleService
+    ):
         self.session = session
         self.user_service = user_service
+        self.role_service = role_service
         
-    async def login(self, email: str, password: str) -> str:
+    async def login(self, TokenCreate) -> TokenResponse:
         """
         log into the system with email and password
         generate a jwt access token and return it
@@ -22,54 +31,48 @@ class AuthenticationService:
             password (str)
         """
         try:
-            user: User = await self.user_service.get_user_by_email(email)
+            user: User = await self.user_service.get_user_by_email(TokenCreate.email)
             
-            if not verify_password(password, user.hashed_password):
+            if not verify_password(TokenCreate.password, user.hashed_password):
                 raise HTTPException(status_code=400, detail="Incorrect password")
-            
-            if user.status == "pending":
-                raise HTTPException(status_code=400, detail="User is not verified by the admin")
-            
+
             token = create_access_token(
                 {
-                    "sub": user.email,
-                    "role": user.role
+                    "id": user.id,
                 }
             )
             
-            return token
+            return TokenResponse(access_token=token)
         except Exception as e:
-            raise HTTPException(status_code=400, detail=str)
-    
-    async def get_current_user(self, token: str):
-        """
-        get the current user from the token
-
-        Args:
-            token (str)
-        """
+            raise HTTPException(status_code=400, detail=str(e))
+        
+    async def get_current_user(self, token: str) -> UserResponse:
         try:
             payload = jwt_decode(token)
-            email: str = payload.get("sub")
-            user = await self.user_service.get_user_by_email(email)
+            user_id: int = payload.get("id")
+            if not user_id:
+                raise HTTPException(status_code=400, detail="Missing user_id in token payload")
+            user = await self.user_service.get_user_by_id(user_id)
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
             return user
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
-    
-    async def get_current_admin(self, token: str):
-        """
-        get the current admin from the token
 
-        Args:
-            token (str)
-        """
+    async def get_current_admin(self, token: str) -> UserResponse:
         try:
             payload = jwt_decode(token)
-            email: str = payload.get("sub")
-            user = await self.user_service.get_user_by_email(email)
-            if user.role != "admin":
-                raise HTTPException(status_code=400, detail="User is not an admin")
+
+            user_id: int = payload.get("id")
+            if not user_id:
+                raise HTTPException(status_code=400, detail="Missing user_id in token payload")
+            user = await self.user_service.get_user_by_id(user_id)
+
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
             
+            if (await self.role_service.get_role_by_id(user.role_id)).role != "admin":
+                raise HTTPException(status_code=403, detail="User is not an admin")
             return user
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
@@ -81,12 +84,7 @@ class AuthenticationService:
         Args:
             token (str)
         """
-        try:
-            payload = jwt_decode(token)
-            role = payload.get("role")
-            return role
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=str(e))
+        pass
     
     async def refresh_token(self, token: str):
         """

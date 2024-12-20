@@ -2,6 +2,8 @@ from repository.base import BaseRepository
 from sqlalchemy.future import select
 from model import User
 
+from sqlalchemy.orm import joinedload
+
 
 class UserRepository(BaseRepository):
     async def get_all_users(self):
@@ -10,12 +12,20 @@ class UserRepository(BaseRepository):
         return users
     
     async def get_user_by_id(self, user_id: int):
-        result = await self.connection.execute(select(User).filter(User.id == user_id))
+        result = await self.connection.execute(
+            select(User)
+            .options(joinedload(User.role))
+            .filter(User.id == user_id)
+        )
         user = result.scalars().first()
         return user
     
     async def get_user_by_email(self, email: str):
-        result = await self.connection.execute(select(User).filter(User.email == email))
+        result = await self.connection.execute(
+            select(User)
+            .options(joinedload(User.role))
+            .filter(User.email == email)
+        )
         user = result.scalars().first()
         return user
     
