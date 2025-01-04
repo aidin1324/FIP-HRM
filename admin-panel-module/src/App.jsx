@@ -15,6 +15,8 @@ import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Layout from './pages/Layout';
 import Register from './pages/Register';
+import PrivateRoute from './components/PrivateRoute';
+import Unauthorized from './pages/Unauthorized';
 
 function App() {
 
@@ -36,9 +38,16 @@ function App() {
       {/* Вложенный маршрут для Layout */}
       <Route path="/" element={<Layout />}>
         {/* Profile будет отображаться внутри Layout */}
-        <Route index element={<Dashboard />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <PrivateRoute role={['admin', 'manager']}>
+              <Dashboard />
+            </PrivateRoute>
+            } 
+        />
         <Route path="profile" element={<Profile />} />
-        
+        {/* <Route path="unauthorized" element={<Unauthorized />} /> */}
       </Route>
     </Routes>
     </>

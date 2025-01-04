@@ -39,6 +39,7 @@ class AuthenticationService:
             token = create_access_token(
                 {
                     "id": user.id,
+                    "role": (await self.role_service.get_role_by_id(user.role_id)).role
                 }
             )
             
