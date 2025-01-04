@@ -16,6 +16,7 @@ import Profile from './pages/Profile';
 import Layout from './pages/Layout';
 import Register from './pages/Register';
 import PrivateRoute from './components/PrivateRoute';
+import Users from './pages/Users';
 import Unauthorized from './pages/Unauthorized';
 
 function App() {
@@ -46,7 +47,9 @@ function App() {
             </PrivateRoute>
             } 
         />
-        <Route path="profile" element={<Profile />} />
+        <Route path="/users" element={<Users />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/profile" element={<Profile />} />
         {/* <Route path="unauthorized" element={<Unauthorized />} /> */}
       </Route>
     </Routes>

@@ -1,137 +1,263 @@
-import React from 'react';
-// import Sidebar from '../partials/Sidebar';
-// import Header from '../partials/Header';
+import React, { useState } from 'react';
+import { FaCalendarAlt } from 'react-icons/fa';
+import { Bar } from 'react-chartjs-2';
 
 function Profile() {
-    // Example user data - replace with your actual user data
-    const userData = {
-        name: "John Doe",
-        role: "Senior Developer",
-        email: "john.doe@example.com",
-        phone: "+1 (555) 123-4567",
-        location: "New York, USA",
-        stats: {
-            projects: 24,
-            tasks: 132,
-            connections: 560,
-            status: "Active"
+  const [dateRange, setDateRange] = useState('15');
+
+  // Pagination states
+  const [guestPage, setGuestPage] = useState(1);
+  const [managerPage, setManagerPage] = useState(1);
+  const itemsPerPage = 3; // Adjust as needed
+
+  const userData = {
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john.doe@example.com',
+  };
+
+  
+const chartData = {
+    labels: ['Category 1', 'Category 2', 'Category 3', 'Category 4'],
+    datasets: [
+        {
+            label: 'Ratings',
+            data: [1.5, 2.5, 3.5, 4.5],
+            backgroundColor: ['#7CB9E8', '#77DD77', '#FFB347', '#CBA135'],
         },
-        recentActivity: [
-            { id: 1, text: "Completed project milestone", time: "2 hours ago" },
-            { id: 2, text: "Started new task", time: "4 hours ago" },
-            { id: 3, text: "Team meeting", time: "6 hours ago" }
-        ]
-    };
+    ],
+};
+// check how to use chartoptions
+const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { display: false },
+        tooltip: {
+            callbacks: {
+                label: (context) => `Rating: ${context.parsed.y}/5`,
+            },
+        },
+    },
+    scales: {
+        y: {
+            beginAtZero: true,
+            max: 5,
+            ticks: {
+                stepSize: 0.5,
+            },
+            title: {
+                display: true,
+                text: 'Rating',
+            },
+        },
+        x: {
+            title: {
+                display: true,
+                text: 'Categories',
+            },
+        },
+    },
+};
 
-    return (
-        <div className="flex h-screen overflow-hidden">
-            {/* <Sidebar /> */}
 
-            <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-                {/* <Header /> */}
+  const comments = [
+    { id: 1, role: 'guest', name: 'Гость', text: 'Хорошая работа!', date: '2023-09-01' },
+    { id: 2, role: 'manager', name: 'Jane Smith', text: 'Прошу прислать отчёт до конца дня.', date: '2023-09-02' },
+    { id: 3, role: 'guest', name: 'Гость', text: 'Есть вопрос по документам...', date: '2023-09-03' },
+    { id: 4, role: 'manager', name: 'John Manager', text: 'Свяжитесь с отделом кадров.', date: '2023-09-04' },
+    { id: 5, role: 'guest', name: 'Гость', text: 'Ещё один комментарий.', date: '2023-09-05' },
+    { id: 6, role: 'manager', name: 'Alice Manager', text: 'Отличная работа над задачей!', date: '2023-09-06' },
+  ];
 
-                <main className="grow">
-                    <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
-                        <div className="flex flex-col col-span-full xl:col-span-8 bg-white dark:bg-gray-800 shadow-sm rounded-xl">
-                            {/* Header */}
-                            <header className="px-5 py-4 border-b border-gray-100 dark:border-gray-700/60">
-                                <h2 className="font-semibold text-gray-800 dark:text-gray-100">User Profile</h2>
-                            </header>
-                            
-                            <div className="p-5">
-                                {/* Profile section */}
-                                <div className="flex flex-col md:flex-row items-center md:items-start">
-                                    {/* Avatar */}
-                                    <div className="relative mb-4 md:mb-0 md:mr-4">
-                                        <svg 
-                                            className="w-24 h-24 text-gray-400 bg-gray-100 rounded-full p-2"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                                        </svg>
-                                        <button className="absolute bottom-0 right-0 p-2 bg-violet-500 hover:bg-violet-600 text-white rounded-full shadow-sm">
-                                            <svg className="w-4 h-4 fill-current" viewBox="0 0 16 16">
-                                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                                            </svg>
-                                        </button>
-                                    </div>
+  // Split comments based on role
+  const guestComments = comments.filter((c) => c.role === 'guest');
+  const managerComments = comments.filter((c) => c.role === 'manager');
 
-                                    {/* User info */}
-                                    <div className="flex flex-col items-center md:items-start">
-                                        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">{userData.name}</h2>
-                                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">{userData.role}</p>
-                                        <div className="flex space-x-4 mb-4">
-                                            <button className="btn bg-violet-500 hover:bg-violet-600 text-white">Edit Profile</button>
-                                            <button className="btn border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-600 dark:text-gray-300">Settings</button>
-                                        </div>
-                                    </div>
-                                </div>
+  // Calculate pagination for each group
+  const guestTotalPages = Math.ceil(guestComments.length / itemsPerPage);
+  const managerTotalPages = Math.ceil(managerComments.length / itemsPerPage);
 
-                                {/* Stats */}
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-                                    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                                        <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-0.5">Projects</div>
-                                        <div className="text-2xl font-bold text-gray-800 dark:text-gray-100">{userData.stats.projects}</div>
-                                    </div>
-                                    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                                        <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-0.5">Tasks</div>
-                                        <div className="text-2xl font-bold text-gray-800 dark:text-gray-100">{userData.stats.tasks}</div>
-                                    </div>
-                                    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                                        <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-0.5">Connections</div>
-                                        <div className="text-2xl font-bold text-gray-800 dark:text-gray-100">{userData.stats.connections}</div>
-                                    </div>
-                                    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                                        <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-0.5">Activity</div>
-                                        <div className="text-2xl font-bold text-green-500">{userData.stats.status}</div>
-                                    </div>
-                                </div>
+  // Slice arrays for current page
+  const currentGuestComments = guestComments.slice(
+    (guestPage - 1) * itemsPerPage,
+    guestPage * itemsPerPage
+  );
+  const currentManagerComments = managerComments.slice(
+    (managerPage - 1) * itemsPerPage,
+    managerPage * itemsPerPage
+  );
 
-                                {/* Contact information */}
-                                <div className="mt-6">
-                                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Contact Information</h3>
-                                    <div className="space-y-3">
-                                        <div className="flex items-center">
-                                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-32">Email:</span>
-                                            <span className="text-sm text-gray-800 dark:text-gray-100">{userData.email}</span>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-32">Phone:</span>
-                                            <span className="text-sm text-gray-800 dark:text-gray-100">{userData.phone}</span>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-32">Location:</span>
-                                            <span className="text-sm text-gray-800 dark:text-gray-100">{userData.location}</span>
-                                        </div>
-                                    </div>
-                                </div>
+  return (
+    <div className="flex flex-col h-screen w-full overflow-auto bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="max-w-7xl mx-auto w-full h-full">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
+          <div>
+            <h1 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-100">
+              Profile
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              {userData.firstName} {userData.lastName} &middot; {userData.email}
+            </p>
+          </div>
 
-                                {/* Recent Activity */}
-                                <div className="mt-6">
-                                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Recent Activity</h3>
-                                    <div className="space-y-3">
-                                        {userData.recentActivity.map((activity) => (
-                                            <div key={activity.id} className="flex items-start p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                                <div className="w-8 h-8 rounded-full bg-violet-500 flex items-center justify-center mr-3">
-                                                    <svg className="w-4 h-4 fill-current text-white" viewBox="0 0 16 16">
-                                                        <path d="M10 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{activity.text}</p>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400">{activity.time}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
+                  <div className="flex items-center space-x-2 mt-3 md:mt-0">
+                    <FaCalendarAlt className="text-gray-600 dark:text-gray-300" />
+                    <select
+                      value={dateRange}
+                      onChange={(e) => setDateRange(e.target.value)}
+                      className="form-select rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-200"
+                    >
+                      <option value="7">Last 7 days</option>
+                      <option value="15">Last 15 days</option>
+                      <option value="30">Last 30 days</option>
+                    </select>
+                  </div>
+                </div>
+
+
+                <div className="flex flex-col lg:flex-row gap-4">
+
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 lg:w-2/3 h-full">
+                        <h2 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">
+                            Activity Chart
+                        </h2>
+                        <div className="h-64 md:h-80 lg:h-96">
+                            <Bar
+                            data={chartData}
+                            options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                y: { beginAtZero: true },
+                                },
+                            }}
+                            />
                         </div>
                     </div>
-                </main>
+
+
+                  <div className="flex flex-col lg:w-1/3 gap-4">
+                    {/* Guest Comments */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1">
+              <h2 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">Гости</h2>
+              <div className="space-y-4">
+                {currentGuestComments.map((comment) => (
+                  <div
+                    key={comment.id}
+                    className="border-b border-gray-200 dark:border-gray-700 pb-2"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium text-gray-700 dark:text-gray-200">
+                        {comment.name}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {new Date(comment.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">
+                      {comment.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              {/* Guest Pagination */}
+              <div className="flex justify-center items-center mt-4 space-x-2">
+                <button
+                  onClick={() => setGuestPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={guestPage === 1}
+                  className={`px-3 py-1 rounded-md text-sm ${
+                    guestPage === 1
+                      ? 'bg-gray-200 text-gray-400 cursor-default'
+                      : 'bg-violet-500 text-white hover:bg-violet-600'
+                  }`}
+                >
+                  Prev
+                </button>
+                <span className="text-gray-700 dark:text-gray-200 text-sm">
+                  {guestPage} / {guestTotalPages || 1}
+                </span>
+                <button
+                  onClick={() =>
+                    setGuestPage((prev) =>
+                      prev < guestTotalPages ? prev + 1 : prev
+                    )
+                  }
+                  disabled={guestPage === guestTotalPages || guestTotalPages === 0}
+                  className={`px-3 py-1 rounded-md text-sm ${
+                    guestPage === guestTotalPages || guestTotalPages === 0
+                      ? 'bg-gray-200 text-gray-400 cursor-default'
+                      : 'bg-violet-500 text-white hover:bg-violet-600'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
             </div>
+
+            {/* Manager Comments */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 mb-[105px]">
+              <h2 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">Менеджеры</h2>
+              <div className="space-y-4">
+                {currentManagerComments.map((comment) => (
+                  <div
+                    key={comment.id}
+                    className="border-b border-gray-200 dark:border-gray-700 pb-2"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium text-gray-700 dark:text-gray-200">
+                        {comment.name}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {new Date(comment.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">
+                      {comment.text}
+                    </p>
+                    <p className="text-xs text-violet-500 mt-1">Роль: {comment.role}</p>
+                  </div>
+                ))}
+              </div>
+              {/* Manager Pagination */}
+              <div className="flex justify-center items-center mt-4 space-x-2">
+                <button
+                  onClick={() => setManagerPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={managerPage === 1}
+                  className={`px-3 py-1 rounded-md text-sm ${
+                    managerPage === 1
+                      ? 'bg-gray-200 text-gray-400 cursor-default'
+                      : 'bg-violet-500 text-white hover:bg-violet-600'
+                  }`}
+                >
+                  Prev
+                </button>
+                <span className="text-gray-700 dark:text-gray-200 text-sm">
+                  {managerPage} / {managerTotalPages || 1}
+                </span>
+                <button
+                  onClick={() =>
+                    setManagerPage((prev) =>
+                      prev < managerTotalPages ? prev + 1 : prev
+                    )
+                  }
+                  disabled={managerPage === managerTotalPages || managerTotalPages === 0}
+                  className={`px-3 py-1 rounded-md text-sm ${
+                    managerPage === managerTotalPages || managerTotalPages === 0
+                      ? 'bg-gray-200 text-gray-400 cursor-default'
+                      : 'bg-violet-500 text-white hover:bg-violet-600'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 export default Profile;
