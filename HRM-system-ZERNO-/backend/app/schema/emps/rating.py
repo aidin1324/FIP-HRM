@@ -10,11 +10,12 @@ class RatingBase(BaseModel):
 
 
 class RatingCreate(RatingBase):
-    feedback_id: int
+    pass
 
 
 class RatingUpdate(RatingBase):
-    feedback_id: int
+    rating: int | None
+    feedback_type_id: int | None
 
 
 class RatingResponse(RatingBase):

@@ -1,11 +1,11 @@
 import datetime
 from fastapi.exceptions import HTTPException
-from model import Feedback, Contact, Comment, Rating, Waiter
+from model import Feedback, Contact, Rating, WaiterScore
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repository.emps.feedbacks import FeedbackRepository
 
-from schema.emps.feedbacks import CompleteFeedbackCreate, FeedbackCreate, FeedbackUpdate
+from schema.emps.feedbacks import CompleteFeedbackCreate, FeedbackUpdate
 
 
 class FeedbackService:
@@ -26,23 +26,19 @@ class FeedbackService:
                 is_notified=feedback_create.is_notified,
                 created_at=datetime.datetime.now()
             )
-
-            # Add Comment if provided
-            if feedback_create.comment:
-                feedback.comment = Comment(
-                    comment=feedback_create.comment
+            
+            # Add Waiter Score if provided
+            if feedback_create.waiter_score:
+                feedback.waiter_score = WaiterScore(
+                    **feedback_create.waiter_score.model_dump()
                 )
-
+            
             # Add Contact if provided
             if feedback_create.contact:
                 feedback.contact = Contact(
                     phone=feedback_create.contact
                 )
-
-            if feedback_create.waiter:
-                feedback.waiter = Waiter(
-                    waiter_name=feedback_create.waiter 
-                )
+            
             # Add Ratings
             feedback.ratings = [
                 Rating(
@@ -51,6 +47,7 @@ class FeedbackService:
                 )
                 for rating in feedback_create.ratings
             ]
+            
             async with self.session.begin() as transaction:
                 self.session.add(feedback)
                 # create feedback
@@ -58,7 +55,7 @@ class FeedbackService:
                 # repo contact create contact by id
                 # repo rating create rating by id
             
-            await self.session.refresh(feedback, ["comment", "contact", "ratings", "waiter"])
+            await self.session.refresh(feedback, ["contact", "ratings", "waiter_score"])
             return feedback
 
         except Exception as e:

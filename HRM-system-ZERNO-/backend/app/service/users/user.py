@@ -4,11 +4,17 @@ from passlib.context import CryptContext
 from repository.users.user import UserRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .role import RoleService
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
  
  
 class UserService:
-    def __init__(self, session: AsyncSession, user_repo: UserRepository):
+    def __init__(
+        self, 
+        session: AsyncSession, 
+        user_repo: UserRepository
+    ):
         self.session = session
         self.user_repo = user_repo
         
@@ -40,14 +46,34 @@ class UserService:
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
     
-    async def get_users_by_cursor(self) -> list[UserResponse]:
+    async def get_users_by_cursor_with_sort(
+        self,
+        limit: int = 5, 
+        cursor: int | None = None,
+        role_id: int | None = None,
+        sort_by: str = "id",
+        ascending: bool = True,
+        active: bool | None = None
+    ) -> list[UserResponse]:
         """
-        get all users
+        get all users with pagination
         
-        soon will be released with pagination!!!
+        Args:
+            limit (int): Number of users to retrieve.
+            cursor (str, optional): The cursor for pagination.
+        
+        Returns:
+            dict: Users data and next cursor.
         """
         try:
-            users = await self.user_repo.get_all_users()
+            users = await self.user_repo.get_users_pagination_with_sort(
+                limit=limit, 
+                cursor=cursor,
+                role_id=role_id,
+                sort_by=sort_by,
+                ascending=ascending,
+                active=active
+            )
             return users
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
@@ -81,7 +107,7 @@ class UserService:
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
         
-    async def update_user(self, user_id: int, user_update) -> UserResponse:
+    async def update_user(self, user_id: int, user_update: UserUpdate) -> UserResponse:
         """
         update a user
         

@@ -1,23 +1,27 @@
-// src/components/Outro.js
+// src/components/Intro.js
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './Outro.css';
+import { FaSmile } from 'react-icons/fa'; // Importing smile emoji
 import zernoLogo from '../components/img/logo.png';
+import './Intro.css';
 
-function Outro() {
+function Intro() {
   return (
     <div className="main-block">
       <div className="container-1">
         <img src={zernoLogo} alt="Логотип Zerno" className="intro-logo" />
-        <p className="welcome-text">Спасибо за ваш отзыв!</p>
+   
+        <p className="block-text">
+        Спасибо, что оставляете отзыв!
+        </p>
       </div>
       <div className="container-2">
         <button className="cont-btn">
-          <Link to="https://www.google.com">Вернуться</Link>
+          <Link to="/nps">Продолжить</Link>
         </button>
       </div>
     </div>
   );
 }
 
-export default Outro;
+export default Intro;

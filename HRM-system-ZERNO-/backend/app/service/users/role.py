@@ -24,6 +24,16 @@ class RoleService:
             return roles
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
+    
+    async def get_role_id_by_name(self, role_name: str) -> int:
+        """
+        get a role id by name
+        """
+        try:
+            role = await self.role_repo.get_role_id_by_name(role_name)
+            return role
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
         
     async def get_role_by_id(self, role_id: int) -> RoleResponse:
         """

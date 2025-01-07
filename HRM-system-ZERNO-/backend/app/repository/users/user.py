@@ -1,3 +1,4 @@
+from sqlalchemy import desc
 from repository.base import BaseRepository
 from sqlalchemy.future import select
 from model import User
@@ -6,8 +7,39 @@ from sqlalchemy.orm import joinedload
 
 
 class UserRepository(BaseRepository):
-    async def get_all_users(self):
-        result = await self.connection.execute(select(User))
+    async def get_users_pagination_with_sort(
+        self,
+        limit: int, 
+        cursor: int,
+        role_id: int = None,
+        sort_by: str = "id",
+        ascending: bool = True,
+        active: bool | None = None
+    ):
+        sort_column = getattr(User, sort_by, None)
+
+        if sort_column is None:
+            raise ValueError(f"Неверное поле для сортировки: {sort_by}")
+        
+        query = select(User).limit(limit).options(joinedload(User.role))
+        filters = []
+        if cursor:
+            filters.append(User.id > cursor)
+        if role_id is not None:
+            filters.append(User.role_id == role_id)
+        if active:
+            filters.append(User.active == active)
+            
+        # Применяем фильтры к запросу
+        if filters:
+            query = query.where(*filters)
+        
+        if ascending:
+            query = query.order_by(sort_column)
+        else:
+            query = query.order_by(desc(sort_column))
+        
+        result = await self.connection.execute(query)
         users = result.scalars().all()
         return users
     

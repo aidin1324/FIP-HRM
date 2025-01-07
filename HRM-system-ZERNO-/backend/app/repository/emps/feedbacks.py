@@ -9,7 +9,7 @@ class FeedbackRepository(BaseRepository):
     async def get_all_feedbacks(self) -> list[Feedback]:
         result = await self.connection.execute(
             select(Feedback)
-            .options(joinedload(Feedback.comment), joinedload(Feedback.contact), joinedload(Feedback.ratings))
+            .options(joinedload(Feedback.waiter_score), joinedload(Feedback.contact), selectinload(Feedback.ratings))
             .order_by(Feedback.created_at.desc())
         )
         feedbacks = result.unique().scalars().all()
@@ -19,7 +19,7 @@ class FeedbackRepository(BaseRepository):
         result = await self.connection.execute(
             select(Feedback)
             .options(
-                joinedload(Feedback.comment), 
+                joinedload(Feedback.waiter_score), 
                 joinedload(Feedback.contact), 
                 selectinload(Feedback.ratings)
             )

@@ -1,9 +1,8 @@
 from pydantic import BaseModel
 from datetime import datetime
-from .comments import CommentResponse
 from .contacts import ContactResponse
-from .waiters import WaiterResponse
-from .rating import RatingResponse, RatingBase
+from .waiters_score import WaiterScoreResponse, WaiterScoreCreate
+from .rating import RatingResponse, RatingCreate
 
 
 class FeedbackBase(BaseModel):
@@ -22,16 +21,14 @@ class FeedbackUpdate(FeedbackBase):
 
 
 class CompleteFeedbackCreate(FeedbackBase):
-    comment: str | None = None
     contact: str | None = None
-    waiter: str | None = None
-    ratings: list[RatingBase]
+    waiter_score: WaiterScoreCreate | None = None
+    ratings: list[RatingCreate]
     
     
 class FeedbackResponse(FeedbackBase):
     id: int
     created_at: datetime
-    comment: CommentResponse | None = None
     contact: ContactResponse | None = None
-    waiter: WaiterResponse | None = None
+    waiter_score: WaiterScoreResponse | None = None
     ratings: list[RatingResponse] = []

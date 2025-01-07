@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Grade.css';
-import zernoLogo from './img/zerno-474747 1 — копия 2.png';
+import zernoLogo from '../components/img/logo.png';
 
 function Grade() {
   const navigate = useNavigate();

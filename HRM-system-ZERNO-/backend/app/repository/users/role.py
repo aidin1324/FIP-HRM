@@ -8,6 +8,11 @@ class RoleRepositroy(BaseRepository):
         roles = result.scalars().all()
         return roles
     
+    async def get_role_id_by_name(self, role: str):
+        result = await self.connection.execute(select(Role).filter(Role.role == role))
+        role = result.scalars().first()
+        return role.id
+    
     async def get_role_by_id(self, role_id: int):
         result = await self.connection.execute(select(Role).filter(Role.id == role_id))
         role = result.scalars().first()

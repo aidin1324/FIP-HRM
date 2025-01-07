@@ -1,10 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/style.css';
-import Cookies from 'js-cookie';
 import { AuthContext } from '../contexts/AuthContext';
-
-const auth_login_path = 'http://localhost:8000/auth/login';
+import { auth_login_path } from '../api_endpoints';
 
 function Login() {
     const { login } = useContext(AuthContext);

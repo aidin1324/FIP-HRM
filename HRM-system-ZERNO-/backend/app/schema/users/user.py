@@ -5,25 +5,26 @@ class UserBase(BaseModel):
     first_name: str
     second_name: str
     email: EmailStr
-    hashed_password: str
     role_id: int
+    active: bool = False
     
     class Config:
         from_attributes = True
         
 
 class UserCreate(UserBase):
-    pass
+    hashed_password: str
 
 
 class UserUpdate(UserBase):
-    first_name: str | None
-    last_name: str | None
-    email: EmailStr | None
-    hashed_password: str | None
+    first_name: str | None = None
+    second_name: str | None = None
+    email: EmailStr | None = None
+    role_id: int | None = None
+    active: bool | None = None
     
 
 class UserResponse(UserBase):
     id: int
-    
+    hashed_password: str
     

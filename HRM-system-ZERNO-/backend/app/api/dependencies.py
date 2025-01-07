@@ -2,7 +2,6 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from repository.emps.feedback_type import FeedbackTypeRepository
 from repository.emps.feedbacks import FeedbackRepository
-from repository.emps.comments import CommentRepository
 from repository.emps.contacts import ContactRepository
 from repository.emps.rating import RatingRepository
 
@@ -32,12 +31,6 @@ def get_feedback_repository(
     conn: AsyncSession
 ) -> FeedbackRepository:
     return FeedbackRepository(conn)
-
-
-def get_comment_repository(
-    conn: AsyncSession 
-) -> CommentRepository:
-    return CommentRepository(conn)
 
 
 def get_contact_repository(
