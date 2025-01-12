@@ -1,4 +1,4 @@
-from sqlalchemy.future import select
+from sqlalchemy import select, func
 from model import WaiterScore
 from repository.base import BaseRepository
 from schema.emps.waiters_score import WaiterScoreCreate, WaiterScoreUpdate
@@ -15,6 +15,16 @@ class WaiterScoreRepository(BaseRepository):
         waiter = result.scalars().first()
         return waiter
 
+    async def get_count_records_by_filter(self, filters: dict) -> int:
+        query = select(func.count(WaiterScore.id))
+        
+        for field, value in filters.items():
+            query = query.where(getattr(WaiterScore, field) == value)
+        
+        result = await self.connection.execute(query)
+        count = result.scalar_one()
+        return count
+    
     async def create_waiter(self, waiter_create: WaiterScoreCreate) -> WaiterScore:
         waiter = WaiterScore(**waiter_create.model_dump())
         self.connection.add(waiter)

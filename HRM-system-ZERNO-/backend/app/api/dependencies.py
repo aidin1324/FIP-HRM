@@ -8,6 +8,8 @@ from repository.emps.rating import RatingRepository
 from repository.users.user import UserRepository
 from repository.users.registration_request import RegistrationRequestRepository
 from repository.users.role import RoleRepositroy
+from repository.emps.category import CategoryRepository
+from repository.emps.waiters_score import WaiterScoreRepository
 
 from db.db import get_db
 
@@ -19,6 +21,9 @@ from service.users.user import UserService
 from service.authentication import AuthenticationService
 from service.users.registration_request import RegistrationRequest
 from service.users.role import RoleService  
+from service.stats import StatsService
+from service.emps.waiters_score import WaiterScoreService
+from service.emps.category import CategoryService
 
 
 def get_feedback_type_repository(
@@ -45,6 +50,12 @@ def get_rating_repository(
     return RatingRepository(conn)
 
 
+def get_category_repository(
+    conn: AsyncSession
+) -> CategoryRepository:
+    return CategoryRepository(conn)
+
+
 def get_user_repository(
     conn: AsyncSession
 ) -> UserRepository:
@@ -55,6 +66,12 @@ def get_registration_request_repository(
     conn: AsyncSession
 ) -> RegistrationRequestRepository:
     return RegistrationRequestRepository(conn)
+
+
+def get_waiter_score_repository(
+    conn: AsyncSession
+) -> WaiterScoreRepository:
+    return WaiterScoreRepository(conn)
 
 
 def get_role_repository(
@@ -108,6 +125,17 @@ def get_telegram_bot_service(
     )
 
 
+def get_category_service(
+    session: AsyncSession = Depends(get_db)
+) -> CategoryService:
+    category_repo = get_category_repository(session)
+    
+    return CategoryService(
+        session=session,
+        category_repo=category_repo
+    )
+    
+    
 def get_role_service(
     session: AsyncSession = Depends(get_db)
 ) -> RoleService:
@@ -132,6 +160,17 @@ def get_registration_request_service(
     )
     
 
+def get_waiter_score_service(
+    session: AsyncSession = Depends(get_db)
+) -> WaiterScoreService:
+    waiter_score_repo = get_waiter_score_repository(session)
+    
+    return WaiterScoreService(
+        session=session,
+        waiter_score_repo=waiter_score_repo
+    )
+    
+    
 def get_authentication_service(
     session: AsyncSession = Depends(get_db)
 ) -> AuthenticationService:
@@ -142,5 +181,18 @@ def get_authentication_service(
         session=session,
         user_service=user_service,
         role_service=role_service
+    )
+    
+
+def get_stats_service(
+    session: AsyncSession = Depends(get_db)
+) -> StatsService:
+    waiter_score_service = get_waiter_score_service(session)
+    category_service = get_category_service(session)
+    
+    return StatsService(
+        session=session,
+        waiter_score_service=waiter_score_service,
+        category_service=category_service
     )
     

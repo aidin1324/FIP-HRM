@@ -36,7 +36,9 @@ async def create_feedback(
     feedback_service: CommonFeedbackService = CommonFeedbackService,
     telegram_bot_service: CommonTelegramBotService = CommonTelegramBotService
 ) -> FeedbackResponse:
+    
     feedback: Feedback = await feedback_service.create_feedback(feedback_create)
+    
     print("POOL STATS\n")
     (await get_pool_stats())
     # result: Feedback = await telegram_bot_service.send_feedback_message(
@@ -44,11 +46,11 @@ async def create_feedback(
     #     feedback=feedback
     # )
 
-    background_tasks.add_task(
-        telegram_bot_service.send_feedback_message,
-        chat_id=chat_id,
-        feedback=feedback
-    )
+    # background_tasks.add_task(
+    #     telegram_bot_service.send_feedback_message,
+    #     chat_id=chat_id,
+    #     feedback=feedback
+    # )
     return {"status": "Feedback created successfully"}
 
 

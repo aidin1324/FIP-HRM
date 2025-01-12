@@ -43,7 +43,7 @@ class UserRepository(BaseRepository):
         users = result.scalars().all()
         return users
     
-    async def get_user_by_id(self, user_id: int):
+    async def get_user_by_id(self, user_id: int) -> User | None:
         result = await self.connection.execute(
             select(User)
             .options(joinedload(User.role))

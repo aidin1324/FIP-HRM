@@ -1,10 +1,11 @@
 // Desc: A page to display all users, search and filter users by name, email, and role, and toggle user active status.
 // Нужно понять
-
-import React, { useState, useEffect } from 'react';
-import { get_user_path, patch_user_path } from '../api_endpoints';
+import { RoleContext } from '../contexts/RoleContext';
+import React, { useState, useEffect, useContext } from 'react';
+import { get_user_path, patch_user_path, get_roles_path } from '../api_endpoints';
 
 function Users() {
+    const { roles, loading: rolesLoading, error: rolesError } = useContext(RoleContext);
     const [users, setUsers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedRole, setSelectedRole] = useState('');
@@ -12,14 +13,7 @@ function Users() {
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-
-    // Mapping role_id to role names
-    const roleMap = {
-        1: 'admin',
-        2: 'manager',
-        3: 'user',
-    };
-
+   
     const fetchUsers = async () => {
         setLoading(true);
         setError(null);
@@ -31,8 +25,8 @@ function Users() {
                 url.searchParams.append('search', searchTerm);
             }
             if (selectedRole) {
-                url.searchParams.append('role_id', Object.keys(roleMap).find(
-                    (key) => roleMap[key] === selectedRole.toLowerCase()
+                url.searchParams.append('role_id', Object.keys(roles).find(
+                    (key) => roles[key] === selectedRole.toLowerCase()
                 ));
             }
 
@@ -46,7 +40,7 @@ function Users() {
             const transformedUsers = data.map(user => ({
                 ...user,
                 fullName: `${user.first_name} ${user.second_name}`,
-                role: roleMap[user.role_id] || 'user',
+                role: roles[user.role_id] || 'user',
             }));
 
             setUsers(transformedUsers);
@@ -59,9 +53,11 @@ function Users() {
     };
 
     useEffect(() => {
-        fetchUsers();
+        if (!rolesLoading && !rolesError) {
+            fetchUsers();
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchTerm, selectedRole, usersPerPage]);
+    }, [searchTerm, selectedRole, usersPerPage, rolesLoading, rolesError]);
 
     const handleToggleActive = async (id) => {
         try {
@@ -90,7 +86,7 @@ function Users() {
                     ...user, 
                     active: updatedUser.active, 
                     fullName: `${updatedUser.first_name} ${updatedUser.second_name}`,
-                    role: roleMap[updatedUser.role_id] || 'user',
+                    role: roles[updatedUser.role_id] || 'user',
                 } : user
             ));
         } catch (err) {
@@ -180,7 +176,11 @@ function Users() {
                                 ) : (
                                     currentUsers.map((user) => (
                                         <tr key={user.id} className="border-b last:border-0">
-                                            <td className="py-3 px-4">{user.fullName}</td>
+                                            <td className="py-3 px-4">
+                                                <a href={`/profile/${user.id}`} className="text-violet-500 hover:underline">
+                                                    {user.fullName}
+                                                </a>
+                                            </td>
                                             <td className="py-3 px-4">{user.email}</td>
                                             <td className="py-3 px-4 capitalize">{user.role}</td>
                                             <td className="py-3 px-4">

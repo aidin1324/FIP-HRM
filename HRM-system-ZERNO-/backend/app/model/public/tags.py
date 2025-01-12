@@ -8,7 +8,7 @@ class Tag(Base):
     
     id = Column(Integer, primary_key=True)
     tag = Column(String(50), nullable=False)
-    category_id = Column(Integer, ForeignKey('categories.id'))
+    category_id = Column(Integer, ForeignKey('categories.id'), index=True)
     
     waiter_scores = relationship('WaiterScore', back_populates='tag')
     category = relationship('Category', back_populates='tags')

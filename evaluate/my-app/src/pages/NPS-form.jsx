@@ -96,7 +96,6 @@ function NPSForm() {
     fetchWaiters();
   }, []);
 
-  
   const handleTagChange = (e) => {
     setSelectedWaiterTag(parseInt(e.target.value));
   };
@@ -112,16 +111,19 @@ function NPSForm() {
     }
 
     if (currentStep === 2) {
-      if (isNameToggled && selectedWaiterId === null) {
+      // Prioritize waiter selection error
+      if (isNameToggled && !selectedWaiterId) {
         newErrors.name = 'Пожалуйста, выберите официанта.';
       }
-      if (ratings.waiterRecommendation === 0 && isNameToggled) {
-        newErrors.waiterRecommendation = 'Пожалуйста, поставьте оценку от 1 до 5.';
+
+      if (isNameToggled) {
+        if (ratings.waiterRecommendation === 0) {
+          newErrors.waiterRecommendation = 'Пожалуйста, поставьте оценку от 1 до 5.';
+        }
+        if (ratings.waiterRecommendation > 0 && !selectedWaiterTag) {
+          newErrors.selectedWaiterTag = 'Пожалуйста, выберите один тег.';
+        }
       }
-      if (ratings.waiterRecommendation > 0 && isNameToggled && !selectedWaiterTag) {
-        newErrors.selectedWaiterTag = 'Пожалуйста, выберите один тег.';
-      }
-      // Removed comment validation to make it optional
     }
 
     if (currentStep === 3) {
@@ -149,14 +151,16 @@ function NPSForm() {
     const newErrors = {};
 
     // Validation
-    if (isNameToggled && selectedWaiterId === null) {
+    if (isNameToggled && !selectedWaiterId) {
       newErrors.name = 'Пожалуйста, выберите официанта.';
     }
-    if (ratings.waiterRecommendation === 0 && isNameToggled) {
-      newErrors.waiterRecommendation = 'Пожалуйста, поставьте оценку от 1 до 5.';
-    }
-    if (ratings.waiterRecommendation > 0 && isNameToggled && !selectedWaiterTag) {
-      newErrors.selectedWaiterTag = 'Пожалуйста, выберите один тег.';
+    if (isNameToggled) {
+      if (ratings.waiterRecommendation === 0) {
+        newErrors.waiterRecommendation = 'Пожалуйста, поставьте оценку от 1 до 5.';
+      }
+      if (ratings.waiterRecommendation > 0 && !selectedWaiterTag) {
+        newErrors.selectedWaiterTag = 'Пожалуйста, выберите один тег.';
+      }
     }
     // Comment is optional
 
@@ -169,6 +173,14 @@ function NPSForm() {
       return;
     }
 
+    // Дубовый метод, предположительно, нужно будет заменить на что-то более адекватное
+    // 1 - positive, 2 - neutral, 3 - negative
+    const category_id = ratings.waiterRecommendation >= 4 && ratings.waiterRecommendation <= 5
+      ? 1
+      : ratings.waiterRecommendation === 3
+      ? 2
+      : 3;
+
     const dataToSend = {
       is_notified: false,
       contact: isContactToggled ? contact : null,
@@ -177,16 +189,17 @@ function NPSForm() {
         score: isNameToggled ? ratings.waiterRecommendation : null,
         comment: isNameToggled && waiterComment.trim() !== '' ? waiterComment : null,
         tag_id: isNameToggled ? selectedWaiterTag : null,
+        category_id: category_id,
       },
       ratings: [
-      {
-        rating: ratings.serviceSpeed,
-        feedback_type_id: 1, // Replace with actual feedback type ID
-      },
-      {
-        rating: ratings.atmosphere,
-        feedback_type_id: 2, // Replace with actual feedback type ID
-      },
+        {
+          rating: ratings.serviceSpeed,
+          feedback_type_id: 1, // Replace with actual feedback type ID
+        },
+        {
+          rating: ratings.atmosphere,
+          feedback_type_id: 2, // Replace with actual feedback type ID
+        },
       ],
     };
 
@@ -333,9 +346,9 @@ function NPSForm() {
                     ))}
                   </select>
                 )}
-                {errors.waiterRecommendation && (
-                  <p className="error-message">{errors.waiterRecommendation}</p>
-                )}
+                {/* Display errors in prioritized order */}
+                {errors.name && <p className="error-message">{errors.name}</p>}
+                {errors.waiterRecommendation && <p className="error-message">{errors.waiterRecommendation}</p>}
 
                 <div className="grade-item">
                   <p>3. Рекомендовали бы официанта друзьям (1-5):</p>

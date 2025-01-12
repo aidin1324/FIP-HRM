@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from model import User
 from schema.users.user import UserCreate, UserUpdate, UserResponse
 from passlib.context import CryptContext
 from repository.users.user import UserRepository
@@ -86,7 +87,9 @@ class UserService:
             user_id (int)
         """
         try:
-            user = await self.user_repo.get_user_by_id(user_id)
+            user: User = await self.user_repo.get_user_by_id(user_id)
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
             return user
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
@@ -116,12 +119,16 @@ class UserService:
             user_update (UserUpdate)
         """
         try:
+            
             async with self.session.begin():
                 user = await self.user_repo.get_user_by_id(user_id)
+                if not user:
+                    raise HTTPException(status_code=404, detail="User not found")
                 user = await self.user_repo.update_user(user, user_update)
                 return user
+        
         except Exception as e:
-            raise HTTPException(status_code=400, detail=str)
+            raise HTTPException(status_code=400, detail=str(e))
     
     async def delete_user(self, user_id: int) -> dict:
         """

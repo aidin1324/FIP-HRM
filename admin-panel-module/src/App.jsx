@@ -49,7 +49,7 @@ function App() {
         />
         <Route path="/users" element={<Users />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/:id" element={<Profile />} />
         {/* <Route path="unauthorized" element={<Unauthorized />} /> */}
       </Route>
     </Routes>

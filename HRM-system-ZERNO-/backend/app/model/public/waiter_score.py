@@ -12,8 +12,10 @@ class WaiterScore(Base):
     feedback_id = Column(Integer, ForeignKey('feedbacks.id'), nullable=False)
     waiter_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     tag_id = Column(Integer, ForeignKey('tags.id'), nullable=False)
-    
+    category_id = Column(Integer, ForeignKey('categories.id'), nullable=False, index=True)
         
     feedback = relationship('Feedback', back_populates='waiter_score')
     user = relationship('User', back_populates='scores')
     tag = relationship('Tag', back_populates='waiter_scores')
+    category = relationship('Category', back_populates='waiter_scores')
+    

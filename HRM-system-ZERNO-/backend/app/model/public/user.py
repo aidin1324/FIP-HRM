@@ -7,9 +7,9 @@ class User(Base):
     __tablename__ = "users"
     
     id = Column(Integer, primary_key=True)
-    first_name = Column(String(50), nullable=False)
-    second_name = Column(String(50), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
+    first_name = Column(String(50), nullable=False, index=True)
+    second_name = Column(String(50), nullable=False, index=True)
+    email = Column(String(100), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
     active = Column(Boolean, default=False)
     role_id = Column(Integer, ForeignKey("roles.id"))

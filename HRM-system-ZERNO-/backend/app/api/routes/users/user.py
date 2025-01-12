@@ -47,6 +47,20 @@ async def get_user_with_pagination(
     return users
 
 
+@router.get(
+    "/get_user/{user_id}",
+    response_model=UserResponse,
+    summary="Get a user profile by id",
+    description="Get a user information by id, spicifically email, role, and active status, name, surname e.t.c",
+)
+async def get_user(
+    user_id: int,
+    user_service: UserService = Depends(get_user_service)
+) -> dict:
+    user = await user_service.get_user_by_id(user_id)
+    return user
+
+
 @router.post(
     "/create_user",
     response_model=dict,

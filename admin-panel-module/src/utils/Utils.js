@@ -21,6 +21,10 @@ export const hexToRGB = (h) => {
   return `${+r},${+g},${+b}`;
 };
 
+export const formatValueStar = (value) => {
+  return `${value}★`;
+};
+
 export const formatValue = (value) => Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',

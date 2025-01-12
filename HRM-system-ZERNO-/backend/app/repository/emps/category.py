@@ -15,6 +15,11 @@ class CategoryRepository(BaseRepository):
         category = result.scalars().first()
         return category
     
+    async def get_id_by_category(self, category: str) -> int | None:
+        result = await self.connection.execute(select(Category.id).filter(Category.category == category))
+        category_id = result.scalar_one_or_none()
+        return category_id
+    
     async def create_category(self, category_create: CategoryCreate) -> Category:
         category = Category(**category_create.model_dump())
         self.connection.add(category)

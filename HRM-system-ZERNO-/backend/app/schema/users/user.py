@@ -27,4 +27,3 @@ class UserUpdate(UserBase):
 class UserResponse(UserBase):
     id: int
     hashed_password: str
-    
