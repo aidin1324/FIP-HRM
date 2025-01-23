@@ -3,7 +3,7 @@
 import * as React from "react"
 import { addDays, format } from "date-fns"
 
-import { cn } from "../lib/utils"
+import { cn } from "../lib_front/utils"
 import { Calendar } from "./ui/calendar"
 import {
   Popover,
