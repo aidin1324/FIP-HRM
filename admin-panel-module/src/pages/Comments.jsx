@@ -6,6 +6,15 @@ function Comments() {
   const initialComments = [
     { id: 1, name: 'John Doe', date: '2023-10-01', text: 'This is a comment.' },
     { id: 2, name: 'Jane Smith', date: '2023-10-02', text: 'This is another comment.' },
+    { id: 3, name: 'John Doe', date: '2023-10-03', text: 'This is a comment.' },
+    { id: 4, name: 'Jane Smith', date: '2023-10-04', text: 'This is another comment.' },
+    { id: 5, name: 'John Doe', date: '2023-10-05', text: 'This is a comment.' },
+    { id: 6, name: 'Jane Smith', date: '2023-10-06', text: 'This is another comment.' },
+    { id: 7, name: 'John Doe', date: '2023-10-07', text: 'This is a comment.' },
+    { id: 8, name: 'Jane Smith', date: '2023-10-08', text: 'This is another comment.' },
+    { id: 9, name: 'John Doe', date: '2023-10-09', text: 'This is a comment.' },
+    { id: 10, name: 'Jane Smith', date: '2023-10-10', text: 'This is another comment.' },
+    
     // Добавьте больше комментариев по необходимости
   ];
 

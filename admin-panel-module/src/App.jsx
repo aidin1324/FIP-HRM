@@ -20,6 +20,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Users from './pages/Users';
 import Unauthorized from './pages/Unauthorized';
 import Comments from './pages/Comments'; // Импортируйте компонент Comments
+import Requests from './pages/Requests';
 
 function App() {
 
@@ -53,7 +54,7 @@ function App() {
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/comments" element={<Comments />} /> {/* Добавлен маршрут для Comments */}
-        
+        <Route path="/requests" element={<Requests />} /> {/* Добавлен маршрут для Requests */}
         {/* <Route path="unauthorized" element={<Unauthorized />} /> */}
       </Route>
     </Routes>
