@@ -2,10 +2,8 @@ from fastapi import HTTPException
 from model import User
 from schema.users.user import UserCreate, UserUpdate, UserResponse
 from passlib.context import CryptContext
-from repository.users.user import UserRepository
+from repository.public.user import UserRepository
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from .role import RoleService
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
  

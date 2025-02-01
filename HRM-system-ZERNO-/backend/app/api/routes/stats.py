@@ -18,3 +18,16 @@ async def get_stats(
 ) -> dict:
     stats = await stats_service.get_stats_dashboard(waiter_id=waiter_id)
     return stats
+
+
+@router.get(
+    "/get_tags_stats/{waiter_id}",
+    summary="Get tags stats",
+    description="Get tags stats for a waiter",
+)
+async def get_tags_stats(
+    waiter_id: int = None,
+    stats_service: StatsService = Depends(get_stats_service),
+) -> dict:
+    tags_stats = await stats_service.get_tags_stats(waiter_id=waiter_id)
+    return tags_stats

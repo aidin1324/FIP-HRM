@@ -15,6 +15,19 @@ class TagRepository(BaseRepository):
         tag = result.scalars().first()
         return tag
     
+    async def get_tags_by_category_id(self, category_id: int) -> list[Tag]:
+        result = await self.connection.execute(select(Tag).filter(Tag.category_id == category_id))
+        tags = result.scalars().all()
+        return list(tags)
+    
+    async def count_tags_by_id(self, tag_id: int) -> int:
+        """
+        Нужно реализовать лучше в агрегированном в виде, из dwh или private scheme
+        """
+        result = await self.connection.execute(select(Tag).filter(Tag.id == tag_id))
+        tags = result.scalars().all()
+        return len(tags)
+    
     async def create_tag(self, tag_create: TagCreate) -> Tag:
         tag = Tag(**tag_create.model_dump())
         self.connection.add(tag)

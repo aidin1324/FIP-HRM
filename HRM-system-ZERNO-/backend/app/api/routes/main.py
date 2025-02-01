@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from .emps.comments import router as comments_router
 from .emps.feedback import router as feedback_router
 from .users.user import router as user_router
 from .users.role import router as role_router
@@ -10,6 +11,7 @@ from .authentication import router as authentication_router
 
 router = APIRouter()
 
+router.include_router(comments_router, prefix="/comments", tags=["comments"])
 router.include_router(feedback_router, prefix="/feedbacks", tags=["feedbacks"])
 router.include_router(user_router, prefix="/users", tags=["users"])
 router.include_router(role_router, prefix="/roles", tags=["roles"])

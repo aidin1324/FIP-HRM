@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from service.users.registration_request import RegistrationRequest
+from service.public.registration_request import RegistrationRequest
 
 from api.dependencies import get_registration_request_service
 from schema.users.registration_request import RegistrationRequestResponse, RegistrationRequestUpdate, RegistrationRequestCreate

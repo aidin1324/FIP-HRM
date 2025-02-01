@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from repository.emps.feedback_type import FeedbackTypeRepository
+from repository.public.feedback_type import FeedbackTypeRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 
 class FeedbackTypeService:

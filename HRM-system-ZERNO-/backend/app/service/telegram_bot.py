@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from repository.emps.feedbacks import FeedbackRepository
-from repository.emps.feedback_type import FeedbackTypeRepository
+from repository.public.feedbacks import FeedbackRepository
+from repository.public.feedback_type import FeedbackTypeRepository
 
 import httpx
 from config import telegram_token

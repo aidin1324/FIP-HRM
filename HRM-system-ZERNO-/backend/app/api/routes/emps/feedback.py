@@ -3,7 +3,7 @@ from typing import Annotated
 from api.dependencies import get_feedback_service, get_telegram_bot_service
 
 from model import Feedback
-from service.emps.feedback import FeedbackService
+from service.public.feedback import FeedbackService
 from service.telegram_bot import TelegramBotService
 from schema.emps.feedbacks import CompleteFeedbackCreate, FeedbackResponse
 

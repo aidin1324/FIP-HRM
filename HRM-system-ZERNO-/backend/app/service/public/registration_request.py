@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from repository.users.registration_request import RegistrationRequestRepository
+from repository.public.registration_request import RegistrationRequestRepository
 
 from sqlalchemy.ext.asyncio import AsyncSession
 

@@ -1,4 +1,4 @@
-from repository.users.role import RoleRepositroy
+from repository.public.role import RoleRepositroy
 
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession

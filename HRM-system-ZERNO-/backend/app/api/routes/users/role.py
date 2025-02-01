@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from service.users.role import RoleService
+from service.public.role import RoleService
 
 from schema.users.role import RoleResponse, RoleCreate, RoleUpdate
 from api.dependencies import get_role_service

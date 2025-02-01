@@ -1,6 +1,6 @@
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from repository.emps.category import CategoryRepository
+from repository.public.category import CategoryRepository
 from schema.emps.category import CategoryCreate, CategoryUpdate, CategoryResponse
 
 
@@ -26,3 +26,11 @@ class CategoryService:
             return category_id
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
+        
+    async def get_all_categories(self) -> list[CategoryResponse]:
+        try:
+            categories = await self.category_repo.get_all_categories()
+            return categories
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        

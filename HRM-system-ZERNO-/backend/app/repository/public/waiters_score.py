@@ -15,6 +15,20 @@ class WaiterScoreRepository(BaseRepository):
         waiter = result.scalars().first()
         return waiter
 
+    async def get_count_records_by_tag_id(
+        self,
+        waiter_id: int,
+        tag_id: int
+    ) -> int:
+        query = select(func.count(WaiterScore.id)).where(
+            WaiterScore.waiter_id == waiter_id,
+            WaiterScore.tag_id == tag_id.id if 
+            hasattr(tag_id, 'id') else tag_id
+        )
+        result = await self.connection.execute(query)
+        count = result.scalar_one()
+        return count
+    
     async def get_count_records_by_filter(self, filters: dict) -> int:
         query = select(func.count(WaiterScore.id))
         

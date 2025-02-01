@@ -3,7 +3,7 @@ from fastapi.exceptions import HTTPException
 from model import Feedback, WaiterScore, Contact, Rating
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from repository.emps.feedbacks import FeedbackRepository
+from repository.public.feedbacks import FeedbackRepository
 
 from schema.emps.feedbacks import CompleteFeedbackCreate, FeedbackUpdate
 
@@ -17,6 +17,28 @@ class FeedbackService:
         self.session = session
         self.feedback_repo = feedback_repo
 
+    async def get_waiter_feedback_comments_by_date(
+        self,
+        cursor: int = 0,
+        limit: int = 5,
+        waiter_id: int = None,
+        start_date: datetime.datetime = None,
+        end_date: datetime.datetime = None,
+        ascending: bool = False
+    ) -> dict:
+        try:
+            response = await self.feedback_repo.get_waiter_feedback_comments_by_date_pagination(
+                cursor=cursor,
+                limit=limit,
+                waiter_id=waiter_id,
+                start_date=start_date,
+                end_date=end_date,
+                ascending=ascending
+            )
+            return response
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        
     async def create_feedback(
         self,
         feedback_create: CompleteFeedbackCreate
