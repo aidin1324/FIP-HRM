@@ -12,6 +12,14 @@ function Requests() {
     { id: 6, firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@example.com', date: '2023-10-06', type: 'registration' },
     { id: 7, firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', date: '2023-10-07', type: 'registration' },
     { id: 8, firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@example.com', date: '2023-10-08', type: 'registration' },
+    { id: 9, firstName: 'Alice', lastName: 'Johnson', email: 'alice.johnson@example.com', date: '2023-10-09', type: 'registration' },
+    { id: 10, firstName: 'Bob', lastName: 'Brown', email: 'bob.brown@example.com', date: '2023-10-10', type: 'registration' },
+    { id: 11, firstName: 'Charlie', lastName: 'Davis', email: 'charlie.davis@example.com', date: '2023-10-11', type: 'registration' },
+    { id: 12, firstName: 'Diana', lastName: 'Miller', email: 'diana.miller@example.com', date: '2023-10-12', type: 'registration' },
+    { id: 13, firstName: 'Eve', lastName: 'Wilson', email: 'eve.wilson@example.com', date: '2023-10-13', type: 'registration' },
+    { id: 14, firstName: 'Frank', lastName: 'Moore', email: 'frank.moore@example.com', date: '2023-10-14', type: 'registration' },
+    { id: 15, firstName: 'Grace', lastName: 'Taylor', email: 'grace.taylor@example.com', date: '2023-10-15', type: 'registration' },
+    
     // Добавьте больше запросов по необходимости
   ];
 
@@ -46,7 +54,7 @@ function Requests() {
           onSelect={setDateRange}
         />
       </div>
-      <div className="flex-1 overflow-y-auto space-y-4 pb-4"> {/* Добавлен отступ внизу */}
+      <div className="flex-1 overflow-y-auto space-y-4 pb-20"> {/* Добавлен большой отступ внизу */}
         {filteredRequests.length > 0 ? (
           filteredRequests.map((request) => (
             <div
