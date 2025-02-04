@@ -1,4 +1,3 @@
-// filepath: /Users/nurlan/Documents/GitHub/FIP-HRM/admin-panel-module/src/App.jsx
 import React, { useEffect } from 'react';
 import {
   Routes,
@@ -19,8 +18,9 @@ import Register from './pages/Register';
 import PrivateRoute from './components/PrivateRoute';
 import Users from './pages/Users';
 import Unauthorized from './pages/Unauthorized';
-import Comments from './pages/Comments'; // Импортируйте компонент Comments
+import Comments from './pages/Comments'; 
 import Requests from './pages/Requests';
+import Contacts from './pages/Contacts';
 
 function App() {
 
@@ -53,8 +53,9 @@ function App() {
         <Route path="/users" element={<Users />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/profile/:id" element={<Profile />} />
-        <Route path="/comments" element={<Comments />} /> {/* Добавлен маршрут для Comments */}
-        <Route path="/requests" element={<Requests />} /> {/* Добавлен маршрут для Requests */}
+        <Route path="/comments" element={<Comments />} /> 
+        <Route path="/requests" element={<Requests />} /> 
+        <Route path="/contacts" element={<Contacts />} />
         {/* <Route path="unauthorized" element={<Unauthorized />} /> */}
       </Route>
     </Routes>

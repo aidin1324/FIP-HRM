@@ -54,7 +54,7 @@ function Requests() {
           onSelect={setDateRange}
         />
       </div>
-      <div className="flex-1 overflow-y-auto space-y-4 pb-20"> {/* Добавлен большой отступ внизу */}
+      <div className="flex-1 overflow-y-auto space-y-4 pb-20"> 
         {filteredRequests.length > 0 ? (
           filteredRequests.map((request) => (
             <div
