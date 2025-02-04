@@ -21,6 +21,7 @@ import Unauthorized from './pages/Unauthorized';
 import Comments from './pages/Comments'; 
 import Requests from './pages/Requests';
 import Contacts from './pages/Contacts';
+import Testing from './pages/Testing';
 
 function App() {
 
@@ -56,6 +57,7 @@ function App() {
         <Route path="/comments" element={<Comments />} /> 
         <Route path="/requests" element={<Requests />} /> 
         <Route path="/contacts" element={<Contacts />} />
+        <Route path='/tests' element={<Testing />} />
         {/* <Route path="unauthorized" element={<Unauthorized />} /> */}
       </Route>
     </Routes>
