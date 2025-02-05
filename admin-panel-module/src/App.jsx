@@ -20,13 +20,9 @@ import Users from './pages/Users';
 import Unauthorized from './pages/Unauthorized';
 import Comments from './pages/Comments'; 
 import Requests from './pages/Requests';
-<<<<<<< HEAD
-import Contacts from './pages/Contacts';
 import Testing from './pages/Testing';
-=======
 import AfterRegister from './pages/AfterRegister';
 import Contact from './pages/Contact';
->>>>>>> 28476d3 (changes, related with back, list of contact)
 
 function App() {
 
@@ -59,16 +55,12 @@ function App() {
         <Route path="/users" element={<Users />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/profile/:id" element={<Profile />} />
-<<<<<<< HEAD
         <Route path="/comments" element={<Comments />} /> 
         <Route path="/requests" element={<Requests />} /> 
-        <Route path="/contacts" element={<Contacts />} />
         <Route path='/tests' element={<Testing />} />
-=======
         <Route path="/comments" element={<Comments />} /> {/* Добавлен маршрут для Comments */}
         <Route path="/requests" element={<Requests />} /> {/* Добавлен маршрут для Requests */}
         <Route path="/contacts" element={<Contact />} /> {/* Добавлен маршрут для Contact */}
->>>>>>> 28476d3 (changes, related with back, list of contact)
         {/* <Route path="unauthorized" element={<Unauthorized />} /> */}
       </Route>
     </Routes>
