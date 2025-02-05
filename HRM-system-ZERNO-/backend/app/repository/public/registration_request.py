@@ -4,7 +4,7 @@ from model import RegistrationRequest
 
 
 class RegistrationRequestRepository(BaseRepository):
-    async def get_all_registration_requests(self):
+    async def   get_all_registration_requests(self):
         result = await self.connection.execute(select(RegistrationRequest))
         registration_requests = result.scalars().all()
         return registration_requests
