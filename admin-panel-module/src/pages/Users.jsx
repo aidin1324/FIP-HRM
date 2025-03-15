@@ -1,5 +1,3 @@
-// Desc: A page to display all users, search and filter users by name, email, and role, and toggle user active status.
-// Нужно понять
 import { RoleContext } from '../contexts/RoleContext';
 import React, { useState, useEffect, useContext } from 'react';
 import { get_user_path, patch_user_path, get_roles_path } from '../api_endpoints';

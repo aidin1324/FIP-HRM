@@ -23,6 +23,7 @@ import Requests from './pages/Requests';
 import Testing from './pages/Testing';
 import AfterRegister from './pages/AfterRegister';
 import Contact from './pages/Contact';
+import Contacts from './pages/Contacts';
 
 function App() {
 
@@ -60,7 +61,7 @@ function App() {
         <Route path='/tests' element={<Testing />} />
         <Route path="/comments" element={<Comments />} /> {/* Добавлен маршрут для Comments */}
         <Route path="/requests" element={<Requests />} /> {/* Добавлен маршрут для Requests */}
-        <Route path="/contacts" element={<Contact />} /> {/* Добавлен маршрут для Contact */}
+        <Route path="/contacts" element={<Contacts />} /> {/* Добавлен маршрут для Contact */}
         {/* <Route path="unauthorized" element={<Unauthorized />} /> */}
       </Route>
     </Routes>
