@@ -14,7 +14,7 @@ import { useThemeProvider } from '../utils/ThemeContext';
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-function BarChartRating({ data }) {
+function BarChartRating({ data, hideStarInTooltip = false }) {
   const canvas = useRef(null);
   const { currentTheme } = useThemeProvider();
   const darkMode = currentTheme === 'dark';
@@ -67,7 +67,13 @@ function BarChartRating({ data }) {
             displayColors: false,
             borderWidth: 0,
             callbacks: {
-              label: (context) => `Mean Rating: ${formatValueStar(context.parsed.y)}`,
+              label: (context) => {
+                if (hideStarInTooltip) {
+                  return `Средний рейтинг: ${context.parsed.y.toFixed(2)}`;
+                } else {
+                  return `Средний рейтинг: ${formatValueStar(context.parsed.y)}`;
+                }
+              },
             },
           },
         },
@@ -76,7 +82,7 @@ function BarChartRating({ data }) {
             type: 'category',
             title: {
               display: true,
-              text: 'Categories',
+              text: 'Категории',
               color: axisLabelColor,
               font: { size: 14, weight: 'bold' },
             },
@@ -95,7 +101,9 @@ function BarChartRating({ data }) {
               stepSize: 0.5,
               callback: (value) => {
                 // Only show whole numbers on axis
-                if (value % 1 === 0) return formatValueStar(value);
+                if (value % 1 === 0) {
+                  return formatValueStar(value);
+                }
                 return '';
               },
               color: axisLabelColor,
@@ -109,8 +117,7 @@ function BarChartRating({ data }) {
     });
 
     return () => chart.destroy();
-  }, [data, darkMode]);
-
+  }, [data, darkMode, hideStarInTooltip]); 
   return (
     <div className="relative w-full h-64 md:h-80 lg:h-96">
       <canvas ref={canvas} className="absolute inset-0" />

@@ -112,7 +112,7 @@ function Users() {
     return (
         <div className="flex flex-col h-screen w-full bg-gray-50 dark:bg-gray-900">
             <div className="flex-1 p-4 overflow-y-auto">
-                <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Users</h1>
+                <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Пользователи</h1>
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
                     <input
                         type="text"
@@ -168,7 +168,7 @@ function Users() {
                                 {currentUsers.length === 0 ? (
                                     <tr>
                                         <td colSpan="4" className="py-4 text-center text-gray-600 dark:text-gray-300">
-                                            No users found.
+                                            Пользователей не найдено.
                                         </td>
                                     </tr>
                                 ) : (
@@ -214,7 +214,7 @@ function Users() {
                         Prev
                     </button>
                     <span className="text-gray-700 dark:text-gray-200">
-                        Page {currentPage} of {totalPages}
+                        Страница {currentPage}/{totalPages}
                     </span>
                     <button
                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}

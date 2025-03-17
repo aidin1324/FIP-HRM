@@ -3,9 +3,16 @@ import DatePickerWithRange from '../components/Datepicker';
 import { get_all_feedbacks } from '../api_endpoints';
 import axios from 'axios';
 
-// Обновленный компонент FeedbackCard с возможностью копирования номера телефона
+// Обновленный компонент FeedbackCard с правильными названиями типов оценок
 const FeedbackCard = React.memo(({ contact }) => {
   const [copied, setCopied] = useState(false);
+
+  // Соответствие ID типов оценок их названиям
+  const feedbackTypes = {
+    1: "Скорость обслуживания",
+    2: "Атмосфера",
+    // Можно добавить другие типы по мере необходимости
+  };
 
   const copyToClipboard = useCallback(async () => {
     try {
@@ -21,7 +28,6 @@ const FeedbackCard = React.memo(({ contact }) => {
     }
   }, [contact.phone]);
 
-  // Мемоизация содержимого рейтингов
   const ratingsContent = useMemo(() => {
     if (!contact.ratings?.length) return null;
     
@@ -29,11 +35,15 @@ const FeedbackCard = React.memo(({ contact }) => {
       <div className="mt-3 border-t pt-2 border-gray-200 dark:border-gray-700">
         <p className="font-medium text-gray-700 dark:text-gray-300 mb-1">Оценки:</p>
         <div className="flex flex-wrap gap-2">
-          {contact.ratings.map((rating, index) => (
-            <span key={index} className="inline-flex items-center px-2 py-1 bg-violet-100 dark:bg-violet-900 text-violet-800 dark:text-violet-200 text-xs rounded">
-              Тип {rating.feedback_type_id}: {rating.rating} ⭐
-            </span>
-          ))}
+          {contact.ratings.map((rating, index) => {
+            const typeName = feedbackTypes[rating.feedback_type_id] || `Тип ${rating.feedback_type_id}`;
+            
+            return (
+              <span key={index} className="inline-flex items-center px-2 py-1 bg-violet-100 dark:bg-violet-900 text-violet-800 dark:text-violet-200 text-xs rounded">
+                {typeName}: {rating.rating} ⭐
+              </span>
+            );
+          })}
         </div>
       </div>
     );
@@ -50,10 +60,9 @@ const FeedbackCard = React.memo(({ contact }) => {
         </span>
       </div>
       <div className="text-sm space-y-2">
-        {/* Выделенный телефон с кнопкой копирования */}
         <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-2 rounded-md">
           <p className="text-gray-700 dark:text-gray-300">
-            <span className="font-medium">Телефон:</span>{' '}
+            <span className="font-medium"><b>Телефон:</b></span>{' '}
             <span className="font-mono">{contact.phone}</span>
           </p>
           <button
@@ -136,9 +145,7 @@ function Contacts() {
     return url;
   }, [requestParams]);
 
-  // Функция для загрузки отзывов с API
   const fetchContacts = useCallback(async () => {
-    // Уникальный ключ для кэша на основе параметров запроса
     const cacheKey = JSON.stringify(requestParams);
     
     // Если данные уже закэшированы и есть параметры фильтрации,
@@ -159,8 +166,7 @@ function Contacts() {
     setError(null);
     try {
       const response = await axios.get(apiUrl);
-      
-      // Преобразуем данные API в удобный формат для отображения
+
       const formattedContacts = response.data.map(feedback => ({
         id: feedback.id,
         name: feedback.contact ? feedback.contact.name || "Гость" : "Гость",
@@ -241,12 +247,12 @@ function Contacts() {
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
           <DatePickerWithRange
-            className="w-full md:w-auto rounded-md border-gray-300 dark:border-gray-600 p-2 shadow-sm"
+            className="w-full md:w-auto rounded-md border-gray-300 dark:border-gray-600 shadow-sm"
             onSelect={handleDateRangeChange}
           />
           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <label className="text-gray-700 dark:text-gray-200" htmlFor="limitSelect">
-              Show
+              Показать
             </label>
             <select
               id="limitSelect"
@@ -256,7 +262,7 @@ function Contacts() {
             >
               {[5, 10, 20, 50].map(limit => (
                 <option key={limit} value={limit}>
-                  {limit} per page
+                  {limit} стр.
                 </option>
               ))}
             </select>
@@ -321,7 +327,7 @@ function Contacts() {
                   }`}
                   aria-label="Перейти к предыдущей странице"
                 >
-                  Prev
+                  Пред.
                 </button>
                 <span className="text-gray-700 dark:text-gray-200 text-xs sm:text-sm md:text-base whitespace-nowrap">
                   <span className="hidden sm:inline">Страница </span>
@@ -340,7 +346,7 @@ function Contacts() {
                   }`}
                   aria-label="Перейти к следующей странице"
                 >
-                  Next
+                  След.
                 </button>
               </div>
             </div>

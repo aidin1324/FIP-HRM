@@ -8,7 +8,7 @@ const CommentCard = React.memo(({ comment }) => (
   >
     <div className="flex items-center mb-2">
       <span className="font-semibold text-gray-800 dark:text-gray-200">
-        Comment #{comment.id}
+        Отзыв #{comment.id}
       </span>
     </div>
     <p className="text-gray-700 dark:text-gray-300 text-sm">
@@ -154,17 +154,17 @@ function Comments() {
     <div className="min-h-screen p-6 pb-28 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto flex flex-col h-full mb-8 relative">
         <h1 className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-6">
-          Comments Section
+          Комментарии
         </h1>
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
           <DatePickerWithRange
-            className="w-full md:w-auto rounded-md border border-gray-300 dark:border-gray-600 p-2 shadow-sm"
+            className="w-full md:w-auto rounded-md border-gray-300 dark:border-gray-600 shadow-sm"
             onSelect={handleDateSelect}
           />
           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <label className="text-gray-700 dark:text-gray-200" htmlFor="limitSelect">
-              Show
+              Показать
             </label>
             <select
               id="limitSelect"
@@ -174,7 +174,7 @@ function Comments() {
             >
               {[5, 10, 50, 100].map(limit => (
                 <option key={limit} value={limit}>
-                  {limit} per page
+                  {limit} стр.
                 </option>
               ))}
             </select>
@@ -186,7 +186,7 @@ function Comments() {
           {loading ? (
             <div className="text-center text-gray-700 dark:text-gray-200 py-10">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500 mx-auto mb-4"></div>
-              Loading comments...
+              Загрузка комментариев...
             </div>
           ) : error ? (
             <div className="text-center text-red-600 py-10" role="alert">
@@ -201,7 +201,7 @@ function Comments() {
                 ))
               ) : (
                 <div className="text-center text-gray-600 dark:text-gray-300 py-10">
-                  No comments found.
+                  Комментариев не найдено.
                 </div>
               )}
             </div>
@@ -219,10 +219,10 @@ function Comments() {
                     : 'bg-violet-500 text-white hover:bg-violet-600'}`}
                 aria-label="Go to previous page"
               >
-                Prev
+                Пред.
               </button>
               <span className="text-gray-700 dark:text-gray-200">
-                Page {currentPage + 1}
+                Страница {currentPage + 1}
               </span>
               <button
                 onClick={handleNext}
@@ -233,7 +233,7 @@ function Comments() {
                     : 'bg-violet-500 text-white hover:bg-violet-600'}`}
                 aria-label="Go to next page"
               >
-                Next
+                След.
               </button>
             </div>
           </div>
