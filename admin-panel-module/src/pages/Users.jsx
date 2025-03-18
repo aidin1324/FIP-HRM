@@ -11,21 +11,26 @@ function Users() {
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-   
+
     const fetchUsers = async () => {
         setLoading(true);
         setError(null);
         try {
             const url = new URL(get_user_path);
-            url.searchParams.append('limit', 1000); // Fetch all users for client-side pagination
+            url.searchParams.append('limit', 1000);
 
             if (searchTerm) {
                 url.searchParams.append('search', searchTerm);
             }
+
             if (selectedRole) {
-                url.searchParams.append('role_id', Object.keys(roles).find(
-                    (key) => roles[key] === selectedRole.toLowerCase()
-                ));
+                const roleId = Object.entries(roles).find(
+                    ([key, value]) => value.toLowerCase() === selectedRole.toLowerCase()
+                )?.[0];
+                
+                if (roleId) {
+                    url.searchParams.append('role_id', roleId);
+                }
             }
 
             const response = await fetch(url.toString());
@@ -34,15 +39,14 @@ function Users() {
             }
             const data = await response.json();
 
-            // Transform users data
             const transformedUsers = data.map(user => ({
                 ...user,
                 fullName: `${user.first_name} ${user.second_name}`,
-                role: roles[user.role_id] || 'user',
+                role: roles[user.role_id] ? capitalizeFirstLetter(roles[user.role_id]) : 'User',
             }));
 
             setUsers(transformedUsers);
-            setCurrentPage(1); // Reset to first page after fetching
+            setCurrentPage(1); 
         } catch (err) {
             setError(err.message);
         } finally {
@@ -50,11 +54,14 @@ function Users() {
         }
     };
 
+    const capitalizeFirstLetter = (string) => {
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    };
+
     useEffect(() => {
         if (!rolesLoading && !rolesError) {
             fetchUsers();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchTerm, selectedRole, usersPerPage, rolesLoading, rolesError]);
 
     const handleToggleActive = async (id) => {
@@ -78,7 +85,6 @@ function Users() {
 
             const updatedUser = await response.json();
 
-            // Update the user locally
             setUsers(prevUsers => prevUsers.map(user => 
                 user.id === id ? { 
                     ...user, 
@@ -93,12 +99,15 @@ function Users() {
         }
     };
 
-    // Client-side Pagination Logic
     const filteredUsers = users.filter(user => {
         const matchSearch =
             user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchRole = selectedRole ? user.role === selectedRole : true;
+
+        const matchRole = selectedRole 
+            ? user.role.toLowerCase() === selectedRole.toLowerCase() 
+            : true;
+        
         return matchSearch && matchRole;
     });
 
@@ -111,9 +120,7 @@ function Users() {
 
     return (
         <div className="flex flex-col h-screen w-full bg-gray-50 dark:bg-gray-900">
-            {/* Контент с фиксированной шапкой и прикрепленной внизу пагинацией */}
             <div className="flex flex-col h-full">
-                {/* Шапка и фильтры (не скроллируемые) */}
                 <div className="px-4 pt-4">
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Пользователи</h1>
                     <div className="flex flex-col md:flex-row gap-4 mb-6 justify-center md:justify-between">
@@ -130,9 +137,13 @@ function Users() {
                             onChange={(e) => setSelectedRole(e.target.value)}
                         >
                             <option value="">Все роли</option>
-                            <option value="admin">Админ</option>
-                            <option value="manager">Менеджер</option>
-                            <option value="user">Пользователь</option>
+                            {Object.values(roles).map(role => (
+                                <option key={role} value={role.toLowerCase()}>
+                                    {role === "admin" ? "Админ" : 
+                                     role === "manager" ? "Менеджер" : 
+                                     role === "user" ? "Пользователь" : role}
+                                </option>
+                            ))}
                         </select>
                         <select
                             className="form-select px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 w-full md:w-1/4"
@@ -147,8 +158,7 @@ function Users() {
                     </div>
                 </div>
 
-                {/* Скроллируемая область с таблицей */}
-                <div className="flex-1 overflow-y-auto px-4 pb-28"> {/* Увеличен отступ снизу с pb-20 до pb-28 */}
+                <div className="flex-1 overflow-y-auto px-4 pb-28"> 
                     {loading ? (
                         <div className="text-center text-gray-700 dark:text-gray-200 py-10">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500 mx-auto mb-4"></div>
@@ -157,7 +167,7 @@ function Users() {
                     ) : error ? (
                         <div className="text-center text-red-500 py-10">{error}</div>
                     ) : (
-                        <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded shadow mb-4"> {/* Добавлен нижний отступ mb-4 */}
+                        <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded shadow mb-4"> 
                             <table className="min-w-full table-auto text-sm text-left">
                                 <thead className="border-b bg-gray-100 dark:bg-gray-700">
                                     <tr>
@@ -202,14 +212,10 @@ function Users() {
                             </table>
                         </div>
                     )}
-                    
-                    {/* Дополнительный невидимый разделитель для улучшения отступа */}
                     {!loading && !error && currentUsers.length > 0 && (
                         <div className="h-4"></div>
                     )}
                 </div>
-
-                {/* Фиксированная пагинация внизу */}
                 <div className="sticky bottom-0 left-0 right-0 bg-gray-50 dark:bg-gray-900 shadow-md border-t border-gray-200 dark:border-gray-700 py-4 px-4 z-10">
                     <div className="flex justify-between items-center">
                         <button

@@ -20,6 +20,7 @@ import Requests from "./pages/Requests";
 import Testing from "./pages/Testing";
 import AfterRegister from "./pages/AfterRegister";
 import Contacts from "./pages/Contacts";
+import PageNotFound from "./pages/404";
 
 function App() {
   const location = useLocation();
@@ -55,6 +56,7 @@ function App() {
           <Route path="/comments" element={<Comments />} />{" "}
           <Route path="/requests" element={<Requests />} />{" "}
           <Route path="/contacts" element={<Contacts />} />{" "}
+          <Route path="/404" element={<PageNotFound />} />
           {/* <Route path="unauthorized" element={<Unauthorized />} /> */}
         </Route>
       </Routes>

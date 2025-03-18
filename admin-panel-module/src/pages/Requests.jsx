@@ -67,8 +67,8 @@ function Requests() {
       setAllRequests(pendingRequests);
       setRequests(pendingRequests);
     } catch (err) {
-      console.error("Failed to fetch requests:", err);
-      setError("Failed to load requests. Please try again later.");
+      console.error("Не удалось получить запросы:", err);
+      setError("Не удалось получить запросы. Пожалуйста, попробуйте еще раз.");
     } finally {
       setLoading(false);
     }
@@ -134,11 +134,11 @@ function Requests() {
       setRequests(prev => prev.filter(request => request.id !== id));
       setAllRequests(prev => prev.filter(request => request.id !== id));
       
-      setSuccessMessage("Request successfully approved.");
+      setSuccessMessage("Запрос успешно принят.");
       setError(null);
     } catch (err) {
-      console.error(`Failed to accept request ${id}:`, err);
-      setError("Failed to accept the request. Please try again.");
+      console.error(`Не удалось принять запрос ${id}:`, err);
+      setError("Не удалось принять запрос. Пожалуйста, попробуйте еще раз.");
     } finally {
       setLoading(false);
     }
@@ -158,11 +158,11 @@ function Requests() {
       setRequests(prev => prev.filter(request => request.id !== id));
       setAllRequests(prev => prev.filter(request => request.id !== id));
       
-      setSuccessMessage("Request successfully rejected.");
+      setSuccessMessage("Запрос успешно отклонен.");
       setError(null);
     } catch (err) {
-      console.error(`Failed to decline request ${id}:`, err);
-      setError("Failed to decline the request. Please try again.");
+      console.error(`Не удалось отклонить запрос ${id}:`, err);
+      setError("Не удалось отклонить запрос. Пожалуйста, попробуйте еще раз.");
     } finally {
       setLoading(false);
     }
@@ -224,7 +224,7 @@ function Requests() {
           </div>
         ) : !loading ? (
           <div className="text-center text-gray-600 dark:text-gray-300">
-            {searchQuery ? "No matching requests found." : "No requests found."}
+            {searchQuery ? "No matching requests found." : "Запросы не найдены."}
           </div>
         ) : null}
       </div>
