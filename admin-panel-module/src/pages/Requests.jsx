@@ -172,7 +172,7 @@ function Requests() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-gray-50 dark:bg-gray-900 p-4">
-      <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Requests Section</h1>
+      <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Запросы регистрации</h1>
       
       <div className="mb-4">
         <div className="relative">
@@ -184,7 +184,7 @@ function Requests() {
           <input
             type="search"
             className="block w-full p-2.5 pl-10 text-sm text-gray-900 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
-            placeholder="Search by name or email..."
+            placeholder="Поиск по имени или почте..."
             value={searchQuery}
             onChange={handleSearchChange}
           />

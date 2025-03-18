@@ -3,23 +3,19 @@ import DatePickerWithRange from '../components/Datepicker';
 import { get_all_feedbacks } from '../api_endpoints';
 import axios from 'axios';
 
-// Обновленный компонент FeedbackCard с правильными названиями типов оценок
 const FeedbackCard = React.memo(({ contact }) => {
   const [copied, setCopied] = useState(false);
 
-  // Соответствие ID типов оценок их названиям
   const feedbackTypes = {
     1: "Скорость обслуживания",
     2: "Атмосфера",
-    // Можно добавить другие типы по мере необходимости
   };
 
   const copyToClipboard = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(contact.phone);
       setCopied(true);
-      
-      // Сброс индикатора копирования через 2 секунды
+
       setTimeout(() => {
         setCopied(false);
       }, 2000);
@@ -176,8 +172,7 @@ function Contacts() {
         comment: feedback.waiter_score ? feedback.waiter_score.comment || "" : "",
         ratings: feedback.ratings || []
       }));
-      
-      // Дополнительная клиентская фильтрация, на случай если API не фильтрует должным образом
+
       let clientFilteredContacts = formattedContacts;
       if (dateRange.from || dateRange.to) {
         clientFilteredContacts = formattedContacts.filter(contact => {
@@ -212,25 +207,21 @@ function Contacts() {
     }
   }, [apiUrl, requestParams, cachedData, dateRange]);
 
-  // Загрузка данных при монтировании компонента или изменении параметров
   useEffect(() => {
     fetchContacts();
   }, [fetchContacts]);
 
-  // Обработчик изменения диапазона дат
   const handleDateRangeChange = useCallback((range) => {
     setDateRange(range);
     setCurrentPage(1);
   }, []);
 
-  // Обработчик изменения количества отзывов на странице
   const handleContactsPerPageChange = useCallback((e) => {
     const newLimit = Number(e.target.value);
     setContactsPerPage(newLimit);
-    setCurrentPage(1); // Сброс на первую страницу при изменении лимита
+    setCurrentPage(1); 
   }, []);
 
-  // Вычисление пагинации
   const totalPages = Math.ceil(filteredContacts.length / contactsPerPage);
   const indexOfLastContact = currentPage * contactsPerPage;
   const indexOfFirstContact = indexOfLastContact - contactsPerPage;
