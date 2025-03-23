@@ -1,112 +1,265 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import LineChart from '../../charts/LineChart01';
-import { chartAreaGradient } from '../../charts/ChartjsConfig';
-import EditMenu from '../../components/DropdownEditMenu';
+import React, { useState, useEffect, useMemo, memo } from 'react';
+import axios from 'axios';
+import { get_all_feedbacks } from '../../api_endpoints';
 
-// Import utilities
-import { tailwindConfig, hexToRGB } from '../../utils/Utils';
+const CATEGORY_NAMES = {
+  1: "Положительные",
+  2: "Нейтральные",   
+  3: "Отрицательные"  
+};
+
+const TAG_NAMES = {
+  1: "Вежливость",
+  2: "Быстрота",
+  3: "Внимательность",
+  4: "Знание меню",
+  5: "Чистота",
+  6: "Атмосфера общения",
+  7: "Грубость",
+  8: "Медлительность",
+  9: "Игнорирование",
+  10: "Ошибки в заказе",
+  11: "Неряшливость",
+  12: "Отказ в помощи",
+  13: "Оперативность",
+  14: "Уважение",
+  15: "Информативность",
+  16: "Качество подачи",
+  17: "Вовлечённость",
+  18: "Реакции на запросы"
+};
+
+const FEEDBACK_TYPES = {
+  1: "Скорость обслуживания",
+  2: "Атмосфера"
+};
+
+const StarRating = memo(({ rating }) => {
+  return (
+    <div className="flex mt-2 mb-1">
+      {[1, 2, 3, 4, 5].map(star => (
+        <svg key={star} 
+          className={`w-5 h-5 ${star <= Math.round(rating) ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600'}`} 
+          fill="currentColor" 
+          viewBox="0 0 20 20"
+        >
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </div>
+  );
+});
+
+const StatCard = memo(({ 
+  bgColor, 
+  titleColor, 
+  title, 
+  children 
+}) => (
+  <div className={`${bgColor} p-5 rounded-lg flex flex-col justify-between h-auto min-h-[110px]`}>
+    <div className={`text-sm font-semibold ${titleColor} uppercase mb-3`}>{title}</div>
+    {children}
+  </div>
+));
 
 function DashboardCard02() {
+  const [feedbackData, setFeedbackData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [lastFetchTime, setLastFetchTime] = useState(0);
 
-  const chartData = {
-    labels: [
-      '12-01-2022', '01-01-2023', '02-01-2023',
-      '03-01-2023', '04-01-2023', '05-01-2023',
-      '06-01-2023', '07-01-2023', '08-01-2023',
-      '09-01-2023', '10-01-2023', '11-01-2023',
-      '12-01-2023', '01-01-2024', '02-01-2024',
-      '03-01-2024', '04-01-2024', '05-01-2024',
-      '06-01-2024', '07-01-2024', '08-01-2024',
-      '09-01-2024', '10-01-2024', '11-01-2024',
-      '12-01-2024', '01-01-2025',
-    ],
-    datasets: [
-      // Indigo line
-      {
-        data: [
-          622, 622, 426, 471, 365, 365, 238,
-          324, 288, 206, 324, 324, 500, 409,
-          409, 273, 232, 273, 500, 570, 767,
-          808, 685, 767, 685, 685,
-        ],
-        fill: true,
-        backgroundColor: function(context) {
-          const chart = context.chart;
-          const {ctx, chartArea} = chart;
-          return chartAreaGradient(ctx, chartArea, [
-            { stop: 0, color: `rgba(${hexToRGB(tailwindConfig().theme.colors.violet[500])}, 0)` },
-            { stop: 1, color: `rgba(${hexToRGB(tailwindConfig().theme.colors.violet[500])}, 0.2)` }
-          ]);
-        },       
-        borderColor: tailwindConfig().theme.colors.violet[500],
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHoverRadius: 3,
-        pointBackgroundColor: tailwindConfig().theme.colors.violet[500],
-        pointHoverBackgroundColor: tailwindConfig().theme.colors.violet[500],
-        pointBorderWidth: 0,
-        pointHoverBorderWidth: 0,          
-        clip: 20,
-        tension: 0.2,
-      },
-      // Gray line
-      {
-        data: [
-          732, 610, 610, 504, 504, 504, 349,
-          349, 504, 342, 504, 610, 391, 192,
-          154, 273, 191, 191, 126, 263, 349,
-          252, 423, 622, 470, 532,
-        ],
-        borderColor: `rgba(${hexToRGB(tailwindConfig().theme.colors.gray[500])}, 0.25)`,
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHoverRadius: 3,
-        pointBackgroundColor: `rgba(${hexToRGB(tailwindConfig().theme.colors.gray[500])}, 0.25)`,
-        pointHoverBackgroundColor: `rgba(${hexToRGB(tailwindConfig().theme.colors.gray[500])}, 0.25)`,
-        pointBorderWidth: 0,
-        pointHoverBorderWidth: 0,
-        clip: 20,
-        tension: 0.2,
-      },
-    ],
-  };
+  const CACHE_DURATION = 60000; 
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      const now = Date.now();
+      if (now - lastFetchTime < CACHE_DURATION && feedbackData.length > 0) {
+        return;
+      }
+      
+      setIsLoading(true);
+      try {
+        const response = await axios.get(get_all_feedbacks);
+        setFeedbackData(response.data);
+        setLastFetchTime(now);
+      } catch (err) {
+        console.error('Ошибка при загрузке данных:', err);
+        setError('Не удалось загрузить данные');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [lastFetchTime, feedbackData.length]);
+
+  const { totalFeedbacks, contactsLeft } = useMemo(() => ({
+    totalFeedbacks: feedbackData.length,
+    contactsLeft: feedbackData.filter(item => item.contact !== null).length
+  }), [feedbackData]);
+  
+  const avgRating = useMemo(() => {
+    let total = 0;
+    let count = 0;
+    
+    feedbackData.forEach(feedback => {
+      if (feedback.waiter_score?.score) {
+        total += feedback.waiter_score.score;
+        count++;
+      }
+    });
+    
+    return count > 0 ? (total / count).toFixed(1) : 0;
+  }, [feedbackData]);
+  
+  const positivePercent = useMemo(() => {
+    const positiveCount = feedbackData.filter(
+      feedback => feedback.waiter_score?.score > 3
+    ).length;
+    
+    return totalFeedbacks > 0 
+      ? Math.round((positiveCount / totalFeedbacks) * 100) 
+      : 0;
+  }, [feedbackData, totalFeedbacks]);
+
+  const { topCategory, topTag } = useMemo(() => {
+    // Используем reduce вместо нескольких циклов
+    const counts = feedbackData.reduce((acc, feedback) => {
+      if (feedback.waiter_score) {
+        const { category_id, tag_id } = feedback.waiter_score;
+        
+        if (category_id) {
+          acc.categories[category_id] = (acc.categories[category_id] || 0) + 1;
+        }
+        
+        if (tag_id) {
+          acc.tags[tag_id] = (acc.tags[tag_id] || 0) + 1;
+        }
+      }
+      return acc;
+    }, { categories: {}, tags: {} });
+
+    const findMaxId = obj => {
+      let maxId = null;
+      let maxCount = 0;
+      
+      Object.entries(obj).forEach(([id, count]) => {
+        if (count > maxCount) {
+          maxCount = count;
+          maxId = id;
+        }
+      });
+      
+      return maxId;
+    };
+    
+    const topCategoryId = findMaxId(counts.categories);
+    const topTagId = findMaxId(counts.tags);
+    
+    return {
+      topCategory: topCategoryId ? CATEGORY_NAMES[topCategoryId] || `Категория ${topCategoryId}` : 'Нет данных',
+      topTag: topTagId ? TAG_NAMES[topTagId] || `Тег ${topTagId}` : 'Нет данных'
+    };
+  }, [feedbackData]);
+
+  const stats = { totalFeedbacks, contactsLeft, avgRating, positivePercent, topCategory, topTag };
 
   return (
-    <div className="flex flex-col col-span-full sm:col-span-6 xl:col-span-4 bg-white dark:bg-gray-800 shadow-sm rounded-xl">
-      <div className="px-5 pt-5">
-        <header className="flex justify-between items-start mb-2">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Acme Advanced</h2>
-          {/* Menu button */}
-          <EditMenu align="right" className="relative inline-flex">
-            <li>
-              <Link className="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 flex py-1 px-3" to="#0">
-                Option 1
-              </Link>
-            </li>
-            <li>
-              <Link className="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 flex py-1 px-3" to="#0">
-                Option 2
-              </Link>
-            </li>
-            <li>
-              <Link className="font-medium text-sm text-red-500 hover:text-red-600 flex py-1 px-3" to="#0">
-                Remove
-              </Link>
-            </li>
-          </EditMenu>
-        </header>
-        <div className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">Sales</div>
-        <div className="flex items-start">
-          <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mr-2">$17,489</div>
-          <div className="text-sm font-medium text-red-700 px-1.5 bg-red-500/20 rounded-full">-14%</div>
+    <div className="flex flex-col col-span-full sm:col-span-6 xl:col-span-4 bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 relative">
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/70 dark:bg-gray-800/70 flex items-center justify-center z-10 rounded-xl">
+          <div className="w-8 h-8 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin"></div>
         </div>
-      </div>
-      {/* Chart built with Chart.js 3 */}
-      <div className="grow max-sm:max-h-[128px] max-h-[128px]">
-        {/* Change the height attribute to adjust the chart height */}
-        <LineChart data={chartData} width={389} height={128} />
-      </div>
+      )}
+      
+      <header className="flex justify-between items-start mb-4">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+          Сводная статистика
+        </h2>
+      </header>
+      
+      {error ? (
+        <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg text-red-600 dark:text-red-300 text-sm">
+          {error}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 h-full">
+          <StatCard 
+            bgColor="bg-violet-50 dark:bg-violet-900/20" 
+            titleColor="text-violet-600 dark:text-violet-300" 
+            title="Всего отзывов"
+          >
+            <div className="flex items-end justify-center mt-auto">
+              <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.totalFeedbacks}</div>
+            </div>
+          </StatCard>
+
+          <StatCard 
+            bgColor="bg-blue-50 dark:bg-blue-900/20" 
+            titleColor="text-blue-600 dark:text-blue-300" 
+            title="Оставили контакты"
+          >
+            <div className="flex items-end justify-between mt-auto">
+              <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.contactsLeft}</div>
+              <div className="text-sm text-blue-500 dark:text-blue-300">
+                {stats.totalFeedbacks > 0 
+                  ? Math.round((stats.contactsLeft / stats.totalFeedbacks) * 100) 
+                  : 0}%
+              </div>
+            </div>
+          </StatCard>
+
+          <StatCard 
+            bgColor="bg-amber-50 dark:bg-amber-900/20" 
+            titleColor="text-amber-600 dark:text-amber-300" 
+            title="Средний рейтинг"
+          >
+            <div className="flex items-end">
+              <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.avgRating}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 ml-1 mb-1">/5</div>
+            </div>
+            <StarRating rating={stats.avgRating} />
+          </StatCard>
+
+          <StatCard 
+            bgColor="bg-emerald-50 dark:bg-emerald-900/20" 
+            titleColor="text-emerald-600 dark:text-emerald-300" 
+            title="Положительные отзывы"
+          >
+            <div className="flex flex-col mt-auto">
+              <div className="flex items-end mb-2">
+                <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.positivePercent}%</div>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                <div 
+                  className="bg-emerald-500 h-2.5 rounded-full" 
+                  style={{ width: `${stats.positivePercent}%` }}
+                ></div>
+              </div>
+            </div>
+          </StatCard>
+
+          <StatCard 
+            bgColor="bg-gray-50 dark:bg-gray-700/30" 
+            titleColor="text-gray-600 dark:text-gray-300" 
+            title="Популярная категория"
+          >
+            <div className="text-2xl font-bold text-gray-800 dark:text-gray-100 truncate">
+              {stats.topCategory}
+            </div>
+          </StatCard>
+
+          <StatCard 
+            bgColor="bg-purple-50 dark:bg-purple-900/20" 
+            titleColor="text-purple-600 dark:text-purple-300" 
+            title="Частый тег"
+          >
+            <div className="text-2xl font-bold text-gray-800 dark:text-gray-100 truncate">
+              {stats.topTag}
+            </div>
+          </StatCard>
+        </div>
+      )}
     </div>
   );
 }
