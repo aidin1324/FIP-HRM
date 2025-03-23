@@ -33,9 +33,7 @@ function Profile() {
   // Dashboard Statistics
   const [statistics, setStatistics] = useState({
     csat: 0,
-    msat: 0,
     feedbackCount: 0,
-    managerFeedbackCount: 0,
   });
 
   // Tags Data for Pie Charts
@@ -97,16 +95,6 @@ function Profile() {
     }
   };
 
-  // Manager Comments State with mock data and simple pagination.
-  const [managerComments, setManagerComments] = useState([]);
-  const [managerPage, setManagerPage] = useState(1);
-  const managerCommentsLimit = 3;
-  const managerTotalPages = Math.ceil(managerComments.length / managerCommentsLimit);
-  const currentManagerComments = managerComments.slice(
-    (managerPage - 1) * managerCommentsLimit,
-    managerPage * managerCommentsLimit
-  );
-
   // Initial fetch for customer comments.
   useEffect(() => {
     if (id) {
@@ -116,18 +104,6 @@ function Profile() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-
-  // Set mock manager comments data.
-  useEffect(() => {
-    const mockData = [
-      { id: 1, name: 'Manager A', date: '2023-09-01T12:00:00Z', text: 'Great job!' },
-      { id: 2, name: 'Manager B', date: '2023-09-02T12:00:00Z', text: 'Needs improvement.' },
-      { id: 3, name: 'Manager A', date: '2023-09-03T12:00:00Z', text: 'Keep it up.' },
-      { id: 4, name: 'Manager B', date: '2023-09-04T12:00:00Z', text: 'Excellent progress.' },
-      { id: 5, name: 'Manager A', date: '2023-09-05T12:00:00Z', text: 'Well done!' },
-    ];
-    setManagerComments(mockData);
-  }, []);
 
   useEffect(() => {
     if (!rolesLoading && !rolesError) {
@@ -158,9 +134,7 @@ function Profile() {
           });
           setStatistics({
             csat: statsData.CSAT || 0,
-            msat: statsData.MSAT || 0,
             feedbackCount: statsData.total_feedbacks || 0,
-            managerFeedbackCount: statsData.manager_feedbacks || 0,
           });
           const transformData = (dataObj) => {
             return Object.entries(dataObj).map(([label, value]) => ({ label, value }));
@@ -252,62 +226,88 @@ function Profile() {
 
   return (
     <div className="flex flex-col h-screen w-full overflow-auto bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="max-w-7xl mx-auto w-full space-y-6">
+      <div className="max-w-7xl mx-auto w-full space-y-6 pb-32"> {/* Увеличен до pb-32 (8rem) */}
         {/* Profile Card */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-            Profile of {userData.first_name} {userData.second_name}
-          </h2>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+              <span className="text-violet-600 dark:text-violet-400">{userData.first_name} {userData.second_name}</span>
+            </h2>
+            <div className={`px-3 py-1 rounded-full text-sm font-medium mt-2 md:mt-0 ${userData.active ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'}`}>
+              {userData.active ? 'Активен' : 'Неактивен'}
+            </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div>
-              <p className="text-gray-600 dark:text-gray-400">First Name:</p>
+              <p className="text-gray-600 dark:text-gray-400">Имя:</p>
               <p className="text-gray-800 dark:text-gray-200">{userData.first_name}</p>
             </div>
             <div>
-              <p className="text-gray-600 dark:text-gray-400">Second Name:</p>
+              <p className="text-gray-600 dark:text-gray-400">Фамилия:</p>
               <p className="text-gray-800 dark:text-gray-200">{userData.second_name}</p>
             </div>
             <div>
-              <p className="text-gray-600 dark:text-gray-400">Email:</p>
+              <p className="text-gray-600 dark:text-gray-400">Почта:</p>
               <p className="text-gray-800 dark:text-gray-200">{userData.email}</p>
             </div>
             <div>
-              <p className="text-gray-600 dark:text-gray-400">Role:</p>
+              <p className="text-gray-600 dark:text-gray-400">Роль:</p>
               <p className="text-gray-800 dark:text-gray-200 capitalize">{userData.role}</p>
             </div>
             <div>
-              <p className="text-gray-600 dark:text-gray-400">Active:</p>
+              <p className="text-gray-600 dark:text-gray-400">Активен:</p>
               <p className={`text-gray-800 dark:text-gray-200 ${userData.active ? 'text-green-500' : 'text-red-500'}`}>
-                {userData.active ? 'Yes' : 'No'}
+                {userData.active ? 'Да' : 'Нет'}
               </p>
             </div>
           </div>
         </div>
 
         {/* Statistics Dashboard */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col items-center">
-            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">CSAT%</h3>
-            <p className="text-3xl font-bold text-violet-500">{statistics.csat}%</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col items-center">
-            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">MSAT%</h3>
-            <p className="text-3xl font-bold text-violet-500">{statistics.msat}%</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col items-center">
-            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Feedback Count</h3>
-            <p className="text-3xl font-bold text-violet-500">{statistics.feedbackCount}</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col items-center">
-            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Manager Feedback</h3>
-            <p className="text-3xl font-bold text-violet-500">{statistics.managerFeedbackCount}</p>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100">
+            Статистика
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* CSAT блок */}
+            <div className="bg-gradient-to-r from-violet-50 to-violet-100 dark:from-violet-900/30 dark:to-violet-800/30 rounded-xl p-6 flex flex-col items-center justify-center transition-transform hover:scale-[1.02] transform duration-300 shadow-sm hover:shadow">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-violet-100 dark:bg-violet-700/40 mb-4">
+                <svg className="w-8 h-8 text-violet-600 dark:text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Удовлетворенность клиентов</h3>
+              <div className="text-5xl font-bold text-violet-600 dark:text-violet-400 flex items-baseline">
+                {statistics.csat}
+                <span className="text-xl text-violet-400 dark:text-violet-300 ml-1">%</span>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 mt-4 text-sm text-center">
+                Отражает общую оценку качества обслуживания по отзывам клиентов
+              </p>
+            </div>
+            
+            {/* Количество отзывов блок */}
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl p-6 flex flex-col items-center justify-center transition-transform hover:scale-[1.02] transform duration-300 shadow-sm hover:shadow">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-700/40 mb-4">
+                <svg className="w-8 h-8 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Всего отзывов</h3>
+              <div className="text-5xl font-bold text-blue-600 dark:text-blue-400">
+                {statistics.feedbackCount}
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 mt-4 text-sm text-center">
+                Общее количество отзывов, оставленных клиентами
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Tag Dashboard */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-            Tag Dashboard
+            Дашборд тегов
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
@@ -332,18 +332,18 @@ function Profile() {
         </div>
 
         {/* Customer Comments Section with Server Pagination */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-20"> {/* Увеличен до mb-20 (5rem) */}
           <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-            Customer Comments
+            Комментарии клиентов
           </h2>
           {customerLoading ? (
-            <p className="text-gray-700 dark:text-gray-300">Loading comments...</p>
+            <p className="text-gray-700 dark:text-gray-300">Загрузка комментариев...</p>
           ) : currentCustomerPage.comments.length > 0 ? (
             <div className="space-y-4">
               {currentCustomerPage.comments.map((comment) => (
                 <div key={comment.id} className="border-b border-gray-200 dark:border-gray-700 pb-2">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-gray-800 dark:text-gray-200">Comment #{comment.id}</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">Комментарий #{comment.id}</span>
                   </div>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">{comment.comment}</p>
                 </div>
@@ -352,7 +352,7 @@ function Profile() {
           ) : (
             <p className="text-gray-600 dark:text-gray-400">No customer comments available.</p>
           )}
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex justify-between items-center mt-8 mb-4"> 
             <button
               onClick={() => {
                 if (currentCustomerPageIndex > 0) {
@@ -360,16 +360,16 @@ function Profile() {
                 }
               }}
               disabled={currentCustomerPageIndex === 0 || customerLoading}
-              className={`px-3 py-1 rounded-md text-sm ${
+              className={`px-4 py-2 rounded-md text-sm ${  
                 currentCustomerPageIndex === 0 || customerLoading
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   : 'bg-violet-500 text-white hover:bg-violet-600'
               }`}
             >
-              Prev
+              Пред.
             </button>
             <span className="text-gray-700 dark:text-gray-200 text-sm">
-              Page {currentCustomerPageIndex + 1}
+              Страница {currentCustomerPageIndex + 1}
             </span>
             <button
               onClick={() => {
@@ -378,66 +378,19 @@ function Profile() {
                 }
               }}
               disabled={!currentCustomerPage.hasMore || customerLoading}
-              className={`px-3 py-1 rounded-md text-sm ${
+              className={`px-4 py-2 rounded-md text-sm ${  
                 !currentCustomerPage.hasMore || customerLoading
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   : 'bg-violet-500 text-white hover:bg-violet-600'
               }`}
             >
-              Next
-            </button>
-          </div>
-        </div>
-
-        {/* Manager Comments Section with Mock Data */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 pb-40">
-          <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">Manager Comments</h3>
-          <div className="space-y-4">
-            {currentManagerComments.length > 0 ? (
-              currentManagerComments.map((comment) => (
-                <div key={comment.id} className="border-b border-gray-200 dark:border-gray-700 pb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-gray-800 dark:text-gray-200">{comment.name}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {new Date(comment.date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm">{comment.text}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-600 dark:text-gray-400">No manager comments available.</p>
-            )}
-          </div>
-          <div className="flex justify-between items-center mt-4">
-            <button
-              onClick={() => setManagerPage((prev) => Math.max(prev - 1, 1))}
-              disabled={managerPage === 1}
-              className={`px-3 py-1 rounded-md text-sm ${
-                managerPage === 1
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-violet-500 text-white hover:bg-violet-600'
-              }`}
-            >
-              Prev
-            </button>
-            <span className="text-gray-700 dark:text-gray-200 text-sm">
-              Page {managerPage} of {managerTotalPages || 1}
-            </span>
-            <button
-              onClick={() => setManagerPage((prev) => (prev < managerTotalPages ? prev + 1 : prev))}
-              disabled={managerPage === managerTotalPages || managerTotalPages === 0}
-              className={`px-3 py-1 rounded-md text-sm ${
-                managerPage === managerTotalPages || managerTotalPages === 0
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-violet-500 text-white hover:bg-violet-600'
-              }`}
-            >
-              Next
+              След.
             </button>
           </div>
         </div>
       </div>
+      {/* Дополнительный пустой блок в конце страницы для гарантированного отступа */}
+      <div className="h-16"></div>
     </div>
   );
 }
