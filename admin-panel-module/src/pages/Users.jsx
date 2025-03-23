@@ -171,10 +171,10 @@ function Users() {
                             <table className="min-w-full table-auto text-sm text-left">
                                 <thead className="border-b bg-gray-100 dark:bg-gray-700">
                                     <tr>
-                                        <th className="py-3 px-4">Name</th>
-                                        <th className="py-3 px-4">Email</th>
-                                        <th className="py-3 px-4">Role</th>
-                                        <th className="py-3 px-4">Active</th>
+                                        <th className="py-3 px-4">Имя</th>
+                                        <th className="py-3 px-4">Почта</th>
+                                        <th className="py-3 px-4">Роль</th>
+                                        <th className="py-3 px-4">Активен</th>
                                     </tr>
                                 </thead>
                                 <tbody>

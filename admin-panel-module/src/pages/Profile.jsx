@@ -343,7 +343,7 @@ function Profile() {
               {currentCustomerPage.comments.map((comment) => (
                 <div key={comment.id} className="border-b border-gray-200 dark:border-gray-700 pb-2">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-gray-800 dark:text-gray-200">Комментарий #{comment.id}</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">Отзыв #{comment.id}</span>
                   </div>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">{comment.comment}</p>
                 </div>
