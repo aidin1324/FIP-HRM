@@ -79,14 +79,14 @@ function Register() {
         <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
             <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 shadow-md rounded-xl">
                 <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 text-center">
-                    Create your account
+                Создайте свой аккаунт
                 </h2>
                 
                 <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
                     {/* Email */}
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                            Email address
+                            Электронный адрес
                         </label>
                         <input
                             id="email"
@@ -103,7 +103,7 @@ function Register() {
                     {/* First Name */}
                     <div>
                         <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                            First Name
+                            Имя
                         </label>
                         <input
                             id="firstName"
@@ -120,7 +120,7 @@ function Register() {
                     {/* Last Name */}
                     <div>
                         <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                            Last Name
+                            Фамилия
                         </label>
                         <input
                             id="lastName"
@@ -137,7 +137,7 @@ function Register() {
                     {/* Role Selection */}
                     <div>
                         <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                            Select Role
+                            Выбрать роль
                         </label>
                         <select
                             id="role"
@@ -147,7 +147,7 @@ function Register() {
                             value={formData.role_id}
                             onChange={handleChange}
                         >
-                            <option value="">Choose a role</option>
+                            <option value="">Выбрать роль</option>
                             {filteredRoles.map(([id, role]) => (
                                 <option key={id} value={id}>
                                 {role.name || role}
@@ -159,7 +159,7 @@ function Register() {
                     {/* Password */}
                     <div>
                         <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                            Password
+                            Пароль
                         </label>
                         <input
                             id="password"
@@ -176,7 +176,7 @@ function Register() {
                     {/* Confirm Password */}
                     <div>
                         <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                            Confirm Password
+                            Подтвердить пароль
                         </label>
                         <input
                             id="confirmPassword"
@@ -202,11 +202,11 @@ function Register() {
                             onChange={handleChange}
                         />
                         <label htmlFor="acceptTerms" className="ml-2 text-sm text-gray-700 dark:text-gray-200">
-                            I accept the{' '}
+                            Я принимаю{' '}
                             <a href="#" className="text-violet-500 hover:text-violet-600 dark:hover:text-violet-400">
-                                terms and conditions
+                            условия и положения
                             </a>{' '}
-                            of ZernoHub
+                            ZernoHub
                         </label>
                     </div>
 
@@ -217,7 +217,7 @@ function Register() {
                             disabled={loading}
                             className="btn w-full bg-violet-500 hover:bg-violet-600 text-white"
                         >
-                            {loading ? 'Submitting...' : 'Send Request to Register'}
+                            {loading ? 'Отправка...' : 'Отправить запрос на регистрацию'}
                         </button>
                     </div>
 
@@ -230,9 +230,9 @@ function Register() {
 
                     {/* Login Link */}
                     <div className="text-sm text-center">
-                        Already have an account?{' '}
+                        Уже есть аккаунт?{' '}
                         <Link to="/login" className="font-medium text-violet-500 hover:text-violet-600 dark:hover:text-violet-400">
-                            Sign in
+                            Войти
                         </Link>
                     </div>
                 </form>
