@@ -123,14 +123,20 @@ function Dashboard() {
               </div>
             )}
 
-            <div className="grid grid-cols-12 gap-6 mb-6">
-              <div className="col-span-12 xl:col-span-8">
-                <DashboardCard01 />
-              </div>
-              <div className="col-span-12 sm:col-span-6 xl:col-span-4">
+            {/* Новая разметка графиков */}
+            {/* Первый график на полную ширину */}
+            <div className="mb-6">
+              <DashboardCard01 />
+            </div>
+
+            {/* Вторая строка с двумя графиками */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
                 <DashboardCard06 />
               </div>
-              <DashboardCard02 />
+              <div>
+                <DashboardCard02 />
+              </div>
             </div>
 
             <div className="grid grid-cols-12 gap-6">

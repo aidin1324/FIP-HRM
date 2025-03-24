@@ -165,101 +165,103 @@ function DashboardCard02() {
   const stats = { totalFeedbacks, contactsLeft, avgRating, positivePercent, topCategory, topTag };
 
   return (
-    <div className="flex flex-col col-span-full sm:col-span-6 xl:col-span-4 bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 relative">
+    <div className={`bg-white dark:bg-gray-800 shadow-lg rounded-lg h-full flex flex-col`}>
       {isLoading && (
         <div className="absolute inset-0 bg-white/70 dark:bg-gray-800/70 flex items-center justify-center z-10 rounded-xl">
           <div className="w-8 h-8 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin"></div>
         </div>
       )}
       
-      <header className="flex justify-between items-start mb-4">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+      <div className="px-5 pt-5">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
           Сводная статистика
         </h2>
-      </header>
+      </div>
       
-      {error ? (
-        <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg text-red-600 dark:text-red-300 text-sm">
-          {error}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-4 h-full">
-          <StatCard 
-            bgColor="bg-violet-50 dark:bg-violet-900/20" 
-            titleColor="text-violet-600 dark:text-violet-300" 
-            title="Всего отзывов"
-          >
-            <div className="flex items-end justify-center mt-auto">
-              <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.totalFeedbacks}</div>
-            </div>
-          </StatCard>
-
-          <StatCard 
-            bgColor="bg-blue-50 dark:bg-blue-900/20" 
-            titleColor="text-blue-600 dark:text-blue-300" 
-            title="Оставили контакты"
-          >
-            <div className="flex items-end justify-between mt-auto">
-              <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.contactsLeft}</div>
-              <div className="text-sm text-blue-500 dark:text-blue-300">
-                {stats.totalFeedbacks > 0 
-                  ? Math.round((stats.contactsLeft / stats.totalFeedbacks) * 100) 
-                  : 0}%
+      <div className="flex-grow px-5 pb-5">
+        {error ? (
+          <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg text-red-600 dark:text-red-300 text-sm">
+            {error}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 h-full">
+            <StatCard 
+              bgColor="bg-violet-50 dark:bg-violet-900/20" 
+              titleColor="text-violet-600 dark:text-violet-300" 
+              title="Всего отзывов"
+            >
+              <div className="flex items-end justify-center mt-auto">
+                <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.totalFeedbacks}</div>
               </div>
-            </div>
-          </StatCard>
+            </StatCard>
 
-          <StatCard 
-            bgColor="bg-amber-50 dark:bg-amber-900/20" 
-            titleColor="text-amber-600 dark:text-amber-300" 
-            title="Средний рейтинг"
-          >
-            <div className="flex items-end">
-              <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.avgRating}</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400 ml-1 mb-1">/5</div>
-            </div>
-            <StarRating rating={stats.avgRating} />
-          </StatCard>
-
-          <StatCard 
-            bgColor="bg-emerald-50 dark:bg-emerald-900/20" 
-            titleColor="text-emerald-600 dark:text-emerald-300" 
-            title="Положительные отзывы"
-          >
-            <div className="flex flex-col mt-auto">
-              <div className="flex items-end mb-2">
-                <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.positivePercent}%</div>
+            <StatCard 
+              bgColor="bg-blue-50 dark:bg-blue-900/20" 
+              titleColor="text-blue-600 dark:text-blue-300" 
+              title="Оставили контакты"
+            >
+              <div className="flex items-end justify-between mt-auto">
+                <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.contactsLeft}</div>
+                <div className="text-sm text-blue-500 dark:text-blue-300">
+                  {stats.totalFeedbacks > 0 
+                    ? Math.round((stats.contactsLeft / stats.totalFeedbacks) * 100) 
+                    : 0}%
+                </div>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                <div 
-                  className="bg-emerald-500 h-2.5 rounded-full" 
-                  style={{ width: `${stats.positivePercent}%` }}
-                ></div>
+            </StatCard>
+
+            <StatCard 
+              bgColor="bg-amber-50 dark:bg-amber-900/20" 
+              titleColor="text-amber-600 dark:text-amber-300" 
+              title="Средний рейтинг"
+            >
+              <div className="flex items-end">
+                <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.avgRating}</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400 ml-1 mb-1">/5</div>
               </div>
-            </div>
-          </StatCard>
+              <StarRating rating={stats.avgRating} />
+            </StatCard>
 
-          <StatCard 
-            bgColor="bg-gray-50 dark:bg-gray-700/30" 
-            titleColor="text-gray-600 dark:text-gray-300" 
-            title="Популярная категория"
-          >
-            <div className="text-2xl font-bold text-gray-800 dark:text-gray-100 truncate">
-              {stats.topCategory}
-            </div>
-          </StatCard>
+            <StatCard 
+              bgColor="bg-emerald-50 dark:bg-emerald-900/20" 
+              titleColor="text-emerald-600 dark:text-emerald-300" 
+              title="Положительные отзывы"
+            >
+              <div className="flex flex-col mt-auto">
+                <div className="flex items-end mb-2">
+                  <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.positivePercent}%</div>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                  <div 
+                    className="bg-emerald-500 h-2.5 rounded-full" 
+                    style={{ width: `${stats.positivePercent}%` }}
+                  ></div>
+                </div>
+              </div>
+            </StatCard>
 
-          <StatCard 
-            bgColor="bg-purple-50 dark:bg-purple-900/20" 
-            titleColor="text-purple-600 dark:text-purple-300" 
-            title="Частый тег"
-          >
-            <div className="text-2xl font-bold text-gray-800 dark:text-gray-100 truncate">
-              {stats.topTag}
-            </div>
-          </StatCard>
-        </div>
-      )}
+            <StatCard 
+              bgColor="bg-gray-50 dark:bg-gray-700/30" 
+              titleColor="text-gray-600 dark:text-gray-300" 
+              title="Популярная категория"
+            >
+              <div className="text-2xl font-bold text-gray-800 dark:text-gray-100 truncate">
+                {stats.topCategory}
+              </div>
+            </StatCard>
+
+            <StatCard 
+              bgColor="bg-purple-50 dark:bg-purple-900/20" 
+              titleColor="text-purple-600 dark:text-purple-300" 
+              title="Частый тег"
+            >
+              <div className="text-2xl font-bold text-gray-800 dark:text-gray-100 truncate">
+                {stats.topTag}
+              </div>
+            </StatCard>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
