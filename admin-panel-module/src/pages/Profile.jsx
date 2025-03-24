@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback, useMemo, useRef } from 'react';
 import { Pie } from 'react-chartjs-2';
 import 'chart.js/auto';
 import {
@@ -12,16 +12,19 @@ import { RoleContext } from '../contexts/RoleContext';
 import Loading from '../components/Loading';
 import { useThemeProvider } from '../utils/ThemeContext';
 
-function Profile() {
+function Profile({ currentUser = false }) {
   const { roles, loading: rolesLoading, error: rolesError } = useContext(RoleContext);
-  const { id } = useParams();
+  const { id: urlId } = useParams();
   const { currentTheme } = useThemeProvider();
+
+  const id = urlId;
+  
   const darkMode = currentTheme === 'dark';
+  const abortControllerRef = useRef(new AbortController());
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // User Profile Data
   const [userData, setUserData] = useState({
     first_name: '',
     second_name: '',
@@ -30,143 +33,25 @@ function Profile() {
     active: false,
   });
 
-  // Dashboard Statistics
   const [statistics, setStatistics] = useState({
     csat: 0,
     feedbackCount: 0,
   });
 
-  // Tags Data for Pie Charts
   const [tagsData, setTagsData] = useState({
     tagSet1: [],
     tagSet2: [],
     tagSet3: [],
   });
 
-  // Customer Comments State using cursor-based pagination.
   const [customerPageHistory, setCustomerPageHistory] = useState([]);
   const [currentCustomerPageIndex, setCurrentCustomerPageIndex] = useState(0);
   const [customerLoading, setCustomerLoading] = useState(false);
-  const commentsLimit = 3; // changed limit for guest (customer) comments
+  const commentsLimit = 3; 
 
-  // Function to load a customer comments page by cursor.
-  const loadCustomerPage = async (cursor, addToHistory = true) => {
-    setCustomerLoading(true);
-    try {
-      const apiUrl = get_customer_comments_path_with_param;
-      const url = new URL(apiUrl);
-      url.searchParams.append('waiter_id', id);
-      url.searchParams.append('limit', commentsLimit);
-      if (cursor !== null) {
-        url.searchParams.append('cursor', cursor);
-      }
-      const res = await fetch(url.toString());
-      if (!res.ok) {
-        throw new Error(`HTTP error! Status: ${res.status}`);
-      }
-      const contentType = res.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await res.text();
-        throw new Error(`Expected JSON response but received: ${text.substring(0, 100)}`);
-      }
-      const data = await res.json();
-      const pageData = {
-        comments: data.feedbacks,
-        nextCursor: data.cursor,
-        hasMore: data.feedbacks.length === commentsLimit,
-      };
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
 
-      if (addToHistory) {
-        const newHistory = customerPageHistory.slice(0, currentCustomerPageIndex + 1);
-        newHistory.push(pageData);
-        setCustomerPageHistory(newHistory);
-        setCurrentCustomerPageIndex(newHistory.length - 1);
-      } else {
-        setCustomerPageHistory((prev) => {
-          const newHistory = [...prev];
-          newHistory[currentCustomerPageIndex] = pageData;
-          return newHistory;
-        });
-      }
-    } catch (err) {
-      console.error('Error fetching customer comments:', err);
-    } finally {
-      setCustomerLoading(false);
-    }
-  };
-
-  // Initial fetch for customer comments.
-  useEffect(() => {
-    if (id) {
-      setCustomerPageHistory([]);
-      setCurrentCustomerPageIndex(0);
-      loadCustomerPage(null, true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
-  useEffect(() => {
-    if (!rolesLoading && !rolesError) {
-      setLoading(true);
-      setError(null);
-
-      const fetchProfile = fetch(get_user_profile_path(id)).then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch user profile.');
-        return res.json();
-      });
-      const fetchStats = fetch(get_stats_dashboad_path(id)).then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch statistics.');
-        return res.json();
-      });
-      const fetchTags = fetch(get_user_tags_stat_path(id)).then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch tags data.');
-        return res.json();
-      });
-
-      Promise.all([fetchProfile, fetchStats, fetchTags])
-        .then(([profileData, statsData, tagsStat]) => {
-          setUserData({
-            first_name: profileData.first_name,
-            second_name: profileData.second_name,
-            email: profileData.email,
-            role: roles[profileData.role_id] || 'Unknown',
-            active: profileData.active,
-          });
-          setStatistics({
-            csat: statsData.CSAT || 0,
-            feedbackCount: statsData.total_feedbacks || 0,
-          });
-          const transformData = (dataObj) => {
-            return Object.entries(dataObj).map(([label, value]) => ({ label, value }));
-          };
-
-          setTagsData({
-            tagSet1: transformData(tagsStat['положительный'] || {}),
-            tagSet2: transformData(tagsStat['нейтральный'] || {}),
-            tagSet3: transformData(tagsStat['негативный'] || {}),
-          });
-        })
-        .catch((err) => {
-          console.error(err);
-          setError(err.message || 'Произошла ошибка при загрузке данных.');
-        })
-        .finally(() => setLoading(false));
-    }
-  }, [id, roles, rolesLoading, rolesError]);
-
-  if (rolesLoading || loading) {
-    return <Loading />;
-  }
-
-  if (rolesError || error) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-red-500">{rolesError || error}</p>
-      </div>
-    );
-  }
-
-  const buildPieData = (dataset = []) => {
+  const buildPieData = useCallback((dataset = []) => {
     const labels = dataset.map(item => item.label);
     const dataValues = dataset.map(item => item.value);
     return {
@@ -197,9 +82,9 @@ function Profile() {
         },
       ],
     };
-  };
+  }, []);
 
-  const pieOptions = {
+  const pieOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -220,13 +105,289 @@ function Profile() {
         },
       },
     },
-  };
+  }), [darkMode]);
 
-  const currentCustomerPage = customerPageHistory[currentCustomerPageIndex] || { comments: [] };
+  const loadCustomerPage = useCallback(async (cursor, addToHistory = true) => {
+    if (customerLoading) return; 
+    
+    setCustomerLoading(true);
+    
+    try {
+      const apiUrl = get_customer_comments_path_with_param;
+      const url = new URL(apiUrl);
+      url.searchParams.append('waiter_id', id);
+      url.searchParams.append('limit', commentsLimit);
+      if (cursor !== null) {
+        url.searchParams.append('cursor', cursor);
+      }
+
+      const controller = new AbortController();
+      const prevController = abortControllerRef.current;
+      abortControllerRef.current = controller;
+
+      if (prevController) {
+        prevController.abort();
+      }
+      
+      const res = await fetch(url.toString(), {
+        signal: controller.signal,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! Status: ${res.status}`);
+      }
+      
+      const data = await res.json();
+
+      let feedbacks = [];
+      let nextCursor = null;
+
+      if (Array.isArray(data.feedbacks)) {
+        feedbacks = data.feedbacks;
+        nextCursor = data.cursor;
+      } 
+      else if (Array.isArray(data.data)) {
+        feedbacks = data.data;
+        nextCursor = data.cursor;
+      }
+      else if (Array.isArray(data)) {
+        feedbacks = data;
+      }
+      
+      const pageData = {
+        comments: feedbacks,
+        nextCursor: nextCursor,
+        hasMore: feedbacks.length === commentsLimit && nextCursor !== null,
+      };
+
+      setCustomerPageHistory(prev => {
+        if (addToHistory) {
+          const newHistory = prev.slice(0, currentCustomerPageIndex + 1);
+          newHistory.push(pageData);
+
+          const newIndex = currentCustomerPageIndex + 1;
+          setTimeout(() => {
+            setCurrentCustomerPageIndex(newIndex);
+          }, 0);
+          
+          return newHistory;
+        } else {
+          const newHistory = [...prev];
+          if (currentCustomerPageIndex < newHistory.length) {
+            newHistory[currentCustomerPageIndex] = pageData;
+          }
+          return newHistory;
+        }
+      });
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Ошибка загрузки комментариев:', err);
+      }
+    } finally {
+      setCustomerLoading(false);
+    }
+  }, [id, commentsLimit, currentCustomerPageIndex, customerLoading]);
+
+  const goToPreviousPage = useCallback(() => {
+    if (currentCustomerPageIndex > 0) {
+      setCurrentCustomerPageIndex(prev => prev - 1);
+    }
+  }, [currentCustomerPageIndex]);
+
+  const goToNextPage = useCallback(() => {
+    const currentPage = customerPageHistory[currentCustomerPageIndex];
+    if (currentPage?.hasMore && !customerLoading) {
+      loadCustomerPage(currentPage.nextCursor, true);
+    }
+  }, [customerPageHistory, currentCustomerPageIndex, customerLoading, loadCustomerPage]);
+
+  useEffect(() => {
+    if (id) {
+      setCustomerPageHistory([]);
+      setCurrentCustomerPageIndex(0);
+      setInitialLoadDone(false); 
+      
+      
+      const loadInitialComments = async () => {
+        if (customerLoading) return; 
+        
+        try {
+          setCustomerLoading(true);
+          
+         
+          const apiUrl = get_customer_comments_path_with_param;
+          const url = new URL(apiUrl);
+          url.searchParams.append('waiter_id', id);
+          url.searchParams.append('limit', commentsLimit);
+          
+          const controller = new AbortController();
+          abortControllerRef.current = controller;
+          
+          const res = await fetch(url.toString(), {
+            signal: controller.signal,
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          });
+          
+          if (!res.ok) {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+          }
+          
+          const data = await res.json();
+
+          let feedbacks = [];
+          let nextCursor = null;
+          
+          if (Array.isArray(data.feedbacks)) {
+            feedbacks = data.feedbacks;
+            nextCursor = data.cursor;
+          } else if (Array.isArray(data.data)) {
+            feedbacks = data.data;
+            nextCursor = data.cursor;
+          } else if (Array.isArray(data)) {
+            feedbacks = data;
+          }
+          
+          const pageData = {
+            comments: feedbacks,
+            nextCursor: nextCursor,
+            hasMore: feedbacks.length === commentsLimit && nextCursor !== null,
+          };
+          
+          setCustomerPageHistory([pageData]);
+          setCurrentCustomerPageIndex(0);
+          setInitialLoadDone(true); 
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.error('Ошибка начальной загрузки комментариев:', err);
+          }
+        } finally {
+          setCustomerLoading(false);
+        }
+      };
+
+      loadInitialComments();
+    }
+    
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [id, commentsLimit]);
+
+  const currentCustomerPage = useMemo(() => 
+    customerPageHistory[currentCustomerPageIndex] || { comments: [] },
+    [customerPageHistory, currentCustomerPageIndex]
+  );
+
+  useEffect(() => {
+    if (!rolesLoading && !rolesError && id) {
+      setLoading(true);
+      setError(null);
+
+      const controller = new AbortController();
+      const signal = controller.signal;
+
+      const fetchProfile = fetch(get_user_profile_path(id), { signal }).then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch user profile.');
+        return res.json();
+      });
+      
+      const fetchStats = fetch(get_stats_dashboad_path(id), { signal }).then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch statistics.');
+        return res.json();
+      });
+      
+      const fetchTags = fetch(get_user_tags_stat_path(id), { signal }).then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch tags data.');
+        return res.json();
+      });
+
+      Promise.all([fetchProfile, fetchStats, fetchTags])
+        .then(([profileData, statsData, tagsStat]) => {
+          if (signal.aborted) return;
+          
+          setUserData({
+            first_name: profileData.first_name || '',
+            second_name: profileData.second_name || '',
+            email: profileData.email || '',
+            role: roles[profileData.role_id] || 'Unknown',
+            active: Boolean(profileData.active),
+          });
+          
+          setStatistics({
+            csat: statsData.CSAT || 0,
+            feedbackCount: statsData.total_feedbacks || 0,
+          });
+          
+          const transformData = (dataObj = {}) => {
+            return Object.entries(dataObj).map(([label, value]) => ({ label, value }));
+          };
+
+          setTagsData({
+            tagSet1: transformData(tagsStat['положительный'] || {}),
+            tagSet2: transformData(tagsStat['нейтральный'] || {}),
+            tagSet3: transformData(tagsStat['негативный'] || {}),
+          });
+        })
+        .catch((err) => {
+          if (signal.aborted) return;
+          
+          console.error(err);
+          setError(err.message || 'Произошла ошибка при загрузке данных.');
+        })
+        .finally(() => {
+          if (!signal.aborted) {
+            setLoading(false);
+          }
+        });
+
+      return () => controller.abort();
+    }
+  }, [id, roles, rolesLoading, rolesError]);
+
+  const isOwnProfile = currentUser;
+
+  if (rolesLoading || loading) {
+    return <Loading />;
+  }
+
+  if (rolesError || error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-red-500">{rolesError || error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen w-full overflow-auto bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="max-w-7xl mx-auto w-full space-y-6 pb-32"> {/* Увеличен до pb-32 (8rem) */}
+      {isOwnProfile && (
+        <div className="max-w-7xl mx-auto mb-4">
+          <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-sm p-3 rounded-md flex justify-between items-center">
+            <span>
+              Это ваш личный профиль. Вы можете редактировать свои данные.
+            </span>
+            <button 
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              onClick={() => {/* Логика редактирования профиля */}}
+            >
+              Редактировать профиль
+            </button>
+          </div>
+        </div>
+      )}
+      
+      <div className="max-w-7xl mx-auto w-full space-y-6 pb-32">
         {/* Profile Card */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -266,44 +427,28 @@ function Profile() {
         {/* Statistics Dashboard */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100">
-            Статистика
+            Статистика отзывов
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* CSAT блок */}
-            <div className="bg-gradient-to-r from-violet-50 to-violet-100 dark:from-violet-900/30 dark:to-violet-800/30 rounded-xl p-6 flex flex-col items-center justify-center transition-transform hover:scale-[1.02] transform duration-300 shadow-sm hover:shadow">
-              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-violet-100 dark:bg-violet-700/40 mb-4">
-                <svg className="w-8 h-8 text-violet-600 dark:text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                </svg>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-6 text-center flex flex-col items-center justify-center">
+              <div className="text-5xl font-bold mb-2 text-violet-600 dark:text-violet-400">
+                {statistics.csat.toFixed(1)}%
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Удовлетворенность клиентов</h3>
-              <div className="text-5xl font-bold text-violet-600 dark:text-violet-400 flex items-baseline">
-                {statistics.csat}
-                <span className="text-xl text-violet-400 dark:text-violet-300 ml-1">%</span>
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 mt-4 text-sm text-center">
-                Отражает общую оценку качества обслуживания по отзывам клиентов
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
+                Средний показатель удовлетворенности (CSAT)
               </p>
             </div>
-            
-            {/* Количество отзывов блок */}
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl p-6 flex flex-col items-center justify-center transition-transform hover:scale-[1.02] transform duration-300 shadow-sm hover:shadow">
-              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-700/40 mb-4">
-                <svg className="w-8 h-8 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Всего отзывов</h3>
-              <div className="text-5xl font-bold text-blue-600 dark:text-blue-400">
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-6 text-center flex flex-col items-center justify-center">
+              <div className="text-5xl font-bold mb-2 text-violet-600 dark:text-violet-400">
                 {statistics.feedbackCount}
               </div>
-              <p className="text-gray-600 dark:text-gray-400 mt-4 text-sm text-center">
-                Общее количество отзывов, оставленных клиентами
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
+                Общее количество отзывов
               </p>
             </div>
           </div>
         </div>
-
+        
         {/* Tag Dashboard */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
@@ -331,65 +476,104 @@ function Profile() {
           </div>
         </div>
 
-        {/* Customer Comments Section with Server Pagination */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-20"> {/* Увеличен до mb-20 (5rem) */}
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-            Комментарии клиентов
-          </h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-20">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+              Комментарии клиентов
+            </h2>
+            <button 
+              onClick={() => loadCustomerPage(null, false)}
+              disabled={customerLoading}
+              className="text-violet-500 hover:text-violet-600 dark:text-violet-400 dark:hover:text-violet-300 disabled:text-gray-400"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
+          
           {customerLoading ? (
-            <p className="text-gray-700 dark:text-gray-300">Загрузка комментариев...</p>
-          ) : currentCustomerPage.comments.length > 0 ? (
-            <div className="space-y-4">
-              {currentCustomerPage.comments.map((comment) => (
-                <div key={comment.id} className="border-b border-gray-200 dark:border-gray-700 pb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-gray-800 dark:text-gray-200">Отзыв #{comment.id}</span>
+            <div className="py-4 space-y-3">
+              {[...Array(2)].map((_, i) => (
+                <div key={`skeleton-${i}`} className="animate-pulse flex space-x-4">
+                  <div className="flex-1 space-y-3 py-1">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+                    </div>
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm">{comment.comment}</p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-gray-600 dark:text-gray-400">No customer comments available.</p>
+            <>
+              {customerPageHistory.length > 0 && 
+               customerPageHistory[currentCustomerPageIndex]?.comments?.length > 0 ? (
+                <div className="space-y-4">
+                  {customerPageHistory[currentCustomerPageIndex].comments.map((comment, idx) => (
+                    <div 
+                      key={comment?.id || `comment-${idx}-${currentCustomerPageIndex}`} 
+                      className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0"
+                    >
+                      <div className="flex flex-wrap justify-between items-center mb-2">
+                        <span className="font-medium text-gray-800 dark:text-gray-200 mr-2">
+                          Отзыв {comment?.id ? `#${comment.id}` : `${idx + 1}`}
+                        </span>
+                        {(comment?.date || comment?.created_at) && (
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(comment.date || comment.created_at).toLocaleDateString('ru-RU')}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-line break-words">
+                        {comment?.comment || comment?.text || 'Нет текста комментария'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-10 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                  <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                  <p className="text-gray-600 dark:text-gray-400">Комментарии отсутствуют</p>
+                  <p className="text-gray-500 dark:text-gray-500 text-sm mt-1">
+                    Когда клиенты оставят отзывы, они появятся здесь
+                  </p>
+                </div>
+              )}
+            </>
           )}
-          <div className="flex justify-between items-center mt-8 mb-4"> 
-            <button
-              onClick={() => {
-                if (currentCustomerPageIndex > 0) {
-                  setCurrentCustomerPageIndex(currentCustomerPageIndex - 1);
-                }
-              }}
-              disabled={currentCustomerPageIndex === 0 || customerLoading}
-              className={`px-4 py-2 rounded-md text-sm ${  
-                currentCustomerPageIndex === 0 || customerLoading
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-violet-500 text-white hover:bg-violet-600'
-              }`}
-            >
-              Пред.
-            </button>
-            <span className="text-gray-700 dark:text-gray-200 text-sm">
-              Страница {currentCustomerPageIndex + 1}
-            </span>
-            <button
-              onClick={() => {
-                if (currentCustomerPage.hasMore && !customerLoading) {
-                  loadCustomerPage(currentCustomerPage.nextCursor, true);
-                }
-              }}
-              disabled={!currentCustomerPage.hasMore || customerLoading}
-              className={`px-4 py-2 rounded-md text-sm ${  
-                !currentCustomerPage.hasMore || customerLoading
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-violet-500 text-white hover:bg-violet-600'
-              }`}
-            >
-              След.
-            </button>
-          </div>
+
+          {customerPageHistory.length > 0 && 
+           (customerPageHistory[currentCustomerPageIndex]?.hasMore || currentCustomerPageIndex > 0) && (
+            <div className="flex justify-between items-center mt-8 mb-4"> 
+              <button
+                onClick={goToPreviousPage}
+                disabled={currentCustomerPageIndex === 0 || customerLoading}
+                aria-label="Предыдущая страница"
+                type="button"
+                className="px-4 py-2 rounded-md text-sm bg-violet-500 text-white hover:bg-violet-600 dark:bg-violet-600 dark:hover:bg-violet-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:hover:bg-gray-200 disabled:cursor-not-allowed dark:disabled:bg-gray-700 dark:disabled:text-gray-500 dark:disabled:hover:bg-gray-700"
+              >
+                Пред.
+              </button>
+              <span className="text-gray-700 dark:text-gray-200 text-sm">
+                Страница {currentCustomerPageIndex + 1}
+              </span>
+              <button
+                onClick={goToNextPage}
+                disabled={!customerPageHistory[currentCustomerPageIndex]?.hasMore || customerLoading}
+                aria-label="Следующая страница"
+                type="button"
+                className="px-4 py-2 rounded-md text-sm bg-violet-500 text-white hover:bg-violet-600 dark:bg-violet-600 dark:hover:bg-violet-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:hover:bg-gray-200 disabled:cursor-not-allowed dark:disabled:bg-gray-700 dark:disabled:text-gray-500 dark:disabled:hover:bg-gray-700"
+              >
+                След.
+              </button>
+            </div>
+          )}
         </div>
       </div>
-      {/* Дополнительный пустой блок в конце страницы для гарантированного отступа */}
       <div className="h-16"></div>
     </div>
   );
