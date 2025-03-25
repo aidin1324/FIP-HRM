@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { FilterProvider } from "./contexts/FilterContext";
 
 import "./css/style.css";
@@ -52,6 +52,7 @@ function App() {
           />
           <Route path="/users" element={<Users />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/profile" element={<Navigate to="/my-profile" replace />} />
           <Route path="/profile/:id" element={<Profile />} />
           <Route path="/tests" element={<Testing />} />
           <Route path="/comments" element={<Comments />} />{" "}

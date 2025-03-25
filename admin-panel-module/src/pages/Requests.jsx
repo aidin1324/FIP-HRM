@@ -1,65 +1,120 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { get_request_path } from '../api_endpoints';
-import { approve_request_path } from '../api_endpoints';
+import { get_request_path, approve_request_path } from '../api_endpoints';
 import axios from 'axios'; 
 import { debounce } from 'lodash'; 
 
 const RequestCard = React.memo(({ request, onAccept, onDecline, isLoading }) => {
+  const { first_name = '', last_name = '', email = '' } = request;
+  const fullName = `${first_name || request.firstName || ''} ${last_name || request.lastName || ''}`.trim();
+  
   return (
-    <div
-      className="border-b border-gray-200 dark:border-gray-700 pb-2 flex flex-col md:flex-row justify-between items-start md:items-center"
-    >
-      <div className="flex-1">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-1">
-          <span className="font-medium text-gray-800 dark:text-gray-200">
-            {request.first_name || request.firstName} {request.last_name || request.lastName}
-          </span>
+    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-violet-600 dark:text-violet-400">
+              {fullName.charAt(0).toUpperCase()}
+            </div>
+            <span className="font-medium text-gray-800 dark:text-gray-200">
+              {fullName}
+            </span>
+          </div>
+          <p className="text-gray-700 dark:text-gray-300 text-sm flex items-center">
+            <svg className="w-4 h-4 mr-1 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            {email}
+          </p>
         </div>
-        <p className="text-gray-700 dark:text-gray-300 text-sm">{request.email}</p>
-      </div>
-      <div className="flex space-x-2 mt-2 md:mt-0 w-full md:w-auto">
-        <button
-          onClick={() => onAccept(request.id)}
-          className="px-2 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 text-xs w-full md:w-auto"
-          disabled={isLoading}
-          aria-label={`Accept request from ${request.first_name || request.firstName}`}
-        >
-          Принять
-        </button>
-        <button
-          onClick={() => onDecline(request.id)}
-          className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs w-full md:w-auto"
-          disabled={isLoading}
-          aria-label={`Decline request from ${request.first_name || request.firstName}`}
-        >
-          Отклонить
-        </button>
+        <div className="flex gap-2 w-full md:w-auto">
+          <button
+            onClick={() => onAccept(request.id)}
+            className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-md hover:from-green-600 hover:to-green-700 transition-all duration-200 text-sm flex-1 md:flex-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+            Принять
+          </button>
+          <button
+            onClick={() => onDecline(request.id)}
+            className="px-3 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-md hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm flex-1 md:flex-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            )}
+            Отклонить
+          </button>
+        </div>
       </div>
     </div>
   );
 });
+
+const RequestSkeleton = () => (
+  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm">
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-pulse">
+      <div className="flex-1">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+        </div>
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+      </div>
+      <div className="flex gap-2 w-full md:w-auto">
+        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+      </div>
+    </div>
+  </div>
+);
 
 function Requests() {
   const [requests, setRequests] = useState([]);
   const [allRequests, setAllRequests] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
+  const [notification, setNotification] = useState({ 
+    show: false, 
+    message: '', 
+    type: 'success'
+  });
   const searchRef = useRef(null);
 
   useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => setSuccessMessage(null), 3000);
+    if (notification.show) {
+      const timer = setTimeout(() => {
+        setNotification(prev => ({ ...prev, show: false }));
+      }, 2000);
+      
       return () => clearTimeout(timer);
     }
-  }, [successMessage]);
+  }, [notification.show]);
+
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     setError(null);
+    
     try {
       const response = await axios.post(get_request_path, {});
-      
       const pendingRequests = response.data.filter(request => 
         request.status === "pending"
       );
@@ -67,17 +122,14 @@ function Requests() {
       setAllRequests(pendingRequests);
       setRequests(pendingRequests);
     } catch (err) {
-      console.error("Не удалось получить запросы:", err);
-      setError("Не удалось получить запросы. Пожалуйста, попробуйте еще раз.");
+      setError("Не удалось получить запросы. Пожалуйста, попробуйте позже.");
     } finally {
       setLoading(false);
     }
   }, []);
 
   const filterBySearchQuery = useCallback((query, requestsToFilter) => {
-    if (!query.trim()) {
-      return requestsToFilter;
-    }
+    if (!query.trim()) return requestsToFilter;
 
     const lowerQuery = query.toLowerCase();
     return requestsToFilter.filter(request => {
@@ -99,6 +151,8 @@ function Requests() {
 
     if (searchQuery.trim()) {
       searchRef.current(searchQuery);
+    } else {
+      setRequests(allRequests);
     }
     
     return () => {
@@ -111,9 +165,6 @@ function Requests() {
   const handleSearchChange = useCallback((e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    if (searchRef.current) {
-      searchRef.current(query);
-    }
   }, []);
 
   useEffect(() => {
@@ -121,50 +172,59 @@ function Requests() {
   }, [fetchRequests]);
 
   const handleAccept = useCallback(async (id) => {
-    setLoading(true);
+    setActionLoading(true);
     try {
       await axios.post(approve_request_path, {
         status: "approved"
       }, {
-        params: {
-          request_id: id
-        }
+        params: { request_id: id }
       });
+
+      const updateRequests = prev => prev.filter(request => request.id !== id);
+      setRequests(updateRequests);
+      setAllRequests(updateRequests);
       
-      setRequests(prev => prev.filter(request => request.id !== id));
-      setAllRequests(prev => prev.filter(request => request.id !== id));
-      
-      setSuccessMessage("Запрос успешно принят.");
-      setError(null);
+      setNotification({
+        show: true,
+        message: "Запрос успешно принят",
+        type: "success"
+      });
     } catch (err) {
-      console.error(`Не удалось принять запрос ${id}:`, err);
-      setError("Не удалось принять запрос. Пожалуйста, попробуйте еще раз.");
+      setNotification({
+        show: true,
+        message: "Не удалось выполнить операцию",
+        type: "error"
+      });
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   }, []);
 
   const handleDecline = useCallback(async (id) => {
-    setLoading(true);
+    setActionLoading(true);
     try {
       await axios.post(approve_request_path, {
         status: "rejected"
       }, {
-        params: {
-          request_id: id
-        }
+        params: { request_id: id }
       });
-
-      setRequests(prev => prev.filter(request => request.id !== id));
-      setAllRequests(prev => prev.filter(request => request.id !== id));
+      const updateRequests = prev => prev.filter(request => request.id !== id);
+      setRequests(updateRequests);
+      setAllRequests(updateRequests);
       
-      setSuccessMessage("Запрос успешно отклонен.");
-      setError(null);
+      setNotification({
+        show: true,
+        message: "Запрос успешно отклонен",
+        type: "success"
+      });
     } catch (err) {
-      console.error(`Не удалось отклонить запрос ${id}:`, err);
-      setError("Не удалось отклонить запрос. Пожалуйста, попробуйте еще раз.");
+      setNotification({
+        show: true,
+        message: "Не удалось выполнить операцию",
+        type: "error"
+      });
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   }, []);
 
@@ -172,18 +232,20 @@ function Requests() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-gray-50 dark:bg-gray-900 p-4">
-      <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Запросы регистрации</h1>
-      
-      <div className="mb-4">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">
+          Запросы регистрации
+        </h1>
+        
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
           </div>
           <input
             type="search"
-            className="block w-full p-2.5 pl-10 text-sm text-gray-900 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+            className="block w-full p-3 pl-10 text-sm text-gray-900 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500 shadow-sm"
             placeholder="Поиск по имени или почте..."
             value={searchQuery}
             onChange={handleSearchChange}
@@ -191,26 +253,71 @@ function Requests() {
         </div>
       </div>
 
-      {successMessage && (
-        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 transition-opacity duration-300" role="alert">
-          <p>{successMessage}</p>
+      {notification.show && (
+        <div 
+          className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 max-w-sm w-full"
+        >
+          <div 
+            className={`mx-4 rounded-md shadow-sm ${
+              notification.type === 'success' 
+                ? 'bg-green-100 dark:bg-green-800' 
+                : 'bg-red-100 dark:bg-red-800'
+            }`}
+          >
+            <div className="flex items-center px-4 py-3">
+              {notification.type === 'success' ? (
+                <svg className="w-5 h-5 text-green-600 dark:text-green-200 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-red-600 dark:text-red-200 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
+              <p className={`text-sm font-medium ${
+                notification.type === 'success' 
+                  ? 'text-green-800 dark:text-green-100' 
+                  : 'text-red-800 dark:text-red-100'
+              }`}>
+                {notification.message}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
       {error && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-          <p>{error}</p>
+        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md shadow-sm" role="alert">
+          <div className="flex">
+            <svg className="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p>{error}</p>
+          </div>
+          <div className="mt-2">
+            <button 
+              onClick={fetchRequests} 
+              className="text-sm font-medium text-red-600 hover:text-red-800 flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Попробовать снова
+            </button>
+          </div>
         </div>
       )}
 
-      {loading && (
-        <div className="flex justify-center items-center py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-        </div>
-      )}
+      <div className="flex-1 overflow-y-auto space-y-4 pb-20">
+        {loading && (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, index) => (
+              <RequestSkeleton key={`skeleton-${index}`} />
+            ))}
+          </div>
+        )}
 
-      <div className="flex-1 overflow-y-auto space-y-4 pb-20"> 
-        {!loading && hasRequests ? (
+        {!loading && hasRequests && (
           <div className="space-y-4">
             {requests.map((request) => (
               <RequestCard
@@ -218,15 +325,46 @@ function Requests() {
                 request={request}
                 onAccept={handleAccept}
                 onDecline={handleDecline}
-                isLoading={loading}
+                isLoading={actionLoading}
               />
             ))}
           </div>
-        ) : !loading ? (
-          <div className="text-center text-gray-600 dark:text-gray-300">
-            {searchQuery ? "No matching requests found." : "Запросы не найдены."}
+        )}
+
+        {!loading && !hasRequests && (
+          <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <svg 
+              className="mx-auto h-12 w-12 text-gray-400" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+              {searchQuery ? "Запросы не найдены" : "Нет запросов на рассмотрении"}
+            </h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {searchQuery 
+                ? "Попробуйте изменить параметры поиска" 
+                : "В настоящее время нет запросов на регистрацию, требующих вашего внимания"}
+            </p>
+            {searchQuery && (
+              <div className="mt-6">
+                <button
+                  type="button"
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
+                  onClick={() => setSearchQuery('')}
+                >
+                  <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Очистить поиск
+                </button>
+              </div>
+            )}
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   );

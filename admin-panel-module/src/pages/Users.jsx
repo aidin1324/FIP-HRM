@@ -1,9 +1,12 @@
 import { RoleContext } from '../contexts/RoleContext';
+import { AuthContext } from '../contexts/AuthContext'; 
 import React, { useState, useEffect, useContext } from 'react';
-import { get_user_path, patch_user_path, get_roles_path } from '../api_endpoints';
+import { get_user_path, get_roles_path } from '../api_endpoints';
+import API from '../api_endpoints';
 
 function Users() {
     const { roles, loading: rolesLoading, error: rolesError } = useContext(RoleContext);
+    const { auth } = useContext(AuthContext); 
     const [users, setUsers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedRole, setSelectedRole] = useState('');
@@ -64,38 +67,34 @@ function Users() {
         }
     }, [searchTerm, selectedRole, usersPerPage, rolesLoading, rolesError]);
 
-    const handleToggleActive = async (id) => {
+    const handleToggleActive = async (userId) => {
         try {
-            const userToUpdate = users.find(user => user.id === id);
-            if (!userToUpdate) {
-                throw new Error('User not found');
-            }
+            const user = currentUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            const newActiveStatus = !user.active;
 
-            const response = await fetch(`${patch_user_path}/${id}`, {
+            const response = await fetch(API.users.update(userId), {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth.access_token}`
                 },
-                body: JSON.stringify({ active: !userToUpdate.active }),
+                body: JSON.stringify({ active: newActiveStatus })
             });
 
             if (!response.ok) {
                 throw new Error('Failed to update user status');
             }
 
-            const updatedUser = await response.json();
+            setUsers(prevUsers => 
+                prevUsers.map(user => 
+                    user.id === userId ? { ...user, active: newActiveStatus } : user
+                )
+            );
 
-            setUsers(prevUsers => prevUsers.map(user => 
-                user.id === id ? { 
-                    ...user, 
-                    active: updatedUser.active, 
-                    fullName: `${updatedUser.first_name} ${updatedUser.second_name}`,
-                    role: roles[updatedUser.role_id] || 'user',
-                } : user
-            ));
-        } catch (err) {
-            console.error(err);
-            alert('Ошибка при переключении статуса пользователя.');
+        } catch (error) {
+            console.error(error);
         }
     };
 
