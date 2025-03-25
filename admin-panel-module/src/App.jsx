@@ -35,30 +35,66 @@ function App() {
   return (
     <FilterProvider>
       <Routes>
-        {/* Маршрут для логина */}
+        {/* Публичные маршруты */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/after-register" element={<AfterRegister />} />
-        {/* Вложенный маршрут для Layout */}
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/404" element={<PageNotFound />} />
+        
+        {/* Вложенные защищенные маршруты */}
         <Route path="/" element={<Layout />}>
-          {/* Profile будет отображаться внутри Layout */}
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute role={["admin", "manager"]}>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route path="/users" element={<Users />} />
-          <Route path="/unauthorized" element={<Unauthorized />} />
+          {/* Редирект с главной */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+          {/* Маршруты только для админов и менеджеров */}
+          <Route path="/dashboard" element={
+            <PrivateRoute role={["admin", "manager"]}>
+              <Dashboard />
+            </PrivateRoute>
+          } />
+          
+          <Route path="/users" element={
+            <PrivateRoute role={["admin", "manager"]}>
+              <Users />
+            </PrivateRoute>
+          } />
+          
+          <Route path="/comments" element={
+            <PrivateRoute role={["admin", "manager"]}>
+              <Comments />
+            </PrivateRoute>
+          } />
+          
+          <Route path="/requests" element={
+            <PrivateRoute role={["admin", "manager"]}>
+              <Requests />
+            </PrivateRoute>
+          } />
+          
+          <Route path="/contacts" element={
+            <PrivateRoute role={["admin", "manager"]}>
+              <Contacts />
+            </PrivateRoute>
+          } />
+          
+          <Route path="/tests" element={
+            <PrivateRoute role={["admin", "manager"]}>
+              <Testing />
+            </PrivateRoute>
+          } />
+          
+          {/* Просмотр профилей - только для админов и менеджеров */}
+          <Route path="/profile/:id" element={
+            <PrivateRoute role={["admin", "manager"]}>
+              <Profile />
+            </PrivateRoute>
+          } />
+          
+          {/* Редирект с /profile на свой профиль */}
           <Route path="/profile" element={<Navigate to="/my-profile" replace />} />
-          <Route path="/profile/:id" element={<Profile />} />
-          <Route path="/tests" element={<Testing />} />
-          <Route path="/comments" element={<Comments />} />{" "}
-          <Route path="/requests" element={<Requests />} />{" "}
-          <Route path="/contacts" element={<Contacts />} />{" "}
-          <Route path="/404" element={<PageNotFound />} />
+          
+          {/* Свой профиль - доступен всем авторизованным пользователям */}
           <Route path="/my-profile" element={
             <PrivateRoute>
               <MyProfile />

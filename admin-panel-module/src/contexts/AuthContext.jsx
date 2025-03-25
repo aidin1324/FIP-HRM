@@ -5,6 +5,23 @@ import * as jwt from 'jwt-decode';
 
 export const AuthContext = createContext();
 
+const decodeToken = (token) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    console.error('Ошибка при декодировании токена:', e);
+    return {};
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({
     access_token: null,
@@ -20,26 +37,20 @@ export const AuthProvider = ({ children }) => {
 
       if (access_token && typeof access_token === 'string' && !isaccess_tokenExpired(access_token)) {
         try {
-          const decoded = jwt.jwtDecode(access_token);
+          const decoded = decodeToken(access_token);
           console.log('Decoded access_token:', decoded);
           setAuth({
-            access_token:access_token,
+            access_token: access_token,
             user: {
               id: decoded.id,
-              email: decoded.email,
-              roles: decoded.roles, // Assumes roles are stored in the access_token
-            },
+              role: decoded.role // Сохраняем роль из токена
+            }
           });
         } catch (error) {
-          console.error('Error decoding access_token:', error);
-          logout();
+          console.error('Error decoding access_token during initialization:', error);
         }
-      } else {
-        console.log('No valid access_token found.');
-        logout();
       }
-
-      setLoading(false); // Authentication check complete
+      setLoading(false);
     };
 
     initializeAuth();
