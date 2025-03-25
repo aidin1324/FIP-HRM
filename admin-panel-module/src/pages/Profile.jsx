@@ -12,6 +12,9 @@ import { RoleContext } from '../contexts/RoleContext';
 import { AuthContext } from '../contexts/AuthContext'; 
 import Loading from '../components/Loading';
 import { useThemeProvider } from '../utils/ThemeContext';
+import EditProfileModal from '../components/EditProfileModal';
+import API from '../api_endpoints';
+import Toast from '../components/Toast';
 
 function Profile({ currentUser = false }) {
   const { roles, loading: rolesLoading, error: rolesError } = useContext(RoleContext);
@@ -52,6 +55,9 @@ function Profile({ currentUser = false }) {
   const commentsLimit = 3; 
 
   const [initialLoadDone, setInitialLoadDone] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
   const buildPieData = useCallback((dataset = []) => {
     const labels = dataset.map(item => item.label);
@@ -357,7 +363,74 @@ function Profile({ currentUser = false }) {
     }
   }, [id, roles, rolesLoading, rolesError]);
 
-  const isOwnProfile = currentUser;
+  useEffect(() => {
+    // Проверяем, является ли это профилем текущего пользователя
+    if (currentUser || (auth.user && auth.user.id === parseInt(id))) {
+      setIsOwnProfile(true);
+    }
+    
+    // Остальной существующий код
+  }, [id]);
+
+  const handleSaveProfile = async (updatedData) => {
+    try {
+      // Убедимся, что role_id - число
+      const payload = {
+        ...updatedData,
+        role_id: parseInt(updatedData.role_id, 10)
+      };
+      
+      const response = await fetch(API.users.update(id), {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.access_token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Не удалось обновить профиль');
+      }
+      
+      const updatedUserData = await response.json();
+      
+      // Обновляем локальные данные пользователя
+      setUserData({
+        ...userData,
+        first_name: updatedUserData.first_name || '',
+        second_name: updatedUserData.second_name || '',
+        email: updatedUserData.email || '',
+        active: Boolean(updatedUserData.active),
+        role_id: updatedUserData.role_id
+      });
+      
+      // Обновляем роль
+      if (roles && updatedUserData.role_id) {
+        setUserData(prev => ({
+          ...prev,
+          role: roles[updatedUserData.role_id] || 'Unknown'
+        }));
+      }
+      
+      // Показываем стильное уведомление вместо alert
+      setToast({
+        show: true,
+        message: 'Профиль успешно обновлен',
+        type: 'success'
+      });
+    } catch (error) {
+      console.error('Ошибка при обновлении профиля:', error);
+      // Показываем уведомление об ошибке
+      setToast({
+        show: true,
+        message: error.message || 'Ошибка при обновлении профиля',
+        type: 'error'
+      });
+      throw error;
+    }
+  };
 
   if (rolesLoading || loading) {
     return <Loading />;
@@ -424,7 +497,7 @@ function Profile({ currentUser = false }) {
             </div>
             <button 
               className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white text-sm font-medium rounded-md shadow-sm transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:ring-violet-400 focus:outline-none"
-              onClick={() => {/* Логика редактирования профиля */}}
+              onClick={() => setShowEditModal(true)}
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -586,6 +659,27 @@ function Profile({ currentUser = false }) {
         </div>
       </div>
       <div className="h-16"></div>
+      {showEditModal && (
+        <EditProfileModal 
+          userData={{
+            ...userData,
+            // Преобразуем название роли в role_id
+            role_id: Object.entries(roles || {}).find(([_, roleName]) => 
+              roleName === userData.role
+            )?.[0] || ''
+          }}
+          onClose={() => setShowEditModal(false)}
+          onSave={handleSaveProfile}
+        />
+      )}
+      {/* iOS-стиль уведомления */}
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ ...toast, show: false })}
+        />
+      )}
     </div>
   );
 }
