@@ -9,6 +9,7 @@ import {
 } from '../api_endpoints';
 import { useParams } from 'react-router-dom';
 import { RoleContext } from '../contexts/RoleContext';
+import { AuthContext } from '../contexts/AuthContext'; 
 import Loading from '../components/Loading';
 import { useThemeProvider } from '../utils/ThemeContext';
 
@@ -16,8 +17,9 @@ function Profile({ currentUser = false }) {
   const { roles, loading: rolesLoading, error: rolesError } = useContext(RoleContext);
   const { id: urlId } = useParams();
   const { currentTheme } = useThemeProvider();
+  const { auth } = useContext(AuthContext);
 
-  const id = urlId;
+  const id = currentUser ? auth.user?.id : urlId;
   
   const darkMode = currentTheme === 'dark';
   const abortControllerRef = useRef(new AbortController());
@@ -371,21 +373,6 @@ function Profile({ currentUser = false }) {
 
   return (
     <div className="flex flex-col h-screen w-full overflow-auto bg-gray-50 dark:bg-gray-900 p-4">
-      {isOwnProfile && (
-        <div className="max-w-7xl mx-auto mb-4">
-          <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-sm p-3 rounded-md flex justify-between items-center">
-            <span>
-              Это ваш личный профиль. Вы можете редактировать свои данные.
-            </span>
-            <button 
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-              onClick={() => {/* Логика редактирования профиля */}}
-            >
-              Редактировать профиль
-            </button>
-          </div>
-        </div>
-      )}
       
       <div className="max-w-7xl mx-auto w-full space-y-6 pb-32">
         {/* Profile Card */}
@@ -423,6 +410,30 @@ function Profile({ currentUser = false }) {
             </div>
           </div>
         </div>
+
+        {isOwnProfile && (
+        <div className="max-w-7xl mx-auto mb-6">
+          <div className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex items-center text-gray-700 dark:text-gray-300">
+              <svg className="w-5 h-5 mr-2 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm">
+                Это ваш личный профиль
+              </span>
+            </div>
+            <button 
+              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white text-sm font-medium rounded-md shadow-sm transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:ring-violet-400 focus:outline-none"
+              onClick={() => {/* Логика редактирования профиля */}}
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Редактировать
+            </button>
+          </div>
+        </div>
+      )}
 
         {/* Statistics Dashboard */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">

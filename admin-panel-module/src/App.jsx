@@ -21,6 +21,7 @@ import Testing from "./pages/Testing";
 import AfterRegister from "./pages/AfterRegister";
 import Contacts from "./pages/Contacts";
 import PageNotFound from "./pages/404";
+import MyProfile from "./pages/MyProfile";
 
 function App() {
   const location = useLocation();
@@ -57,7 +58,11 @@ function App() {
           <Route path="/requests" element={<Requests />} />{" "}
           <Route path="/contacts" element={<Contacts />} />{" "}
           <Route path="/404" element={<PageNotFound />} />
-          {/* <Route path="unauthorized" element={<Unauthorized />} /> */}
+          <Route path="/my-profile" element={
+            <PrivateRoute>
+              <MyProfile />
+            </PrivateRoute>
+          } />
         </Route>
       </Routes>
     </FilterProvider>
