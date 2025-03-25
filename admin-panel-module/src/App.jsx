@@ -1,27 +1,30 @@
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
 import { FilterProvider } from "./contexts/FilterContext";
 
 import "./css/style.css";
-
 import "./charts/ChartjsConfig";
 
-// Import pages
-import Dashboard from "./pages/Dashboard";
-import Login from "./pages/Login";
-import Profile from "./pages/Profile";
+// Импортируем Layout обычным способом, т.к. он нужен сразу
 import Layout from "./pages/Layout";
-import Register from "./pages/Register";
 import PrivateRoute from "./components/PrivateRoute";
-import Users from "./pages/Users";
-import Unauthorized from "./pages/Unauthorized";
-import Comments from "./pages/Comments";
-import Requests from "./pages/Requests";
-import Testing from "./pages/Testing";
-import AfterRegister from "./pages/AfterRegister";
-import Contacts from "./pages/Contacts";
-import PageNotFound from "./pages/404";
-import MyProfile from "./pages/MyProfile";
+import LoadingFallback from "./components/LoadingFallback";
+
+// Заменяем обычные импорты на динамические с использованием React.lazy
+const Dashboard = React.lazy(() => import("./pages/Dashboard"));
+const Login = React.lazy(() => import("./pages/Login"));
+const Profile = React.lazy(() => import("./pages/Profile"));
+const Register = React.lazy(() => import("./pages/Register"));
+const Users = React.lazy(() => import("./pages/Users"));
+const Unauthorized = React.lazy(() => import("./pages/Unauthorized"));
+const Comments = React.lazy(() => import("./pages/Comments"));
+const Requests = React.lazy(() => import("./pages/Requests"));
+const Testing = React.lazy(() => import("./pages/Testing"));
+const AfterRegister = React.lazy(() => import("./pages/AfterRegister"));
+const Contacts = React.lazy(() => import("./pages/Contacts"));
+const PageNotFound = React.lazy(() => import("./pages/404"));
+const MyProfile = React.lazy(() => import("./pages/MyProfile"));
 
 function App() {
   const location = useLocation();
@@ -30,79 +33,82 @@ function App() {
     document.querySelector("html").style.scrollBehavior = "auto";
     window.scroll({ top: 0 });
     document.querySelector("html").style.scrollBehavior = "";
-  }, [location.pathname]); 
+  }, [location.pathname]);
 
   return (
-    <FilterProvider>
-      <Routes>
-        {/* Публичные маршруты */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/after-register" element={<AfterRegister />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="/404" element={<PageNotFound />} />
-        
-        {/* Вложенные защищенные маршруты */}
-        <Route path="/" element={<Layout />}>
-          {/* Редирект с главной */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-          {/* Маршруты только для админов и менеджеров */}
-          <Route path="/dashboard" element={
-            <PrivateRoute role={["admin", "manager"]}>
-              <Dashboard />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/users" element={
-            <PrivateRoute role={["admin", "manager"]}>
-              <Users />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/comments" element={
-            <PrivateRoute role={["admin", "manager"]}>
-              <Comments />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/requests" element={
-            <PrivateRoute role={["admin", "manager"]}>
-              <Requests />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/contacts" element={
-            <PrivateRoute role={["admin", "manager"]}>
-              <Contacts />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/tests" element={
-            <PrivateRoute role={["admin", "manager"]}>
-              <Testing />
-            </PrivateRoute>
-          } />
-          
-          {/* Просмотр профилей - только для админов и менеджеров */}
-          <Route path="/profile/:id" element={
-            <PrivateRoute role={["admin", "manager"]}>
-              <Profile />
-            </PrivateRoute>
-          } />
-          
-          {/* Редирект с /profile на свой профиль */}
-          <Route path="/profile" element={<Navigate to="/my-profile" replace />} />
-          
-          {/* Свой профиль - доступен всем авторизованным пользователям */}
-          <Route path="/my-profile" element={
-            <PrivateRoute>
-              <MyProfile />
-            </PrivateRoute>
-          } />
-        </Route>
-      </Routes>
-    </FilterProvider>
+    <AuthProvider>
+      <FilterProvider>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            {/* Публичные маршруты */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/after-register" element={<AfterRegister />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="/404" element={<PageNotFound />} />
+            
+            {/* Защищенные маршруты внутри Layout */}
+            <Route path="/" element={<Layout />}>
+              {/* Редирект с главной на дашборд */}
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              
+              {/* Маршруты для администраторов и менеджеров */}
+              <Route path="dashboard" element={
+                <PrivateRoute role={["admin", "manager"]}>
+                  <Dashboard />
+                </PrivateRoute>
+              } />
+              
+              <Route path="users" element={
+                <PrivateRoute role={["admin", "manager"]}>
+                  <Users />
+                </PrivateRoute>
+              } />
+              
+              <Route path="comments" element={
+                <PrivateRoute role={["admin", "manager"]}>
+                  <Comments />
+                </PrivateRoute>
+              } />
+              
+              <Route path="requests" element={
+                <PrivateRoute role={["admin", "manager"]}>
+                  <Requests />
+                </PrivateRoute>
+              } />
+              
+              <Route path="contacts" element={
+                <PrivateRoute role={["admin", "manager"]}>
+                  <Contacts />
+                </PrivateRoute>
+              } />
+              
+              <Route path="tests" element={
+                <PrivateRoute role={["admin", "manager"]}>
+                  <Testing />
+                </PrivateRoute>
+              } />
+              
+              {/* Маршруты для всех авторизованных пользователей */}
+              <Route path="profile/:id" element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              } />
+              
+              <Route path="my-profile" element={
+                <PrivateRoute>
+                  <MyProfile />
+                </PrivateRoute>
+              } />
+              
+              {/* Обработка неизвестных маршрутов */}
+              <Route path="*" element={<Navigate to="/404" replace />} />
+            </Route>
+          </Routes>
+        </Suspense>
+      </FilterProvider>
+    </AuthProvider>
   );
 }
 
