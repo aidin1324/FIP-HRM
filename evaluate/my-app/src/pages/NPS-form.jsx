@@ -3,10 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import './NPS-form.css';
 import zernoLogo from '../components/img/logo.png';
 
-// Define your backend endpoints
 const GET_USER_BY_PAGINATION_AND_SORT = 'http://127.0.0.1:8000/users/get_user_with_pagination'; // Replace with your actual endpoint
-const SUBMIT_FEEDBACK = 'http://127.0.0.1:8000/feedbacks/create'; // Replace with your actual endpoint
-
+const SUBMIT_FEEDBACK = 'http://127.0.0.1:8000/feedbacks/create'; 
 function NPSForm() {
   const navigate = useNavigate();
 
@@ -28,9 +26,9 @@ function NPSForm() {
   const [waiterComment, setWaiterComment] = useState('');
   const [selectedWaiterTag, setSelectedWaiterTag] = useState(null);
 
-  const [waiters, setWaiters] = useState([]); // Dynamic waiters
-  const [isLoading, setIsLoading] = useState(false); // Loading state
-  const [fetchError, setFetchError] = useState(null); // Fetch error state
+  const [waiters, setWaiters] = useState([]); 
+  const [isLoading, setIsLoading] = useState(false); 
+  const [fetchError, setFetchError] = useState(null); 
 
   const tags = {
     positive: [
@@ -147,7 +145,11 @@ function NPSForm() {
   };
 
   const handleSubmit = async () => {
-    console.log('handleSubmit called'); // For debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Форма отправлена');
+      // Не логировать данные формы!
+    }
+
     const newErrors = {};
 
     // Validation
@@ -203,8 +205,6 @@ function NPSForm() {
       ],
     };
 
-    console.log('NPS Data:', dataToSend); // For debugging
-
     try {
       const response = await fetch(SUBMIT_FEEDBACK, {
         method: 'POST',
@@ -215,15 +215,18 @@ function NPSForm() {
       });
 
       if (response.ok) {
-        console.log('Data sent successfully');
         navigate('/outro');
       } else {
         const errorData = await response.json();
-        console.error('Server Error:', errorData);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Ошибка сервера при отправке формы');
+        }
         setErrors({ submit: 'Произошла ошибка при отправке данных. Пожалуйста, попробуйте позже.' });
       }
     } catch (error) {
-      console.error('Network Error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Ошибка сервера при отправке формы');
+      }
       setErrors({ submit: 'Ошибка сети. Пожалуйста, проверьте ваше соединение и попробуйте снова.' });
     }
   };

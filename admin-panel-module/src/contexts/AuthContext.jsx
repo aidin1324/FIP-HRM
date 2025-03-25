@@ -5,49 +5,40 @@ import * as jwt from 'jwt-decode';
 
 export const AuthContext = createContext();
 
-const decodeToken = (token) => {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch (e) {
-    console.error('Ошибка при декодировании токена:', e);
-    return {};
-  }
-};
-
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({
     access_token: null,
-    user: null, // Contains user information, including roles
+    user: null,
   });
 
-  const [loading, setLoading] = useState(true); // Initialize loading state
+  const [loading, setLoading] = useState(true);
+
+  const isAccessTokenExpired = (token) => {
+    try {
+      const { exp } = jwt.jwtDecode(token);
+      return exp < Date.now() / 1000;
+    } catch (e) {
+      return true;
+    }
+  };
 
   useEffect(() => {
     const initializeAuth = () => {
-      const access_token = Cookies.get('access_token'); // Ensure the cookie name matches
-      console.log('Retrieved access_token from cookies:', access_token);
+      const access_token = Cookies.get('access_token');
 
-      if (access_token && typeof access_token === 'string' && !isaccess_tokenExpired(access_token)) {
+      if (access_token && typeof access_token === 'string' && !isAccessTokenExpired(access_token)) {
         try {
-          const decoded = decodeToken(access_token);
-          console.log('Decoded access_token:', decoded);
+          const decoded = jwt.jwtDecode(access_token);
           setAuth({
-            access_token: access_token,
+            access_token,
             user: {
               id: decoded.id,
-              role: decoded.role // Сохраняем роль из токена
+              email: decoded.email,
+              roles: decoded.roles || [decoded.role] 
             }
           });
         } catch (error) {
-          console.error('Error decoding access_token during initialization:', error);
+          console.error('Ошибка при декодировании токена:', error);
         }
       }
       setLoading(false);
@@ -56,27 +47,17 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const isaccess_tokenExpired = (access_token) => {
-    try {
-      const { exp } = jwt.jwtDecode(access_token);
-      return exp < Date.now() / 1000;
-    } catch (e) {
-      return true;
-    }
-  };
-
   const login = (access_token) => {
     if (typeof access_token !== 'string') {
-      console.error('Invalid access_token type:', typeof access_token);
-      return;
-    }
+      console.error('Неверный тип токена:', typeof access_token);
+ 
+   }
 
     Cookies.set('access_token', access_token, { expires: 7, secure: true, sameSite: 'strict' });
     try {
       const decoded = jwt.jwtDecode(access_token);
-      console.log('Decoded access_token on login:', decoded);
       setAuth({
-        access_token: access_token,
+        access_token,
         user: {
           id: decoded.id,
           email: decoded.email,
@@ -84,7 +65,7 @@ export const AuthProvider = ({ children }) => {
         },
       });
     } catch (error) {
-      console.error('Error decoding access_token during login:', error);
+      console.error('Ошибка при декодировании токена:', error);
       logout();
     }
   };

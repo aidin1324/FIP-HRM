@@ -32,7 +32,9 @@ function Login() {
         setError(data.message || "Неправильный email или пароль");
       }
     } catch (error) {
-      console.error("Произошла ошибка:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Ошибка авторизации");
+      }
       setError("Произошла сетевая ошибка. Пожалуйста, попробуйте позже.");
     }
   };

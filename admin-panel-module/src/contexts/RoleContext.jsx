@@ -17,7 +17,9 @@ export const RoleProvider = ({ children }) => {
                 return;
             }
             try {
-                console.log('Fetching roles...');
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('Fetching roles...');
+                }
                 const response = await fetch(get_roles_path);
                 if (!response.ok) {
                     throw new Error('Не удалось загрузить роли');
@@ -30,7 +32,9 @@ export const RoleProvider = ({ children }) => {
                 setRoles(roleMap);
                 sessionStorage.setItem('roles', JSON.stringify(roleMap));
             } catch (err) {
-                console.error(err);
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Ошибка при загрузке ролей:', err.message);
+                }
                 setError('Ошибка при загрузке ролей.');
             } finally {
                 setLoading(false);

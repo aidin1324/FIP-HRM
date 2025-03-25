@@ -194,7 +194,9 @@ function Profile({ currentUser = false }) {
       });
     } catch (err) {
       if (err.name !== 'AbortError') {
-        console.error('Ошибка загрузки комментариев:', err);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Ошибка загрузки данных:', err.message);
+        }
       }
     } finally {
       setCustomerLoading(false);
@@ -275,7 +277,9 @@ function Profile({ currentUser = false }) {
           setInitialLoadDone(true); 
         } catch (err) {
           if (err.name !== 'AbortError') {
-            console.error('Ошибка начальной загрузки комментариев:', err);
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Ошибка загрузки данных:', err.message);
+            }
           }
         } finally {
           setCustomerLoading(false);
@@ -364,17 +368,14 @@ function Profile({ currentUser = false }) {
   }, [id, roles, rolesLoading, rolesError]);
 
   useEffect(() => {
-    // Проверяем, является ли это профилем текущего пользователя
     if (currentUser || (auth.user && auth.user.id === parseInt(id))) {
       setIsOwnProfile(true);
     }
-    
-    // Остальной существующий код
+
   }, [id]);
 
   const handleSaveProfile = async (updatedData) => {
     try {
-      // Убедимся, что role_id - число
       const payload = {
         ...updatedData,
         role_id: parseInt(updatedData.role_id, 10)
@@ -395,8 +396,6 @@ function Profile({ currentUser = false }) {
       }
       
       const updatedUserData = await response.json();
-      
-      // Обновляем локальные данные пользователя
       setUserData({
         ...userData,
         first_name: updatedUserData.first_name || '',
@@ -413,16 +412,15 @@ function Profile({ currentUser = false }) {
           role: roles[updatedUserData.role_id] || 'Unknown'
         }));
       }
-      
-      // Показываем стильное уведомление вместо alert
       setToast({
         show: true,
         message: 'Профиль успешно обновлен',
         type: 'success'
       });
     } catch (error) {
-      console.error('Ошибка при обновлении профиля:', error);
-      // Показываем уведомление об ошибке
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Ошибка загрузки данных:', error.message);
+      }
       setToast({
         show: true,
         message: error.message || 'Ошибка при обновлении профиля',
@@ -663,7 +661,6 @@ function Profile({ currentUser = false }) {
         <EditProfileModal 
           userData={{
             ...userData,
-            // Преобразуем название роли в role_id
             role_id: Object.entries(roles || {}).find(([_, roleName]) => 
               roleName === userData.role
             )?.[0] || ''
@@ -672,7 +669,6 @@ function Profile({ currentUser = false }) {
           onSave={handleSaveProfile}
         />
       )}
-      {/* iOS-стиль уведомления */}
       {toast.show && (
         <Toast
           message={toast.message}

@@ -94,7 +94,9 @@ function Users() {
             );
 
         } catch (error) {
-            console.error(error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Ошибка при работе с пользователями:', error.message);
+            }
         }
     };
 

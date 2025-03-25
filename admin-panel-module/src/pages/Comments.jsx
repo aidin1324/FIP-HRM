@@ -27,10 +27,8 @@ function Comments() {
   const [dateRange, setDateRange] = useState({ from: null, to: null });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  // Adding a cache for comments
   const [cachedComments, setCachedComments] = useState({});
 
-  // Memoized request parameters
   const requestParams = useMemo(() => {
     const params = {
       limit: commentsLimit,
@@ -47,7 +45,6 @@ function Comments() {
     return params;
   }, [dateRange, commentsLimit, currentPage, cursorHistory]);
 
-  // Memoized API URL
   const apiUrl = useMemo(() => {
     const url = new URL(get_customer_comments_path_with_param);
     
@@ -66,10 +63,8 @@ function Comments() {
   }, [requestParams]);
 
   const fetchComments = useCallback(async () => {
-    // Unique cache key for each set of request parameters
     const cacheKey = JSON.stringify(requestParams);
-    
-    // If comments are already cached, use them
+
     if (cachedComments[cacheKey]) {
       setComments(cachedComments[cacheKey].feedbacks);
       setHasMore(cachedComments[cacheKey].hasMore);
@@ -92,13 +87,11 @@ function Comments() {
       }
       
       const data = await res.json();
-      
-      // Saving results to state
+
       setComments(data.feedbacks);
       setHasMore(data.feedbacks.length === Number(commentsLimit));
       setCursor(data.cursor);
-      
-      // Saving results to cache
+
       setCachedComments(prev => ({
         ...prev,
         [cacheKey]: {
@@ -108,14 +101,15 @@ function Comments() {
         }
       }));
     } catch (err) {
-      console.error('Ошибка при загрузке комментариев:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Ошибка при загрузке комментариев');
+      }
       setError(`Не удалось загрузить комментарии: ${err.message}`);
     } finally {
       setLoading(false);
     }
   }, [apiUrl, requestParams, cachedComments, commentsLimit]);
 
-  // Loading comments on initial render
   useEffect(() => {
     fetchComments();
   }, [fetchComments]);

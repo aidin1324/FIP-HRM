@@ -103,7 +103,9 @@ const DropdownProfile = React.memo(({ align }) => {
             return; 
           }
           
-          console.error('Ошибка при загрузке профиля:', err);
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Ошибка загрузки профиля пользователя');
+          }
 
           if (auth.user) {
             setUserData(auth.user);

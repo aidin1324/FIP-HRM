@@ -128,7 +128,9 @@ const useFeedbackData = (filter) => {
       })
       .catch((err) => {
         if (!axios.isCancel(err)) {
-          console.error("Ошибка при загрузке данных:", err);
+          if (process.env.NODE_ENV === 'development') {
+            console.error("Ошибка загрузки данных дашборда");
+          }
           setError("Не удалось загрузить данные оценок");
         }
       })

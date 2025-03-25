@@ -18,7 +18,7 @@ function Register() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    // Update the handleSubmit function to include the "status" field in the request payload.
+   
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
@@ -27,18 +27,16 @@ function Register() {
         }
         setLoading(true);
         setError(null);
-    
-        // Build the payload with the "status" field set to "pending"
+
         const payload = {
             first_name: formData.firstName,
             second_name: formData.lastName,
             email: formData.email,
-            hashed_password: formData.password, // backend will hash it
+            hashed_password: formData.password, 
             status: "pending",
             role_id: parseInt(formData.role_id, 0)
         };
         //
-        // console.log("Payload:", payload);
         try {
         const response = await fetch(send_register_request_path, {
             method: 'POST',
@@ -55,9 +53,10 @@ function Register() {
             navigate('/after-register');
         }
         const data = await response.json();
-        //console.log("Registration successful:", data);
         } catch (error) {
-        console.error(error);
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Ошибка регистрации');
+        }
         setError(error.message);
         } finally {
         setLoading(false);
@@ -72,7 +71,6 @@ function Register() {
         }));
     };
 
-    // Filter out role with id 1 (admin)
     const filteredRoles = Object.entries(roles).filter(([id]) => Number(id) !== 1);
 
     return (
