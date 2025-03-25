@@ -13,10 +13,21 @@ function Login() {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [blockTime, setBlockTime] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+
+    if (blockTime && new Date() < blockTime) {
+      const secondsLeft = Math.ceil((blockTime - new Date()) / 1000);
+      setError(`Слишком много попыток. Повторите через ${secondsLeft} секунд`);
+      return;
+    }
+    
+    setLoading(true);
+    
     try {
       const response = await fetch(auth_login_path, {
         method: "POST",
@@ -24,18 +35,31 @@ function Login() {
         body: new URLSearchParams({ username: email, password }),
       });
       const data = await response.json();
-
+  
       if (response.ok) {
         login(data.access_token);
         navigate("/dashboard");
+        setLoginAttempts(0);
       } else {
         setError(data.message || "Неправильный email или пароль");
       }
     } catch (error) {
+      const newAttempts = loginAttempts + 1;
+      setLoginAttempts(newAttempts);
+      
+      if (newAttempts >= 5) {
+        const blockUntil = new Date(new Date().getTime() + 30000); 
+        setBlockTime(blockUntil);
+        setError('Слишком много неудачных попыток. Пожалуйста, подождите 30 секунд.');
+      } else {
+        setError('Неверные учетные данные.');
+      }
+      
       if (process.env.NODE_ENV === 'development') {
         console.error("Ошибка авторизации");
       }
-      setError("Произошла сетевая ошибка. Пожалуйста, попробуйте позже.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -126,9 +150,10 @@ function Login() {
           <div>
             <button
               type="submit"
+              disabled={loading}
               className="btn w-full flex justify-center bg-violet-500 hover:bg-violet-600 text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-200"
             >
-              Войти
+              {loading ? "Вход..." : "Войти"}
             </button>
           </div>
 

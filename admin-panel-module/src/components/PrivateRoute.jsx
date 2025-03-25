@@ -1,12 +1,13 @@
 // src/components/PrivateRoute.jsx
 import React, { useContext, useMemo } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext';
+import { AuthContext, validateToken } from '../contexts/AuthContext';
 import Loading from './Loading';
 
 const PrivateRoute = ({ children, role = [] }) => {
   const { auth, loading } = useContext(AuthContext);
   const location = useLocation();
+  const requiredRoles = Array.isArray(role) ? role : [role];
 
   const decodedToken = useMemo(() => {
     if (!auth.access_token) return null;
@@ -22,7 +23,7 @@ const PrivateRoute = ({ children, role = [] }) => {
       return JSON.parse(jsonPayload);
     } catch (e) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Ошибка при декодировании токена в PrivateRoute');
+        console.error('Ошибка при декодировании токена');
       }
       return null;
     }
@@ -32,27 +33,32 @@ const PrivateRoute = ({ children, role = [] }) => {
     return <Loading />;
   }
 
-  if (!auth.access_token) {
+  if (!auth.access_token || !validateToken(auth.access_token)) { 
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   const userRoleFromToken = decodedToken?.role || '';
-  const userRole = auth.user?.role || userRoleFromToken;
+  const userRolesFromAuth = auth.user?.roles || [];
+
+  const userRoles = [...new Set([
+    ...(Array.isArray(userRolesFromAuth) ? userRolesFromAuth : [userRolesFromAuth]),
+    userRoleFromToken
+  ])].filter(Boolean); 
 
   const roleMapping = {
     'админ': 'admin',
     'официант': 'waiter',
     'менеджер': 'manager'
   };
- 
-  const normalizedRole = roleMapping[userRole] || userRole;
 
-  if (normalizedRole === 'waiter') {
+  const normalizedUserRoles = userRoles.map(role => roleMapping[role] || role);
+
+  if (normalizedUserRoles.includes('waiter')) {
     if (location.pathname !== '/my-profile' && !location.pathname.startsWith('/api/')) {
       return <Navigate to="/my-profile" replace />;
     }
   } 
-  else if (role.length > 0 && !role.includes(normalizedRole)) {
+  else if (requiredRoles.length > 0 && !requiredRoles.some(r => normalizedUserRoles.includes(r))) {
     return <Navigate to="/unauthorized" replace />;
   }
 

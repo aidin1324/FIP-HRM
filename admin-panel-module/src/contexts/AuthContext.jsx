@@ -5,6 +5,22 @@ import * as jwt from 'jwt-decode';
 
 export const AuthContext = createContext();
 
+export const validateToken = (token) => {
+  if (!token || typeof token !== 'string') return false;
+  
+  try {
+    const decoded = jwt.jwtDecode(token);
+
+    if (!decoded.id || !decoded.exp) return false;
+
+    if (decoded.exp < Date.now() / 1000) return false;
+    
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({
     access_token: null,
@@ -48,10 +64,12 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (access_token) => {
-    if (typeof access_token !== 'string') {
-      console.error('Неверный тип токена:', typeof access_token);
- 
-   }
+    if (!validateToken(access_token)) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Недействительный токен');
+      }
+      return;
+    }
 
     Cookies.set('access_token', access_token, { expires: 7, secure: true, sameSite: 'strict' });
     try {
