@@ -1,10 +1,16 @@
 import plugin from "tailwindcss/plugin";
 import forms from '@tailwindcss/forms';
 
-export default {
+module.exports = {
   content: [
     './index.html',
     './src/**/*.{js,jsx,ts,tsx}',
+  ],
+  safelist: [
+    'text-violet-500',
+    'text-blue-500',
+    'text-green-500',
+    'text-slate-500',
   ],
   darkMode: 'class',
   theme: {
