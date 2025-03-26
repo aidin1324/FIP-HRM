@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import DatePickerWithRange from '../components/Datepicker';
 import { get_customer_comments_path_with_param } from '../api_endpoints';
 
@@ -17,6 +17,68 @@ const CommentCard = React.memo(({ comment }) => (
   </div>
 ));
 
+const CommentsList = React.memo(({ comments }) => (
+  <div className="space-y-4 overflow-y-auto pb-24 max-h-[calc(100vh-350px)]">
+    {comments.map((comment) => (
+      <CommentCard key={comment.id || `comment-${Math.random()}`} comment={comment} />
+    ))}
+  </div>
+));
+
+const LoadingIndicator = React.memo(() => (
+  <div className="text-center text-gray-700 dark:text-gray-200 py-10">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500 mx-auto mb-4"></div>
+    Загрузка комментариев...
+  </div>
+));
+
+const ErrorMessage = React.memo(({ message }) => (
+  <div className="text-center text-red-600 py-10" role="alert">
+    <p className="font-semibold">Ошибка</p>
+    <p>{message}</p>
+  </div>
+));
+
+const Pagination = React.memo(({ currentPage, hasMore, loading, onPrev, onNext }) => (
+  <div className="sticky bottom-0 left-0 right-0 bg-gray-50 dark:bg-gray-900 shadow-md border-t border-gray-200 dark:border-gray-700 py-4 z-10">
+    <div className="flex justify-between items-center">
+      <button
+        onClick={onPrev}
+        disabled={currentPage === 0 || loading}
+        className={`px-5 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none 
+        ${currentPage === 0 || loading
+            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            : 'bg-violet-500 text-white hover:bg-violet-600'}`}
+        aria-label="Go to previous page"
+      >
+        Пред.
+      </button>
+      <span className="text-gray-700 dark:text-gray-200">
+        Страница {currentPage + 1}
+      </span>
+      <button
+        onClick={onNext}
+        disabled={!hasMore || loading}
+        className={`px-5 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none 
+        ${!hasMore || loading
+            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            : 'bg-violet-500 text-white hover:bg-violet-600'}`}
+        aria-label="Go to next page"
+      >
+        След.
+      </button>
+    </div>
+  </div>
+));
+
+function debounce(fn, ms = 300) {
+  let timeoutId;
+  return function(...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn.apply(this, args), ms);
+  };
+}
+
 function Comments() {
   const [comments, setComments] = useState([]);
   const [cursor, setCursor] = useState(null);
@@ -27,7 +89,15 @@ function Comments() {
   const [dateRange, setDateRange] = useState({ from: null, to: null });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
   const [cachedComments, setCachedComments] = useState({});
+  const cacheKeysRef = useRef([]);
+  const MAX_CACHE_SIZE = 20;
+  
+  const mountedRef = useRef(true);
+  const abortControllerRef = useRef(null);
+  const timeoutRef = useRef(null);
+  const apiUrlRef = useRef(''); 
 
   const requestParams = useMemo(() => {
     const params = {
@@ -36,114 +106,285 @@ function Comments() {
     };
     
     if (dateRange.from) {
-      params.start_date = dateRange.from.toISOString().split('T')[0];
+      try {
+        params.start_date = dateRange.from.toISOString().split('T')[0];
+      } catch (e) {
+        params.start_date = null;
+      }
     }
+    
     if (dateRange.to) {
-      params.end_date = dateRange.to.toISOString().split('T')[0];
+      try {
+        params.end_date = dateRange.to.toISOString().split('T')[0]; 
+      } catch (e) {
+        params.end_date = null;
+      }
     }
     
     return params;
-  }, [dateRange, commentsLimit, currentPage, cursorHistory]);
-
+  }, [dateRange.from, dateRange.to, commentsLimit, currentPage, cursorHistory]);
+  
   const apiUrl = useMemo(() => {
-    const url = new URL(get_customer_comments_path_with_param);
-    
-    if (requestParams.start_date) {
-      url.searchParams.append('start_date', requestParams.start_date);
+    try {
+      const url = new URL(get_customer_comments_path_with_param);
+      
+      Object.entries(requestParams).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          url.searchParams.append(key, value);
+        }
+      });
+      
+      const urlString = url.toString();
+      apiUrlRef.current = urlString;
+      return urlString;
+    } catch (_) {
+      return apiUrlRef.current; 
     }
-    if (requestParams.end_date) {
-      url.searchParams.append('end_date', requestParams.end_date);
-    }
-    url.searchParams.append('limit', requestParams.limit);
-    if (requestParams.cursor !== null) {
-      url.searchParams.append('cursor', requestParams.cursor);
-    }
-    
-    return url.toString();
   }, [requestParams]);
 
+  const updateCache = useCallback((key, data) => {
+    setCachedComments(prev => {
+      if (cacheKeysRef.current.length >= MAX_CACHE_SIZE) {
+        try {
+          const oldestKey = cacheKeysRef.current.shift();
+          const newCache = {};
+          Object.keys(prev).forEach(k => {
+            if (k !== oldestKey) newCache[k] = prev[k];
+          });
+          newCache[key] = data;
+          return newCache;
+        } catch (e) {
+          return { [key]: data };
+        }
+      }
+      return { ...prev, [key]: data };
+    });
+
+    if (!cacheKeysRef.current.includes(key)) {
+      cacheKeysRef.current.push(key);
+    }
+  }, []);
+
   const fetchComments = useCallback(async () => {
+    if (!apiUrl) return;
+    
     const cacheKey = JSON.stringify(requestParams);
 
     if (cachedComments[cacheKey]) {
-      setComments(cachedComments[cacheKey].feedbacks);
-      setHasMore(cachedComments[cacheKey].hasMore);
-      setCursor(cachedComments[cacheKey].cursor);
-      return;
+      try {
+        const cacheData = cachedComments[cacheKey];
+        setComments(cacheData.feedbacks || []);
+        setHasMore(!!cacheData.hasMore);
+        setCursor(cacheData.cursor || null);
+        return;
+      } catch (e) {
+      }
+    }
+
+    if (abortControllerRef.current) {
+      try {
+        abortControllerRef.current.abort();
+      } catch (e) {
+      }
+    }
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    try {
+      abortControllerRef.current = new AbortController();
+    } catch (e) {
+      abortControllerRef.current = null;
     }
     
     setLoading(true);
     setError(null);
+    
     try {
-      const res = await fetch(apiUrl);
-      if (!res.ok) {
-        throw new Error(`HTTP error! Status: ${res.status}`);
+      timeoutRef.current = setTimeout(() => {
+        if (abortControllerRef.current) {
+          try {
+            abortControllerRef.current.abort();
+          } catch (e) {
+          }
+        }
+      }, 30000);
+
+      const fetchOptions = {
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      };
+
+      if (abortControllerRef.current) {
+        fetchOptions.signal = abortControllerRef.current.signal;
       }
       
+      const res = await fetch(apiUrl, fetchOptions);
+
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      if (!mountedRef.current) return;
+      
+      if (!res.ok) {
+        throw new Error(`Ошибка сервера: ${res.status}`);
+      }
+
       const contentType = res.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
-        const text = await res.text();
-        throw new Error(`Expected JSON response but received: ${text.substring(0, 100)}`);
+        throw new Error(`Неверный формат ответа сервера`);
       }
-      
-      const data = await res.json();
 
-      setComments(data.feedbacks);
-      setHasMore(data.feedbacks.length === Number(commentsLimit));
-      setCursor(data.cursor);
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error(`Ошибка при обработке ответа сервера`);
+      }
 
-      setCachedComments(prev => ({
-        ...prev,
-        [cacheKey]: {
-          feedbacks: data.feedbacks,
-          hasMore: data.feedbacks.length === Number(commentsLimit),
-          cursor: data.cursor
+      if (!mountedRef.current) return;
+
+      const feedbacks = Array.isArray(data?.feedbacks) ? data.feedbacks : [];
+
+      const processedFeedbacks = feedbacks.map(comment => {
+        try {
+          return {
+            ...comment,
+            formattedDate: comment.created_at ? 
+              new Date(comment.created_at).toLocaleDateString() : 
+              '',
+            comment: comment.comment ? 
+              (comment.comment.length > 2000 ? 
+                comment.comment.substring(0, 2000) + '...' : 
+                comment.comment) : 
+              'Комментарий отсутствует'
+          };
+        } catch (e) {
+          return {
+            id: comment?.id || `fallback-${Math.random()}`,
+            comment: 'Ошибка отображения комментария',
+            formattedDate: ''
+          };
         }
-      }));
+      });
+      
+      setComments(processedFeedbacks);
+      setHasMore(feedbacks.length === Number(commentsLimit));
+      setCursor(data?.cursor || null);
+
+      const cacheData = {
+        feedbacks: processedFeedbacks,
+        hasMore: feedbacks.length === Number(commentsLimit),
+        cursor: data?.cursor || null
+      };
+      
+      updateCache(cacheKey, cacheData);
+      
     } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Ошибка при загрузке комментариев');
+      if (err.name !== 'AbortError' && mountedRef.current) {
+        setError(`Не удалось загрузить комментарии: ${err.message}`);
       }
-      setError(`Не удалось загрузить комментарии: ${err.message}`);
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
-  }, [apiUrl, requestParams, cachedComments, commentsLimit]);
+  }, [apiUrl, requestParams, cachedComments, commentsLimit, updateCache]);
 
   useEffect(() => {
     fetchComments();
   }, [fetchComments]);
 
-  const handleDateSelect = useCallback((range) => {
-    setDateRange(range);
-    setCursorHistory([null]);
-    setCurrentPage(0);
+  useEffect(() => {
+    mountedRef.current = true;
+    
+    return () => {
+      mountedRef.current = false;
+
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort();
+        } catch (e) {
+        }
+      }
+
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
+  const debouncedDateSelect = useCallback(
+    debounce((range) => {
+      setDateRange(range || { from: null, to: null });
+      setCursorHistory([null]);
+      setCurrentPage(0);
+    }, 300),
+    []
+  );
+  
+  const handleDateSelect = useCallback((range) => {
+    debouncedDateSelect(range);
+  }, [debouncedDateSelect]);
+  
+  const debouncedLimitChange = useCallback(
+    debounce((newLimit) => {
+      const limit = Math.max(1, Math.min(Number(newLimit) || 5, 100));
+      setCommentsLimit(limit);
+      setCursorHistory([null]);
+      setCurrentPage(0);
+    }, 300),
+    []
+  );
+  
   const handleLimitChange = useCallback((e) => {
     const newLimit = Number(e.target.value);
-    setCommentsLimit(newLimit);
-    setCursorHistory([null]);
-    setCurrentPage(0);
-  }, []);
+    debouncedLimitChange(newLimit);
+  }, [debouncedLimitChange]);
 
   const handlePrev = useCallback(() => {
     if (currentPage === 0) return;
     setCurrentPage(prev => prev - 1);
   }, [currentPage]);
-
+  
   const handleNext = useCallback(() => {
     if (!hasMore) return;
     setCursorHistory(prev => {
-      const newHistory = [...prev];
+      const newHistory = Array.isArray(prev) ? [...prev] : [null];
       newHistory[currentPage + 1] = cursor;
       return newHistory;
     });
     setCurrentPage(prev => prev + 1);
   }, [hasMore, cursor, currentPage]);
 
-  const hasComments = useMemo(() => comments.length > 0, [comments]);
+  const hasComments = useMemo(() => 
+    Array.isArray(comments) && comments.length > 0, 
+  [comments]);
 
+  const renderContent = useMemo(() => {
+    if (loading) {
+      return <LoadingIndicator />;
+    }
+    
+    if (error) {
+      return <ErrorMessage message={error} />;
+    }
+    
+    if (!hasComments) {
+      return (
+        <div className="text-center text-gray-600 dark:text-gray-300 py-10">
+          Комментариев не найдено.
+        </div>
+      );
+    }
+    
+    return <CommentsList comments={comments} />;
+  }, [loading, error, hasComments, comments]);
+  
   return (
     <div className="min-h-screen p-6 pb-28 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto flex flex-col h-full mb-8 relative">
@@ -175,66 +416,22 @@ function Comments() {
           </div>
         </div>
 
-        {/* Comments Container*/}
+        {/* Comments Container */}
         <div className="flex-1 flex flex-col">
-          {loading ? (
-            <div className="text-center text-gray-700 dark:text-gray-200 py-10">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500 mx-auto mb-4"></div>
-              Загрузка комментариев...
-            </div>
-          ) : error ? (
-            <div className="text-center text-red-600 py-10" role="alert">
-              <p className="font-semibold">Error</p>
-              <p>{error}</p>
-            </div>
-          ) : (
-            <div className="space-y-4 overflow-y-auto pb-24 max-h-[calc(100vh-350px)]">
-              {hasComments ? (
-                comments.map((comment) => (
-                  <CommentCard key={comment.id} comment={comment} />
-                ))
-              ) : (
-                <div className="text-center text-gray-600 dark:text-gray-300 py-10">
-                  Комментариев не найдено.
-                </div>
-              )}
-            </div>
-          )}
+          {renderContent}
 
           {/* Pagination buttons */}
-          <div className="sticky bottom-0 left-0 right-0 bg-gray-50 dark:bg-gray-900 shadow-md border-t border-gray-200 dark:border-gray-700 py-4 z-10">
-            <div className="flex justify-between items-center">
-              <button
-                onClick={handlePrev}
-                disabled={currentPage === 0 || loading}
-                className={`px-5 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none 
-                ${currentPage === 0 || loading
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-violet-500 text-white hover:bg-violet-600'}`}
-                aria-label="Go to previous page"
-              >
-                Пред.
-              </button>
-              <span className="text-gray-700 dark:text-gray-200">
-                Страница {currentPage + 1}
-              </span>
-              <button
-                onClick={handleNext}
-                disabled={!hasMore || loading}
-                className={`px-5 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none 
-                ${!hasMore || loading
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-violet-500 text-white hover:bg-violet-600'}`}
-                aria-label="Go to next page"
-              >
-                След.
-              </button>
-            </div>
-          </div>
+          <Pagination 
+            currentPage={currentPage}
+            hasMore={hasMore}
+            loading={loading}
+            onPrev={handlePrev}
+            onNext={handleNext}
+          />
         </div>
       </div>
     </div>
   );
 }
 
-export default Comments;
+export default React.memo(Comments);
