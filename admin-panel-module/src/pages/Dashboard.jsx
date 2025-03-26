@@ -1,122 +1,127 @@
-import React, { useContext, useEffect } from "react";
-import DashboardCard01 from "../partials/dashboard/DashboardCard01";
-import DashboardCard02 from "../partials/dashboard/DashboardCard02";
-// import DashboardCard03 from "../partials/dashboard/DashboardCard03";
-// import DashboardCard04 from "../partials/dashboard/DashboardCard04";
-// import DashboardCard05 from "../partials/dashboard/DashboardCard05";
-import DashboardCard06 from "../partials/dashboard/DashboardCard06";
-// import DashboardCard07 from "../partials/dashboard/DashboardCard07";
-// import DashboardCard08 from "../partials/dashboard/DashboardCard08";
-// import DashboardCard09 from "../partials/dashboard/DashboardCard09";
-// import DashboardCard10 from "../partials/dashboard/DashboardCard10";
-// import DashboardCard11 from "../partials/dashboard/DashboardCard11";
-// import DashboardCard12 from "../partials/dashboard/DashboardCard12";
-// import DashboardCard13 from "../partials/dashboard/DashboardCard13";
+import React, { useContext, useEffect, useState, useRef, useCallback, lazy, Suspense } from "react";
 import { FilterContext } from "../contexts/FilterContext";
 
-function Dashboard() {
-  const { fetchAllFeedbacks, timePeriod, filter, setFilter, isLoading } =
-    useContext(FilterContext);
+const DashboardCard01 = lazy(() => import("../partials/dashboard/DashboardCard01"));
+const DashboardCard02 = lazy(() => import("../partials/dashboard/DashboardCard02"));
+const DashboardCard06 = lazy(() => import("../partials/dashboard/DashboardCard06"));
+
+const CardSkeleton = () => (
+  <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 animate-pulse">
+    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+    <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+  </div>
+);
+
+const Dashboard = React.memo(() => {
+  const { fetchAllFeedbacks, timePeriod, filter, setFilter, isLoading } = useContext(FilterContext);
+  const [visibleCharts, setVisibleCharts] = useState({ chart1: false, chart2: false, chart3: false });
+
+  const observerRef1 = useRef(null);
+  const observerRef2 = useRef(null);
+  const observerRef3 = useRef(null);
+
+  const styles = {
+    button: {
+      base: "flex items-center justify-center h-8 px-4 rounded-md text-sm font-medium transition-all duration-150",
+      active: "bg-violet-500 text-white shadow-inner",
+      inactive: "hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+    },
+    icon: {
+      base: "w-4 h-4 mr-2",
+      active: "text-white",
+      inactive: "text-violet-500 dark:text-violet-400"
+    },
+    card: "bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6"
+  };
+
+  const getPeriodLabel = useCallback((period) => {
+    const labels = {
+      today: "Сегодня",
+      yesterday: "Вчера",
+      week: "Последняя неделя",
+      month: "Последний месяц",
+      quarter: "Последний квартал",
+      year: "Последний год",
+      all: "Все время"
+    };
+    return labels[period] || "Выбранный период";
+  }, []);
+  
+  const handleGroupingChange = useCallback((type) => {
+    setFilter(type);
+  }, [setFilter]);
+  
+  const debouncedFetchData = useCallback(() => {
+    fetchAllFeedbacks();
+  }, [fetchAllFeedbacks]);
+
+  useEffect(() => {
+    const options = { root: null, rootMargin: '100px', threshold: 0.1 };
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const chart = entry.target.dataset.chart;
+          setVisibleCharts(prev => ({ ...prev, [chart]: true }));
+        }
+      });
+    }, options);
+    
+    if (observerRef1.current) observer.observe(observerRef1.current);
+    if (observerRef2.current) observer.observe(observerRef2.current);
+    if (observerRef3.current) observer.observe(observerRef3.current);
+    
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     fetchAllFeedbacks();
   }, [fetchAllFeedbacks]);
-
-  const getPeriodLabel = (period) => {
-    switch (period) {
-      case "today":
-        return "Сегодня";
-      case "yesterday":
-        return "Вчера";
-      case "week":
-        return "Последняя неделя";
-      case "month":
-        return "Последний месяц";
-      case "quarter":
-        return "Последний квартал";
-      case "year":
-        return "Последний год";
-      case "all":
-        return "Все время";
-      default:
-        return "Выбранный период";
-    }
-  };
-
-  const handleGroupingChange = (type) => {
-    setFilter(type);
-  };
-
+  
   return (
     <div className="flex h-screen overflow-hidden">
       <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
         <main className="grow">
           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+            {/* Заголовок и управление */}
             <div className="sm:flex sm:justify-between sm:items-center mb-8">
-              <div className="mb-4 sm:mb-0">
-                <h1 className="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold">
-                  Дашборд
-                </h1>
-              </div>
-
+              <h1 className="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold mb-4 sm:mb-0">
+                Дашборд
+              </h1>
+              
               <div className="grid grid-flow-col sm:auto-cols-max justify-start sm:justify-end gap-2">
                 <div className="relative">
                   <div className="inline-flex items-center p-1 rounded-md bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 shadow-sm">
                     <button
-                      className={`flex items-center justify-center h-8 px-4 rounded-md text-sm font-medium transition-all duration-150 ${
-                        filter === "daily"
-                          ? "bg-violet-500 text-white shadow-inner"
-                          : "hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-                      }`}
+                      className={`${styles.button.base} ${filter === "daily" ? styles.button.active : styles.button.inactive}`}
                       onClick={() => handleGroupingChange("daily")}
                       aria-pressed={filter === "daily"}
                     >
                       <svg
-                        className={`w-4 h-4 mr-2 ${
-                          filter === "daily"
-                            ? "text-white"
-                            : "text-violet-500 dark:text-violet-400"
-                        }`}
+                        className={`${styles.icon.base} ${filter === "daily" ? styles.icon.active : styles.icon.inactive}`}
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       По дням
                     </button>
                     <button
-                      className={`flex items-center justify-center h-8 px-4 rounded-md text-sm font-medium transition-all duration-150 ${
-                        filter === "monthly"
-                          ? "bg-violet-500 text-white shadow-inner"
-                          : "hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-                      }`}
+                      className={`${styles.button.base} ${filter === "monthly" ? styles.button.active : styles.button.inactive}`}
                       onClick={() => handleGroupingChange("monthly")}
                       aria-pressed={filter === "monthly"}
                     >
                       <svg
-                        className={`w-4 h-4 mr-2 ${
-                          filter === "monthly"
-                            ? "text-white"
-                            : "text-violet-500 dark:text-violet-400"
-                        }`}
+                        className={`${styles.icon.base} ${filter === "monthly" ? styles.icon.active : styles.icon.inactive}`}
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       По месяц.
                     </button>
@@ -129,18 +134,8 @@ function Dashboard() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div className="flex items-center">
                   <div className="bg-blue-100 dark:bg-blue-800/40 p-2 rounded-full mr-3">
-                    <svg
-                      className="w-5 h-5 text-blue-600 dark:text-blue-300"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
+                    <svg className="w-5 h-5 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
                   <div>
@@ -157,65 +152,53 @@ function Dashboard() {
                 </div>
                 
                 <button 
-                  onClick={() => fetchAllFeedbacks()}
-                  className="inline-flex items-center px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 shadow-sm"
+                  onClick={debouncedFetchData}
+                  disabled={isLoading}
+                  className="inline-flex items-center px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 shadow-sm disabled:opacity-50"
                 >
                   <svg className="w-4 h-4 mr-2 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  Обновить данные
+                  {isLoading ? "Обновление..." : "Обновить данные"}
                 </button>
               </div>
             </div>
 
             {isLoading && (
-              <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6 flex items-center justify-center">
-                <div className="w-6 h-6 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mr-3"></div>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Обновление данных...
-                </p>
+              <div className={styles.card}>
+                <div className="flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mr-3"></div>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Обновление данных...
+                  </p>
+                </div>
               </div>
             )}
 
-            {/* Новая разметка графиков */}
-            {/* Первый график на полную ширину */}
-            <div className="mb-6">
-              <DashboardCard01 />
+            <div className="mb-6" data-chart="chart1" ref={observerRef1}>
+              {visibleCharts.chart1 ? (
+                <Suspense fallback={<CardSkeleton />}>
+                  <DashboardCard01 />
+                </Suspense>
+              ) : <CardSkeleton />}
             </div>
 
-            {/* Вторая строка с двумя графиками */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <DashboardCard06 />
+              <div data-chart="chart2" ref={observerRef2}>
+                {visibleCharts.chart2 ? (
+                  <Suspense fallback={<CardSkeleton />}>
+                    <DashboardCard06 />
+                  </Suspense>
+                ) : <CardSkeleton />}
               </div>
-              <div>
-                <DashboardCard02 />
+              
+              <div data-chart="chart3" ref={observerRef3}>
+                {visibleCharts.chart3 ? (
+                  <Suspense fallback={<CardSkeleton />}>
+                    <DashboardCard02 />
+                  </Suspense>
+                ) : <CardSkeleton />}
               </div>
-            </div>
-
-            <div className="grid grid-cols-12 gap-6">
-
-              {/* <DashboardCard03 />
-              
-              <DashboardCard04 />
-              
-              <DashboardCard05 />
-            
-              <DashboardCard02 />
-            
-              <DashboardCard07 />
-           
-              <DashboardCard08 />
-          
-              <DashboardCard09 /> */}
-              {/* Можно добавить сколько активных официантов */}
-              {/* <DashboardCard10 /> */}
-        
-              {/* <DashboardCard11 />
-      
-              <DashboardCard12 />
-
-              <DashboardCard13 /> */}
             </div>
 
             <div className="h-24"></div>
@@ -224,6 +207,6 @@ function Dashboard() {
       </div>
     </div>
   );
-}
+});
 
 export default Dashboard;
