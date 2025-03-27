@@ -407,7 +407,7 @@ function Comments() {
               onChange={handleLimitChange}
               className="px-8 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
             >
-              {[5, 10, 50, 100].map(limit => (
+              {[5, 10, 20, 50].map(limit => (
                 <option key={limit} value={limit}>
                   {limit} стр.
                 </option>
