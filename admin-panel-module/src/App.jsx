@@ -6,12 +6,10 @@ import { FilterProvider } from "./contexts/FilterContext";
 import "./css/style.css";
 import "./charts/ChartjsConfig";
 
-// Импортируем Layout обычным способом, т.к. он нужен сразу
 import Layout from "./pages/Layout";
 import PrivateRoute from "./components/PrivateRoute";
 import LoadingFallback from "./components/LoadingFallback";
 
-// Заменяем обычные импорты на динамические с использованием React.lazy
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
 const Login = React.lazy(() => import("./pages/Login"));
 const Profile = React.lazy(() => import("./pages/Profile"));
@@ -20,7 +18,6 @@ const Users = React.lazy(() => import("./pages/Users"));
 const Unauthorized = React.lazy(() => import("./pages/Unauthorized"));
 const Comments = React.lazy(() => import("./pages/Comments"));
 const Requests = React.lazy(() => import("./pages/Requests"));
-const Testing = React.lazy(() => import("./pages/Testing"));
 const AfterRegister = React.lazy(() => import("./pages/AfterRegister"));
 const Contacts = React.lazy(() => import("./pages/Contacts"));
 const PageNotFound = React.lazy(() => import("./pages/404"));
@@ -80,12 +77,6 @@ function App() {
               <Route path="contacts" element={
                 <PrivateRoute role={["admin", "manager"]}>
                   <Contacts />
-                </PrivateRoute>
-              } />
-              
-              <Route path="tests" element={
-                <PrivateRoute role={["admin", "manager"]}>
-                  <Testing />
                 </PrivateRoute>
               } />
               

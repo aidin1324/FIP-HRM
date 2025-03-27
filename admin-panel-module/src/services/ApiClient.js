@@ -25,7 +25,6 @@ const cacheManager = {
   cleanup() {
     const MAX_CACHE_SIZE = 15 * 1024 * 1024; 
     if (this.getSize() > MAX_CACHE_SIZE) {
-      console.log('Кэш слишком большой, очищаем старые записи');
       this.clear();
       return;
     }
@@ -112,7 +111,6 @@ client.get = function(url, config = {}) {
     const cachedData = cacheManager.get(cacheKey);
     
     if (cachedData) {
-      console.log(`[Cache Hit] ${url}`);
       return Promise.resolve({ data: cachedData, status: 200, cached: true });
     }
   }
