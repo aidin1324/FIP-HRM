@@ -47,6 +47,18 @@ const API = {
   }
 };
 
+export const CACHE_CONFIG = {
+  '/roles/get_all': { maxAge: 3600000 }, 
+
+  '/users/get_user_with_pagination': { maxAge: 300000 },
+
+  '/feedbacks/get_all_feedbacks': { maxAge: 60000 }, 
+
+  '/users/get_user/': { maxAge: 300000 }, 
+
+  '/auth/login': false
+};
+
 export const auth_login_path = API.auth.login;
 export const send_register_request_path = API.auth.register;
 export const get_request_path = API.registrationRequests.getAll;
