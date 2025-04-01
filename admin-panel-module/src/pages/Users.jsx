@@ -10,7 +10,7 @@ function Users() {
     const [users, setUsers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedRole, setSelectedRole] = useState('');
-    const [usersPerPage, setUsersPerPage] = useState(5);
+    const [usersPerPage, setUsersPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -151,7 +151,6 @@ function Users() {
                             value={usersPerPage}
                             onChange={(e) => setUsersPerPage(Number(e.target.value))}
                         >
-                            <option value={5}>5 стр.</option>
                             <option value={10}>10 стр.</option>
                             <option value={20}>20 стр.</option>
                             <option value={50}>50 стр.</option>

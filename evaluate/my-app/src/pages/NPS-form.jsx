@@ -15,11 +15,8 @@ function NPSForm() {
     waiterRecommendation: 0,
   });
   const [selectedWaiterId, setSelectedWaiterId] = useState(null); 
-  const [comments, setComments] = useState('');
   const [isNameToggled, setIsNameToggled] = useState(true);
-  const [isContactToggled, setIsContactToggled] = useState(false);
 
-  const [name, setName] = useState('');
   const [contact, setContact] = useState('');
 
   const [errors, setErrors] = useState({});
@@ -29,6 +26,8 @@ function NPSForm() {
   const [waiters, setWaiters] = useState([]); 
   const [isLoading, setIsLoading] = useState(false); 
   const [fetchError, setFetchError] = useState(null); 
+
+  const [isSubmitting, setIsSubmitting] = useState(false); 
 
   const tags = {
     positive: [
@@ -109,7 +108,6 @@ function NPSForm() {
     }
 
     if (currentStep === 2) {
-      // Prioritize waiter selection error
       if (isNameToggled && !selectedWaiterId) {
         newErrors.name = 'Пожалуйста, выберите официанта.';
       }
@@ -125,7 +123,7 @@ function NPSForm() {
     }
 
     if (currentStep === 3) {
-      if (isContactToggled && contact.trim() === '') {
+      if (contact.trim() === '') {
         newErrors.contact = 'Пожалуйста, введите контактный номер.';
       }
     }
@@ -144,18 +142,29 @@ function NPSForm() {
     setCurrentStep(currentStep - 1);
   };
 
-  const handleSubmit = async () => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Форма отправлена');
-      // Не логировать данные формы!
+  const validateContact = (contactValue) => {
+    if (!contactValue || contactValue.trim() === '') {
+      return 'Пожалуйста, введите контактный номер.';
     }
 
+    const digitsOnly = contactValue.replace(/\D/g, '');
+
+    if (digitsOnly.length < 5) {
+      return 'Номер телефона слишком короткий.';
+    }
+    
+    return null; 
+  };
+
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    
     const newErrors = {};
 
-    // Validation
     if (isNameToggled && !selectedWaiterId) {
       newErrors.name = 'Пожалуйста, выберите официанта.';
     }
+    
     if (isNameToggled) {
       if (ratings.waiterRecommendation === 0) {
         newErrors.waiterRecommendation = 'Пожалуйста, поставьте оценку от 1 до 5.';
@@ -164,19 +173,20 @@ function NPSForm() {
         newErrors.selectedWaiterTag = 'Пожалуйста, выберите один тег.';
       }
     }
-    // Comment is optional
 
-    if (isContactToggled && contact.trim() === '') {
-      newErrors.contact = 'Пожалуйста, введите контактный номер.';
+    const contactError = validateContact(contact);
+    if (contactError) {
+      newErrors.contact = contactError;
     }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      return;
+      return; 
     }
 
-    // Дубовый метод, предположительно, нужно будет заменить на что-то более адекватное
-    // 1 - positive, 2 - neutral, 3 - negative
+    setIsSubmitting(true);
+    setErrors({});
+
     const category_id = ratings.waiterRecommendation >= 4 && ratings.waiterRecommendation <= 5
       ? 1
       : ratings.waiterRecommendation === 3
@@ -185,7 +195,7 @@ function NPSForm() {
 
     const dataToSend = {
       is_notified: false,
-      contact: isContactToggled ? contact : null,
+      contact: contact.trim(), 
       waiter_score: {
         waiter_id: isNameToggled ? selectedWaiterId : null,
         score: isNameToggled ? ratings.waiterRecommendation : null,
@@ -196,11 +206,11 @@ function NPSForm() {
       ratings: [
         {
           rating: ratings.serviceSpeed,
-          feedback_type_id: 1, // Replace with actual feedback type ID
+          feedback_type_id: 1,
         },
         {
           rating: ratings.atmosphere,
-          feedback_type_id: 2, // Replace with actual feedback type ID
+          feedback_type_id: 2,
         },
       ],
     };
@@ -217,17 +227,17 @@ function NPSForm() {
       if (response.ok) {
         navigate('/outro');
       } else {
-        const errorData = await response.json();
-        if (process.env.NODE_ENV === 'development') {
-          console.error('Ошибка сервера при отправке формы');
-        }
-        setErrors({ submit: 'Произошла ошибка при отправке данных. Пожалуйста, попробуйте позже.' });
+        const errorData = await response.json().catch(() => ({}));
+        setErrors({ 
+          submit: errorData.message || 'Произошла ошибка при отправке данных. Пожалуйста, попробуйте позже.' 
+        });
       }
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Ошибка сервера при отправке формы');
-      }
-      setErrors({ submit: 'Ошибка сети. Пожалуйста, проверьте ваше соединение и попробуйте снова.' });
+      setErrors({ 
+        submit: 'Ошибка сети. Пожалуйста, проверьте ваше соединение и попробуйте снова.' 
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -412,35 +422,34 @@ function NPSForm() {
         {currentStep === 3 && (
           <>
             <h2 className="nps-title">Контактная информация:</h2>
-            <div className="nps-contact-section">
-              <span className="nps-label">Указать контактный номер:</span>
-              <label className="nps-switch">
-                <input
-                  type="checkbox"
-                  checked={isContactToggled}
-                  onChange={() => setIsContactToggled(!isContactToggled)}
-                />
-                <span className="nps-slider"></span>
-              </label>
-            </div>
-            {isContactToggled && (
-              <>
-                <input
-                  type="tel"
-                  value={contact}
-                  onChange={(e) => setContact(e.target.value)}
-                  placeholder="Введите контактный номер"
-                  className="nps-input"
-                  aria-label="Контактный номер"
-                />
-                {errors.contact && <p className="error-message">{errors.contact}</p>}
-              </>
-            )}
+            {/* Удаляем переключатель и оставляем только поле ввода */}
+            <p className="nps-label">Укажите ваш контактный номер:</p>
+            <input
+              type="tel"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              placeholder="Введите контактный номер"
+              className="nps-input"
+              aria-label="Контактный номер"
+              required
+            />
+            {errors.contact && <p className="error-message">{errors.contact}</p>}
+            
             <div className="navigation-buttons">
-              <button type="button" className="submit-btn" onClick={handleSubmit}>
-                Отправить отзыв
+              <button 
+                type="button" 
+                className="submit-btn" 
+                onClick={handleSubmit}
+                disabled={isSubmitting} // Блокируем кнопку во время отправки
+              >
+                {isSubmitting ? 'Отправка...' : 'Отправить отзыв'}
               </button>
-              <button type="button" className="back-btn" onClick={handleBack}>
+              <button 
+                type="button" 
+                className="back-btn" 
+                onClick={handleBack}
+                disabled={isSubmitting} // Блокируем кнопку во время отправки
+              >
                 Назад
               </button>
             </div>
