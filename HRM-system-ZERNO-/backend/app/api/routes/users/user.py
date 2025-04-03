@@ -1,6 +1,6 @@
 from api.dependencies import get_user_service, get_role_service
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from schema.users.user import UserResponse, UserUpdate, UserCreate
 from service.public.user import UserService

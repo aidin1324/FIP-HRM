@@ -1,7 +1,7 @@
 from api.dependencies import get_authentication_service
 from db.db import get_db
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from schema.users.user import UserResponse

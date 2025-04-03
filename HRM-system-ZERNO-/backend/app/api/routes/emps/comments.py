@@ -1,5 +1,5 @@
 import datetime
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends
 from typing import Annotated
 from api.dependencies import get_feedback_service
 

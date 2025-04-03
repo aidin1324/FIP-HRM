@@ -1,7 +1,7 @@
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from repository.public.category import CategoryRepository
-from schema.emps.category import CategoryCreate, CategoryUpdate, CategoryResponse
+from schema.emps.category import CategoryResponse
 
 
 class CategoryService:
@@ -34,3 +34,31 @@ class CategoryService:
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
         
+    async def create_category(self, category_create) -> CategoryResponse:
+        try:
+            category = await self.category_repo.create_category(category_create)
+            return category
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        
+    async def update_category(self, category_id, category_update) -> CategoryResponse:
+        try:
+            category = await self.category_repo.get_category_by_id(category_id)
+            if not category:
+                raise HTTPException(status_code=404, detail="Category not found")
+            updated_category = await self.category_repo.update_category(category, category_update)
+            return updated_category
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        
+    async def delete_category(self, category_id) -> dict:
+        try:
+            category = await self.category_repo.get_category_by_id(category_id)
+            if not category:
+                raise HTTPException(status_code=404, detail="Category not found")
+            await self.category_repo.delete_category(category)
+            return {"detail": "Category deleted"}
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        
+    

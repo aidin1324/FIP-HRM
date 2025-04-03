@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .utils.utils import create_access_token, verify_password, jwt_decode
 from model import User
-from schema.authentication import TokenCreate, TokenResponse
+from schema.authentication import TokenResponse
 from service.public.role import RoleService
 from schema.users.user import UserResponse 
 

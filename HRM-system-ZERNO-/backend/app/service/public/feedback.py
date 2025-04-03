@@ -106,3 +106,14 @@ class FeedbackService:
         
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
+        
+    async def delete_feedback(
+        self,
+        feedback: Feedback
+    ):
+        try:
+            response = await self.feedback_repo.delete_feedback(feedback=feedback)
+            return response
+        
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))

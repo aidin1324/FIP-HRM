@@ -9,7 +9,6 @@ from schema.emps.feedbacks import CompleteFeedbackCreate, FeedbackResponse
 
 from db.db import get_pool_stats
 # временное решени
-from config import chat_id
 
 router = APIRouter()
 

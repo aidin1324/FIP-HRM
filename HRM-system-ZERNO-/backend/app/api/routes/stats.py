@@ -1,7 +1,7 @@
 from ..dependencies import get_stats_service
 from service.stats import StatsService
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 
 router = APIRouter()
