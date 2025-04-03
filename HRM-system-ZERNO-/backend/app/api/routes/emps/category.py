@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from service.public.category import CategoryService
 
-from schema.emps.category import CategoryResponse
+from schema.emps.category import CategoryCreate, CategoryResponse, CategoryUpdate
 from api.dependencies import get_category_service
 
 from typing import Annotated
@@ -66,7 +66,7 @@ async def get_category_by_id(
     description="Create a new category",
 )
 async def create_category(
-    category: CategoryResponse,
+    category: CategoryCreate,
     category_service: CommonRoleService = CommonRoleService
 ) -> CategoryResponse:
     """
@@ -90,7 +90,7 @@ async def create_category(
 )
 async def update_category(
     category_id: int,
-    category: CategoryResponse,
+    category: CategoryUpdate,
     category_service: CommonRoleService = CommonRoleService
 ) -> CategoryResponse:
     """
@@ -109,7 +109,7 @@ async def update_category(
 
 @router.delete(
     "/category/{category_id}",
-    response_model=CategoryResponse,
+    response_model=dict,
     summary="Delete a category",
     description="Delete a category",
 )

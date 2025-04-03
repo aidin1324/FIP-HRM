@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from service.public.feedback_type import FeedbackTypeService
 
-from schema.emps.feedback_type import FeedbackTypeResponse
+from schema.emps.feedback_type import FeedbackTypeCreate, FeedbackTypeResponse, FeedbackTypeUpdate
 from api.dependencies import get_feedback_type_service
 
 from typing import Annotated
@@ -66,7 +66,7 @@ async def get_feedback_type_by_id(
     description="Create a new feedback type",
 )
 async def create_feedback_type(
-    feedback_type: FeedbackTypeResponse,
+    feedback_type: FeedbackTypeCreate,
     feedback_type_service: CommonFeedbackTypeService = CommonFeedbackTypeService
 ) -> FeedbackTypeResponse:
     """
@@ -90,7 +90,7 @@ async def create_feedback_type(
 )
 async def update_feedback_type(
     feedback_type_id: int,
-    feedback_type: FeedbackTypeResponse,
+    feedback_type: FeedbackTypeUpdate,
     feedback_type_service: CommonFeedbackTypeService = CommonFeedbackTypeService
 ) -> FeedbackTypeResponse:
     """
@@ -109,7 +109,7 @@ async def update_feedback_type(
 
 @router.delete(
     "/feedback_type/{feedback_type_id}",
-    response_model=FeedbackTypeResponse,
+    response_model=dict,
     summary="Delete a feedback type",
     description="Delete a feedback type",
 )

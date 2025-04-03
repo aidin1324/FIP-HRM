@@ -19,4 +19,3 @@ class FeedbackTypeUpdate(FeedbackTypeBase):
 
 class FeedbackTypeResponse(FeedbackTypeBase):
     id: int
-    ratings: list[RatingResponse]
