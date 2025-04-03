@@ -108,11 +108,17 @@ class FeedbackService:
             raise HTTPException(status_code=400, detail=str(e))
         
     async def delete_feedback(
-        self,
-        feedback: Feedback
+    self,
+    feedback_id: int
     ):
         try:
-            response = await self.feedback_repo.delete_feedback(feedback=feedback)
+            
+            async with self.session.begin() as transaction:
+                # First fetch the feedback instance
+                feedback = await self.feedback_repo.get_feedback_by_id(feedback_id)
+                if not feedback:
+                    raise HTTPException(status_code=404, detail="Feedback not found")
+                response = await self.feedback_repo.delete_feedback(feedback=feedback)
             return response
         
         except Exception as e:
