@@ -1,0 +1,10 @@
+{
+    "app_name": "HRM System",
+    "version": "1.0",
+    "telegram_chat_ids": [
+        {
+            "id": "968cb1cd-5f11-4c13-8f40-0a2433f3257d",
+            "chat_id": "5767183527"
+        }
+    ]
+}

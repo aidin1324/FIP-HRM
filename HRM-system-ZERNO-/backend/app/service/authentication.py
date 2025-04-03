@@ -72,7 +72,7 @@ class AuthenticationService:
             if not user:
                 raise HTTPException(status_code=404, detail="User not found")
             
-            if (await self.role_service.get_role_by_id(user.role_id)).role != "admin":
+            if (await self.role_service.get_role_by_id(user.role_id)).role != "админ":
                 raise HTTPException(status_code=403, detail="User is not an admin")
             return user
         except Exception as e:

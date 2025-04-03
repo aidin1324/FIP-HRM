@@ -15,7 +15,6 @@ from db.db import get_db
 
 from service.public.feedback_type import FeedbackTypeService
 from service.public.feedback import FeedbackService
-from service.telegram_bot import TelegramBotService
 
 from service.public.user import UserService
 from service.authentication import AuthenticationService
@@ -25,6 +24,7 @@ from service.stats import StatsService
 from service.public.waiters_score import WaiterScoreService
 from service.public.category import CategoryService
 from service.public.tag import TagService
+from service.telegram_bot import TelegramFormatMessageService
 
 def get_feedback_type_repository(
     conn: AsyncSession
@@ -118,14 +118,20 @@ def get_user_service(
     
 def get_telegram_bot_service(
     session: AsyncSession = Depends(get_db)
-) -> TelegramBotService:
+) -> TelegramFormatMessageService:
     feedback_repo = get_feedback_repository(session)
     feedback_type_repo = get_feedback_type_repository(session)
+    user_repo = get_user_repository(session)
+    category_repo = get_category_repository(session)
+    tag_repo = get_tag_repository(session)
     
-    return TelegramBotService(
+    return TelegramFormatMessageService(
         session=session,
         feedback_repo=feedback_repo,
-        feedback_type_repo=feedback_type_repo
+        feedback_type_repo=feedback_type_repo,
+        user_repo=user_repo,
+        category_repo=category_repo,
+        tag_repo=tag_repo
     )
 
 def get_tag_service(

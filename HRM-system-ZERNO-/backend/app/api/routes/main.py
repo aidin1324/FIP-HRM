@@ -12,6 +12,7 @@ from .users.registration_request import router as registration_request_router
 
 from .stats import router as stats_router
 from .authentication import router as authentication_router
+from .config_json import router as config_json_router
 
 router = APIRouter()
 
@@ -26,3 +27,4 @@ router.include_router(role_router, prefix="/roles", tags=["roles"])
 router.include_router(registration_request_router, prefix="/registration_requests", tags=["registration_requests"])
 router.include_router(authentication_router, prefix="/auth", tags=["auth"])
 router.include_router(stats_router, prefix="/stats", tags=["stats"])
+router.include_router(config_json_router, prefix="/config_json", tags=["config_json_telegram_chat_id"])

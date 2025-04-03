@@ -1,5 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.app.repository.public.category import CategoryRepository
+from backend.app.repository.public.tag import TagRepository
+from backend.app.repository.public.user import UserRepository
 from repository.public.feedbacks import FeedbackRepository
 from repository.public.feedback_type import FeedbackTypeRepository
 
@@ -10,16 +13,22 @@ from model import Feedback
 from schema.emps.feedbacks import FeedbackUpdate
 
 
-class TelegramBotService:
+class TelegramFormatMessageService:
     def __init__(
         self,
         session: AsyncSession,
         feedback_repo: FeedbackRepository,
-        feedback_type_repo: FeedbackTypeRepository    
+        feedback_type_repo: FeedbackTypeRepository,
+        user_repo: UserRepository, 
+        category_repo: CategoryRepository,
+        tag_repo: TagRepository   
     ):
         self.session = session
         self.feedback_repo = feedback_repo
         self.feedback_type_repo = feedback_type_repo
+        self.user_repo = user_repo
+        self.category_repo = category_repo
+        self.tag_repo = tag_repo
         
     async def format_feedback(
         self, 
@@ -31,47 +40,29 @@ class TelegramBotService:
             feedback_type = await self.feedback_type_repo.get_feedback_type_by_id(rating.feedback_type_id)
             ratings.append(f"Категория: {feedback_type.feedback_type},\nОценка: {rating.rating}")
             
+        user = (await self.user_repo.get_user_by_id(feedback.waiter_score.waiter_id) )if feedback.waiter_score else None
+        first_name = user.first_name if user else None
+        second_name = user.second_name if user else None
+        phone = feedback.contact.phone if feedback.contact else None
+        comment = feedback.waiter_score.comment if feedback.waiter_score else None
+        score = feedback.waiter_score.score if feedback.waiter_score else None
+        category = (await self.category_repo.get_category_by_id(feedback.waiter_score.category_id)).category if feedback.waiter_score.category_id else None
+        tag = (await self.tag_repo.get_tag_by_id(feedback.waiter_score.tag_id)).tag if feedback.waiter_score.tag_id else None
+        
         return (
             f"📝 Отзыв №{feedback.id}\n"
-            f"📅 Время отправки отзыва: {feedback.created_at.strftime('%Y-%m-%d %H:%M')}\n\n"
-            f"🤵 Обслуживал: {feedback.waiter.waiter_name if feedback.waiter else "Не указан"}\n"
-            f"📞 Контактные данные\n"
-            f"Телефон: {feedback.contact.phone if feedback.contact else "Не указан"}\n\n"
-            f"⭐ Оценки\n"
-            + "\n".join(ratings) + "\n\n"
-            f"💬 Комментарий\n"
-            f"{feedback.comment.comment if feedback.comment else "Не оставлен"}\n\n"
+            f"📅 Время отправки: {feedback.created_at.strftime('%Y-%m-%d %H:%M')}\n\n"
+            f"🤵 Обслуживал: "
+            f"{first_name if first_name else 'Не указан'} "
+            f"{second_name if second_name else ''}\n\n"
+            f"📞 Контакт: {phone if feedback.contact else 'Не указан'}\n\n"
+            f"⭐ Оценка: {score}\n\n"
+            f"🏷 {category} тег: {tag}\n\n"
+            f"💬 Комментарий:\n"
+            f"{comment if comment else 'Не оставлен'}\n"
         )
 
-    async def send_feedback_message(
-        self,
-        chat_id: int,
-        feedback: Feedback 
-    ):
-        url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
-        
-        async with httpx.AsyncClient() as client:
-            text = await self.format_feedback(feedback)
-            payload = {
-                "chat_id": chat_id,
-                "text": text
-            }
-            try:
-                response = await client.post(url, json=payload)
-                response.raise_for_status() 
-                
-                 
-                result = await self.feedback_repo.update_feedback(
-                    feedback=feedback,
-                    feedback_update=FeedbackUpdate(
-                        is_notified=True
-                    )
-                )
-                await self.session.commit()
-                await self.session.close()
-                return result
+
             
-            except httpx.HTTPStatusError as e:
-                print(f"Не удалось отправить сообщение пользователю {chat_id}: {e}")
 
         
