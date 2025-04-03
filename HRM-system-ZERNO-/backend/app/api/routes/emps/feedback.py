@@ -65,3 +65,17 @@ async def get_all_feedbacks(
 ) -> list[FeedbackResponse]:
     feedbacks: list[Feedback] = await feedback_service.get_all_feedbacks()
     return [FeedbackResponse.from_orm(feedback.__dict__) for feedback in feedbacks]
+
+
+@router.delete(
+    "/delete/{feedback_id}",
+    response_model=dict,
+    summary="Delete customer feedback",
+    description="Delete customer feedback by id",
+)
+async def delete_feedback(
+    feedback_id: int,
+    feedback_service: CommonFeedbackService = CommonFeedbackService
+) -> dict:
+    await feedback_service.delete_feedback(feedback_id)
+    return {"status": "Feedback deleted successfully"}

@@ -88,3 +88,17 @@ async def update_user(
 ) -> dict:
     updated_user = await user_service.update_user(user_id, request)
     return updated_user
+
+
+@router.delete(
+    "/delete_user/{user_id}",
+    response_model=dict,
+    summary="Delete a user",
+    description="Delete a user by id",
+)
+async def delete_user(
+    user_id: int,
+    user_service: UserService = Depends(get_user_service)
+) -> dict:
+    await user_service.delete_user(user_id)
+    return {"status": "User deleted successfully"}
