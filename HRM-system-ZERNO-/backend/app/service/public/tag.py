@@ -40,7 +40,8 @@ class TagService:
         
     async def create_tag(self, tag_create):
         try:
-            tag = await self.tag_repo.create_tag(tag_create)
+            async with self.session.begin():
+                tag = await self.tag_repo.create_tag(tag_create)
             return tag
         
         except Exception as e:
@@ -48,11 +49,12 @@ class TagService:
         
     async def update_tag(self, tag_id, tag_update):
         try:
-            tag = await self.tag_repo.get_tag_by_id(tag_id)
-            if not tag:
-                raise HTTPException(status_code=404, detail="Tag not found")
-            
-            updated_tag = await self.tag_repo.update_tag(tag, tag_update)
+            async with self.session.begin():
+                tag = await self.tag_repo.get_tag_by_id(tag_id)
+                if not tag:
+                    raise HTTPException(status_code=404, detail="Tag not found")
+                
+                updated_tag = await self.tag_repo.update_tag(tag, tag_update)
             return updated_tag
         
         except Exception as e:
@@ -60,11 +62,12 @@ class TagService:
         
     async def delete_tag(self, tag_id):
         try:
-            tag = await self.tag_repo.get_tag_by_id(tag_id)
-            if not tag:
-                raise HTTPException(status_code=404, detail="Tag not found")
-            
-            await self.tag_repo.delete_tag(tag)
+            async with self.session.begin():
+                tag = await self.tag_repo.get_tag_by_id(tag_id)
+                if not tag:
+                    raise HTTPException(status_code=404, detail="Tag not found")
+                
+                await self.tag_repo.delete_tag(tag)
             return {"detail": "Tag deleted"}
         
         except Exception as e:

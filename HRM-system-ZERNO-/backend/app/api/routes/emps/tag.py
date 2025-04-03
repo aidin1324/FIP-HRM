@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from service.public.tag import TagService
 
-from schema.emps.tag import TagResponse
+from schema.emps.tag import TagCreate, TagResponse, TagUpdate
 from api.dependencies import get_tag_service
 
 from typing import Annotated
@@ -66,7 +66,7 @@ async def get_tag_by_id(
     description="Create a new tag",
 )
 async def create_tag(
-    tag: TagResponse,
+    tag: TagCreate,
     tag_service: CommonTagService = CommonTagService
 ) -> TagResponse:
     """
@@ -90,7 +90,7 @@ async def create_tag(
 )
 async def update_tag(
     tag_id: int,
-    tag: TagResponse,
+    tag: TagUpdate,
     tag_service: CommonTagService = CommonTagService
 ) -> TagResponse:
     """
