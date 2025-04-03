@@ -22,7 +22,7 @@ router = APIRouter()
     description="Get all feedback types",
 )
 async def get_all_feedback_types(
-    feedback_type_service: CommonFeedbackTypeService = Depends(get_feedback_type_service)
+    feedback_type_service: CommonFeedbackTypeService = CommonFeedbackTypeService
 ) -> list[FeedbackTypeResponse]:
     """
     Get all feedback types.
@@ -44,7 +44,7 @@ async def get_all_feedback_types(
 )
 async def get_feedback_type_by_id(
     feedback_type_id: int,
-    feedback_type_service: CommonFeedbackTypeService = Depends(get_feedback_type_service)
+    feedback_type_service: CommonFeedbackTypeService = CommonFeedbackTypeService
 ) -> FeedbackTypeResponse:
     """
     Get feedback type by ID.
@@ -67,7 +67,7 @@ async def get_feedback_type_by_id(
 )
 async def create_feedback_type(
     feedback_type: FeedbackTypeResponse,
-    feedback_type_service: CommonFeedbackTypeService = Depends(get_feedback_type_service)
+    feedback_type_service: CommonFeedbackTypeService = CommonFeedbackTypeService
 ) -> FeedbackTypeResponse:
     """
     Create a new feedback type.
@@ -91,7 +91,7 @@ async def create_feedback_type(
 async def update_feedback_type(
     feedback_type_id: int,
     feedback_type: FeedbackTypeResponse,
-    feedback_type_service: CommonFeedbackTypeService = Depends(get_feedback_type_service)
+    feedback_type_service: CommonFeedbackTypeService = CommonFeedbackTypeService
 ) -> FeedbackTypeResponse:
     """
     Update a feedback type.
@@ -115,7 +115,7 @@ async def update_feedback_type(
 )
 async def delete_feedback_type(
     feedback_type_id: int,
-    feedback_type_service: CommonFeedbackTypeService = Depends(get_feedback_type_service)
+    feedback_type_service: CommonFeedbackTypeService = CommonFeedbackTypeService
 ) -> FeedbackTypeResponse:
     """
     Delete a feedback type.

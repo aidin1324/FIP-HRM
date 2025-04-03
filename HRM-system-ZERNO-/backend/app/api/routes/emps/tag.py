@@ -22,7 +22,7 @@ router = APIRouter()
     description="Get all tags",
 )
 async def get_all_tags(
-    tag_service: CommonTagService = Depends(get_tag_service)
+    tag_service: CommonTagService = CommonTagService
 ) -> list[TagResponse]:
     """
     Get all tags.
@@ -44,7 +44,7 @@ async def get_all_tags(
 )
 async def get_tag_by_id(
     tag_id: int,
-    tag_service: CommonTagService = Depends(get_tag_service)
+    tag_service: CommonTagService = CommonTagService
 ) -> TagResponse:
     """
     Get tag by ID.
@@ -67,7 +67,7 @@ async def get_tag_by_id(
 )
 async def create_tag(
     tag: TagResponse,
-    tag_service: CommonTagService = Depends(get_tag_service)
+    tag_service: CommonTagService = CommonTagService
 ) -> TagResponse:
     """
     Create a new tag.
@@ -91,7 +91,7 @@ async def create_tag(
 async def update_tag(
     tag_id: int,
     tag: TagResponse,
-    tag_service: CommonTagService = Depends(get_tag_service)
+    tag_service: CommonTagService = CommonTagService
 ) -> TagResponse:
     """
     Update a tag.
@@ -115,7 +115,7 @@ async def update_tag(
 )
 async def delete_tag(
     tag_id: int,
-    tag_service: CommonTagService = Depends(get_tag_service)
+    tag_service: CommonTagService = CommonTagService
 ) -> dict:
     """
     Delete a tag.

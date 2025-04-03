@@ -22,7 +22,7 @@ router = APIRouter()
     description="Get all categories",
 )
 async def get_all_categories(
-    category_service: CommonRoleService = Depends(get_category_service)
+    category_service: CommonRoleService = CommonRoleService
 ) -> CategoryResponse:
     """
     Get all categories.
@@ -44,7 +44,7 @@ async def get_all_categories(
 )
 async def get_category_by_id(
     category_id: int,
-    category_service: CommonRoleService = Depends(get_category_service)
+    category_service: CommonRoleService = CommonRoleService
 ) -> CategoryResponse:
     """
     Get category by ID.
@@ -67,7 +67,7 @@ async def get_category_by_id(
 )
 async def create_category(
     category: CategoryResponse,
-    category_service: CommonRoleService = Depends(get_category_service)
+    category_service: CommonRoleService = CommonRoleService
 ) -> CategoryResponse:
     """
     Create a new category.
@@ -91,7 +91,7 @@ async def create_category(
 async def update_category(
     category_id: int,
     category: CategoryResponse,
-    category_service: CommonRoleService = Depends(get_category_service)
+    category_service: CommonRoleService = CommonRoleService
 ) -> CategoryResponse:
     """
     Update a category.
@@ -115,7 +115,7 @@ async def update_category(
 )
 async def delete_category(
     category_id: int,
-    category_service: CommonRoleService = Depends(get_category_service)
+    category_service: CommonRoleService = CommonRoleService
 ) -> CategoryResponse:
     """
     Delete a category.
