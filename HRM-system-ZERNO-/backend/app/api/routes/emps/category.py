@@ -17,13 +17,13 @@ router = APIRouter()
 
 @router.get(
     "/category",
-    response_model=CategoryResponse,
+    response_model=list[CategoryResponse],
     summary="Get all categories",
     description="Get all categories",
 )
 async def get_all_categories(
     category_service: CommonRoleService = CommonRoleService
-) -> CategoryResponse:
+) -> list[CategoryResponse]:
     """
     Get all categories.
 
