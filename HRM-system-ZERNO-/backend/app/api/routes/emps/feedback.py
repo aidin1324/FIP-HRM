@@ -17,10 +17,10 @@ CommonFeedbackService = Annotated[
     Depends(get_feedback_service)
 ]
 
-CommonTelegramBotService = Annotated[
-    TelegramBotService,
-    Depends(get_telegram_bot_service)
-]
+# CommonTelegramBotService = Annotated[
+#     TelegramBotService,
+#     Depends(get_telegram_bot_service)
+# ]
 
 
 @router.post(
@@ -32,14 +32,15 @@ CommonTelegramBotService = Annotated[
 async def create_feedback(
     background_tasks: BackgroundTasks,
     feedback_create: CompleteFeedbackCreate,
-    feedback_service: CommonFeedbackService = CommonFeedbackService,
-    telegram_bot_service: CommonTelegramBotService = CommonTelegramBotService
+    feedback_service: CommonFeedbackService = CommonFeedbackService
 ) -> FeedbackResponse:
     
     feedback: Feedback = await feedback_service.create_feedback(feedback_create)
     
     print("POOL STATS\n")
     (await get_pool_stats())
+    
+    
     # result: Feedback = await telegram_bot_service.send_feedback_message(
     #     chat_id=chat_id,
     #     feedback=feedback

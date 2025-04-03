@@ -45,7 +45,7 @@ async def check_admin_permission(
     token: Annotated[str, Depends(oauth2_scheme)],
     session: AsyncSession = Depends(get_db),
 ) -> dict:
-    auth_service = AuthenticationService(session)
+    auth_service = get_authentication_service(session)
     
     user = await auth_service.get_current_admin(token)
     return user
@@ -60,7 +60,7 @@ async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     session: AsyncSession = Depends(get_db)
 ) -> dict:
-    auth_service = AuthenticationService(session)
+    auth_service = get_authentication_service(session)
     
     user = await auth_service.get_current_user(token)
     return user
