@@ -1,7 +1,7 @@
 from sqlalchemy import select, func
-from model import WaiterScore
-from repository.base import BaseRepository
-from schema.emps.waiters_score import WaiterScoreCreate, WaiterScoreUpdate
+from app.model import WaiterScore
+from app.repository.base import BaseRepository
+from app.schema.emps.waiters_score import WaiterScoreCreate, WaiterScoreUpdate
 
 class WaiterScoreRepository(BaseRepository):
 

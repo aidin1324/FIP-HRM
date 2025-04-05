@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from service.public.tag import TagService
+from app.service.public.tag import TagService
 
-from schema.emps.tag import TagCreate, TagResponse, TagUpdate
-from api.dependencies import get_tag_service
+from app.schema.emps.tag import TagCreate, TagResponse, TagUpdate
+from app.api.dependencies import get_tag_service
 
 from typing import Annotated
 

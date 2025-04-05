@@ -1,7 +1,7 @@
 from sqlalchemy.future import select
-from model import Contact
-from repository.base import BaseRepository
-from schema.emps.contacts import ContactCreate, ContactUpdate
+from app.model import Contact
+from app.repository.base import BaseRepository
+from app.schema.emps.contacts import ContactCreate, ContactUpdate
 
 
 class ContactRepository(BaseRepository):

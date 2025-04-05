@@ -1,5 +1,5 @@
 from ..dependencies import get_stats_service
-from service.stats import StatsService
+from app.service.stats import StatsService
 
 from fastapi import APIRouter, Depends
 

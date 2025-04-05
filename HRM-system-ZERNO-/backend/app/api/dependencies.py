@@ -1,30 +1,30 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from repository.public .feedback_type import FeedbackTypeRepository
-from repository.public .feedbacks import FeedbackRepository
-from repository.public .contacts import ContactRepository
-from repository.public .rating import RatingRepository
-from repository.public.tag import TagRepository
-from repository.public.user import UserRepository
-from repository.public.registration_request import RegistrationRequestRepository
-from repository.public.role import RoleRepositroy
-from repository.public.category import CategoryRepository
-from repository.public.waiters_score import WaiterScoreRepository
+from app.repository.public .feedback_type import FeedbackTypeRepository
+from app.repository.public .feedbacks import FeedbackRepository
+from app.repository.public .contacts import ContactRepository
+from app.repository.public .rating import RatingRepository
+from app.repository.public.tag import TagRepository
+from app.repository.public.user import UserRepository
+from app.repository.public.registration_request import RegistrationRequestRepository
+from app.repository.public.role import RoleRepositroy
+from app.repository.public.category import CategoryRepository
+from app.repository.public.waiters_score import WaiterScoreRepository
 
-from db.db import get_db
+from app.db.db import get_db
 
-from service.public.feedback_type import FeedbackTypeService
-from service.public.feedback import FeedbackService
+from app.service.public.feedback_type import FeedbackTypeService
+from app.service.public.feedback import FeedbackService
 
-from service.public.user import UserService
-from service.authentication import AuthenticationService
-from service.public.registration_request import RegistrationRequest
-from service.public.role import RoleService  
-from service.stats import StatsService
-from service.public.waiters_score import WaiterScoreService
-from service.public.category import CategoryService
-from service.public.tag import TagService
-from service.telegram_bot import TelegramFormatMessageService
+from app.service.public.user import UserService
+from app.service.authentication import AuthenticationService
+from app.service.public.registration_request import RegistrationRequest
+from app.service.public.role import RoleService  
+from app.service.stats import StatsService
+from app.service.public.waiters_score import WaiterScoreService
+from app.service.public.category import CategoryService
+from app.service.public.tag import TagService
+from app.service.telegram_bot import TelegramFormatMessageService
 
 def get_feedback_type_repository(
     conn: AsyncSession

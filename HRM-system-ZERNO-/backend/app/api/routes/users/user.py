@@ -1,13 +1,13 @@
-from api.dependencies import get_user_service, get_role_service
+from app.api.dependencies import get_user_service, get_role_service
 
 from fastapi import APIRouter, Depends
 
-from schema.users.user import UserResponse, UserUpdate, UserCreate
-from service.public.user import UserService
-from service.public.role import RoleService
+from app.schema.users.user import UserResponse, UserUpdate, UserCreate
+from app.service.public.user import UserService
+from app.service.public.role import RoleService
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.db import get_db
+from app.db.db import get_db
 
 router = APIRouter()
 

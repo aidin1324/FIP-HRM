@@ -1,6 +1,6 @@
-from repository.base import BaseRepository
+from app.repository.base import BaseRepository
 from sqlalchemy.future import select
-from model import Role
+from app.model import Role
 
 class RoleRepositroy(BaseRepository):
     async def get_all_roles(self):

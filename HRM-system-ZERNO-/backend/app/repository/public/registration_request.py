@@ -1,6 +1,6 @@
-from repository.base import BaseRepository
+from app.repository.base import BaseRepository
 from sqlalchemy.future import select
-from model import RegistrationRequest
+from app.model import RegistrationRequest
 
 
 class RegistrationRequestRepository(BaseRepository):

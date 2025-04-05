@@ -1,7 +1,7 @@
 from sqlalchemy.future import select
-from model import FeedbackType
-from repository.base import BaseRepository
-from schema.emps.feedback_type import FeedbackTypeCreate, FeedbackTypeUpdate
+from app.model import FeedbackType
+from app.repository.base import BaseRepository
+from app.schema.emps.feedback_type import FeedbackTypeCreate, FeedbackTypeUpdate
 
 
 class FeedbackTypeRepository(BaseRepository):

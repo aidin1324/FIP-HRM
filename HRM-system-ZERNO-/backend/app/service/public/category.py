@@ -1,7 +1,7 @@
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from repository.public.category import CategoryRepository
-from schema.emps.category import CategoryResponse
+from app.repository.public.category import CategoryRepository
+from app.schema.emps.category import CategoryResponse
 
 
 class CategoryService:

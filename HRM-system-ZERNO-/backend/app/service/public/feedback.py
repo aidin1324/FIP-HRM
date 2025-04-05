@@ -1,11 +1,11 @@
 import datetime
 from fastapi.exceptions import HTTPException
-from model import Feedback, WaiterScore, Contact, Rating
+from app.model import Feedback, WaiterScore, Contact, Rating
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from repository.public.feedbacks import FeedbackRepository
+from app.repository.public.feedbacks import FeedbackRepository
 
-from schema.emps.feedbacks import CompleteFeedbackCreate, FeedbackUpdate
+from app.schema.emps.feedbacks import CompleteFeedbackCreate, FeedbackUpdate
 
 
 class FeedbackService:

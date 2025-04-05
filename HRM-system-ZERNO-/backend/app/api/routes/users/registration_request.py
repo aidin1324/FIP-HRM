@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from service.public.registration_request import RegistrationRequest
+from app.service.public.registration_request import RegistrationRequest
 
-from api.dependencies import get_registration_request_service
-from schema.users.registration_request import RegistrationRequestResponse, RegistrationRequestUpdate, RegistrationRequestCreate
+from app.api.dependencies import get_registration_request_service
+from app.schema.users.registration_request import RegistrationRequestResponse, RegistrationRequestUpdate, RegistrationRequestCreate
 
 from typing import Annotated
 

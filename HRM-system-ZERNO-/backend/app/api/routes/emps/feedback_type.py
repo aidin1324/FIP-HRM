@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from service.public.feedback_type import FeedbackTypeService
+from app.service.public.feedback_type import FeedbackTypeService
 
-from schema.emps.feedback_type import FeedbackTypeCreate, FeedbackTypeResponse, FeedbackTypeUpdate
-from api.dependencies import get_feedback_type_service
+from app.schema.emps.feedback_type import FeedbackTypeCreate, FeedbackTypeResponse, FeedbackTypeUpdate
+from app.api.dependencies import get_feedback_type_service
 
 from typing import Annotated
 

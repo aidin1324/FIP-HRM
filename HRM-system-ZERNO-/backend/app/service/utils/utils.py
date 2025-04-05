@@ -1,7 +1,7 @@
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt
-from config import secret_key, algorithm, access_token_expire_minutes
+from app.config import secret_key, algorithm, access_token_expire_minutes
 from jose import ExpiredSignatureError
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

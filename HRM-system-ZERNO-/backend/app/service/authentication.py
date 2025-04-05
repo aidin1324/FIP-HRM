@@ -3,10 +3,10 @@ from .public.user import UserService
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .utils.utils import create_access_token, verify_password, jwt_decode
-from model import User
-from schema.authentication import TokenResponse
-from service.public.role import RoleService
-from schema.users.user import UserResponse 
+from app.model import User
+from app.schema.authentication import TokenResponse
+from app.service.public.role import RoleService
+from app.schema.users.user import UserResponse 
 
 
 class AuthenticationService:

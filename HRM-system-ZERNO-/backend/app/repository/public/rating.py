@@ -1,7 +1,7 @@
 from sqlalchemy.future import select
-from model import Rating
-from repository.base import BaseRepository
-from schema.emps.rating import RatingCreate, RatingUpdate
+from app.model import Rating
+from app.repository.base import BaseRepository
+from app.schema.emps.rating import RatingCreate, RatingUpdate
 
 
 class RatingRepository(BaseRepository):

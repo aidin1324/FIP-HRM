@@ -1,9 +1,9 @@
 import datetime
 from fastapi import APIRouter, Depends
 from typing import Annotated
-from api.dependencies import get_feedback_service
+from app.api.dependencies import get_feedback_service
 
-from service.public.feedback import FeedbackService
+from app.service.public.feedback import FeedbackService
 
 router = APIRouter()
 

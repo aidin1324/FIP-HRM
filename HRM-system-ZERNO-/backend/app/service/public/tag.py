@@ -1,4 +1,4 @@
-from repository.public.tag import TagRepository
+from app.repository.public.tag import TagRepository
 
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession

@@ -1,10 +1,10 @@
 from fastapi import HTTPException
-from repository.public.registration_request import RegistrationRequestRepository
+from app.repository.public.registration_request import RegistrationRequestRepository
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schema.users.user import UserCreate
-from schema.users.registration_request import RegistrationRequestCreate, RegistrationRequestResponse, RegistrationRequestUpdate
+from app.schema.users.user import UserCreate
+from app.schema.users.registration_request import RegistrationRequestCreate, RegistrationRequestResponse, RegistrationRequestUpdate
 from passlib.context import CryptContext
 
 from .user import UserService

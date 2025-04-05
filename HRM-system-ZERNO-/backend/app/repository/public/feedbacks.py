@@ -1,7 +1,7 @@
 from sqlalchemy.future import select
-from model import Feedback, WaiterScore
-from repository.base import BaseRepository
-from schema.emps.feedbacks import FeedbackCreate, FeedbackUpdate
+from app.model import Feedback, WaiterScore
+from app.repository.base import BaseRepository
+from app.schema.emps.feedbacks import FeedbackCreate, FeedbackUpdate
 from sqlalchemy.orm import joinedload, selectinload
 import datetime 
 class FeedbackRepository(BaseRepository):

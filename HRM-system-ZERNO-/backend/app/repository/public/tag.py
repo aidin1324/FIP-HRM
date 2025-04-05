@@ -1,7 +1,7 @@
-from repository.base import BaseRepository 
-from model import Tag
+from app.repository.base import BaseRepository 
+from app.model import Tag
 from sqlalchemy.future import select
-from schema.emps.tag import TagCreate, TagUpdate
+from app.schema.emps.tag import TagCreate, TagUpdate
 
 
 class TagRepository(BaseRepository):

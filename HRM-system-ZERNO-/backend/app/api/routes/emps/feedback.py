@@ -3,16 +3,16 @@ from fastapi import APIRouter, Depends, BackgroundTasks
 from typing import Annotated
 
 import httpx
-from api.dependencies import get_feedback_service, get_telegram_bot_service
+from app.api.dependencies import get_feedback_service, get_telegram_bot_service
 
-from model import Feedback
-from service.public.feedback import FeedbackService
-from service.telegram_bot import TelegramFormatMessageService
-from schema.emps.feedbacks import CompleteFeedbackCreate, FeedbackResponse
+from app.model import Feedback
+from app.service.public.feedback import FeedbackService
+from app.service.telegram_bot import TelegramFormatMessageService
+from app.schema.emps.feedbacks import CompleteFeedbackCreate, FeedbackResponse
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.db import get_db, get_pool_stats
+from app.db.db import get_db, get_pool_stats
 from ..config_json import read_config
 
 from dotenv import load_dotenv

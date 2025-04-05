@@ -1,9 +1,9 @@
-from repository.public.role import RoleRepositroy
+from app.repository.public.role import RoleRepositroy
 
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schema.users.role import RoleResponse
+from app.schema.users.role import RoleResponse
 
 
 class RoleService:

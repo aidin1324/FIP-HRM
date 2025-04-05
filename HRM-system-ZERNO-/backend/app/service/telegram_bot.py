@@ -1,16 +1,16 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.repository.public.category import CategoryRepository
-from backend.app.repository.public.tag import TagRepository
-from backend.app.repository.public.user import UserRepository
-from repository.public.feedbacks import FeedbackRepository
-from repository.public.feedback_type import FeedbackTypeRepository
+from app.repository.public.category import CategoryRepository
+from app.repository.public.tag import TagRepository
+from app.repository.public.user import UserRepository
+from app.repository.public.feedbacks import FeedbackRepository
+from app.repository.public.feedback_type import FeedbackTypeRepository
 
 import httpx
-from config import telegram_token
-from model import Feedback
+from app.config import telegram_token
+from app.model import Feedback
 
-from schema.emps.feedbacks import FeedbackUpdate
+from app.schema.emps.feedbacks import FeedbackUpdate
 
 
 class TelegramFormatMessageService:

@@ -9,8 +9,8 @@ from pathlib import Path
 
 from .authentication import oauth2_scheme
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.db import get_db
-from api.dependencies import get_authentication_service
+from app.db.db import get_db
+from app.api.dependencies import get_authentication_service
 
 router = APIRouter()
 

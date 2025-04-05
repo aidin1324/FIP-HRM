@@ -1,7 +1,7 @@
-from repository.base import BaseRepository
-from model import Category
+from app.repository.base import BaseRepository
+from app.model import Category
 from sqlalchemy.future import select
-from schema.emps.category import CategoryCreate, CategoryUpdate
+from app.schema.emps.category import CategoryCreate, CategoryUpdate
 
 
 class CategoryRepository(BaseRepository):

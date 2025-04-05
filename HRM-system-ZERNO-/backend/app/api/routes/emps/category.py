@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from service.public.category import CategoryService
+from app.service.public.category import CategoryService
 
-from schema.emps.category import CategoryCreate, CategoryResponse, CategoryUpdate
-from api.dependencies import get_category_service
+from app.schema.emps.category import CategoryCreate, CategoryResponse, CategoryUpdate
+from app.api.dependencies import get_category_service
 
 from typing import Annotated
 

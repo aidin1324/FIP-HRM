@@ -1,7 +1,7 @@
 from sqlalchemy import desc
-from repository.base import BaseRepository
+from app.repository.base import BaseRepository
 from sqlalchemy.future import select
-from model import User
+from app.model import User
 
 from sqlalchemy.orm import joinedload
 

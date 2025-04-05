@@ -1,12 +1,12 @@
-from api.dependencies import get_authentication_service
-from db.db import get_db
+from app.api.dependencies import get_authentication_service
+from app.db.db import get_db
 
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from schema.users.user import UserResponse
-from schema.authentication import TokenResponse, TokenCreate
-from service.authentication import AuthenticationService
+from app.schema.users.user import UserResponse
+from app.schema.authentication import TokenResponse, TokenCreate
+from app.service.authentication import AuthenticationService
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated

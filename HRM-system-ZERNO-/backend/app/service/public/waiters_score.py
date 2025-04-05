@@ -1,6 +1,6 @@
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from repository.public.waiters_score import WaiterScoreRepository
+from app.repository.public.waiters_score import WaiterScoreRepository
 
 
 class WaiterScoreService:
