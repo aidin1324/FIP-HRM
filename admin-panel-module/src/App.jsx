@@ -2,9 +2,12 @@ import React, { useEffect, Suspense } from "react";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { FilterProvider } from "./contexts/FilterContext";
+import { MetadataProvider } from "./contexts/MetadataContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 
 import "./css/style.css";
 import "./charts/ChartjsConfig";
+import "./css/additional-styles/custom-animations.css";
 
 import Layout from "./pages/Layout";
 import PrivateRoute from "./components/PrivateRoute";
@@ -22,6 +25,7 @@ const AfterRegister = React.lazy(() => import("./pages/AfterRegister"));
 const Contacts = React.lazy(() => import("./pages/Contacts"));
 const PageNotFound = React.lazy(() => import("./pages/404"));
 const MyProfile = React.lazy(() => import("./pages/MyProfile"));
+const MetadataManager = React.lazy(() => import("./pages/MetadataManager"));
 
 function App() {
   const location = useLocation();
@@ -35,69 +39,79 @@ function App() {
   return (
     <AuthProvider>
       <FilterProvider>
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            {/* Публичные маршруты */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/after-register" element={<AfterRegister />} />
-            <Route path="/unauthorized" element={<Unauthorized />} />
-            <Route path="/404" element={<PageNotFound />} />
-            
-            {/* Защищенные маршруты внутри Layout */}
-            <Route path="/" element={<Layout />}>
-              {/* Редирект с главной на дашборд */}
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              
-              {/* Маршруты для администраторов и менеджеров */}
-              <Route path="dashboard" element={
-                <PrivateRoute role={["admin", "manager"]}>
-                  <Dashboard />
-                </PrivateRoute>
-              } />
-              
-              <Route path="users" element={
-                <PrivateRoute role={["admin", "manager"]}>
-                  <Users />
-                </PrivateRoute>
-              } />
-              
-              <Route path="comments" element={
-                <PrivateRoute role={["admin", "manager"]}>
-                  <Comments />
-                </PrivateRoute>
-              } />
-              
-              <Route path="requests" element={
-                <PrivateRoute role={["admin", "manager"]}>
-                  <Requests />
-                </PrivateRoute>
-              } />
-              
-              <Route path="contacts" element={
-                <PrivateRoute role={["admin", "manager"]}>
-                  <Contacts />
-                </PrivateRoute>
-              } />
-              
-              {/* Маршруты для всех авторизованных пользователей */}
-              <Route path="profile/:id" element={
-                <PrivateRoute>
-                  <Profile />
-                </PrivateRoute>
-              } />
-              
-              <Route path="my-profile" element={
-                <PrivateRoute>
-                  <MyProfile />
-                </PrivateRoute>
-              } />
-              
-              {/* Обработка неизвестных маршрутов */}
-              <Route path="*" element={<Navigate to="/404" replace />} />
-            </Route>
-          </Routes>
-        </Suspense>
+        <NotificationProvider>
+          <MetadataProvider>
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                {/* Публичные маршруты */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/after-register" element={<AfterRegister />} />
+                <Route path="/unauthorized" element={<Unauthorized />} />
+                <Route path="/404" element={<PageNotFound />} />
+                
+                {/* Защищенные маршруты внутри Layout */}
+                <Route path="/" element={<Layout />}>
+                  {/* Редирект с главной на дашборд */}
+                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  
+                  {/* Маршруты для администраторов и менеджеров */}
+                  <Route path="dashboard" element={
+                    <PrivateRoute role={["admin", "manager"]}>
+                      <Dashboard />
+                    </PrivateRoute>
+                  } />
+                  
+                  <Route path="users" element={
+                    <PrivateRoute role={["admin", "manager"]}>
+                      <Users />
+                    </PrivateRoute>
+                  } />
+                  
+                  <Route path="comments" element={
+                    <PrivateRoute role={["admin", "manager"]}>
+                      <Comments />
+                    </PrivateRoute>
+                  } />
+                  
+                  <Route path="requests" element={
+                    <PrivateRoute role={["admin", "manager"]}>
+                      <Requests />
+                    </PrivateRoute>
+                  } />
+                  
+                  <Route path="contacts" element={
+                    <PrivateRoute role={["admin", "manager"]}>
+                      <Contacts />
+                    </PrivateRoute>
+                  } />
+                  
+                  <Route path="metadata" element={
+                    <PrivateRoute role={["admin", "manager"]}>
+                      <MetadataManager />
+                    </PrivateRoute>
+                  } />
+                  
+                  {/* Маршруты для всех авторизованных пользователей */}
+                  <Route path="profile/:id" element={
+                    <PrivateRoute>
+                      <Profile />
+                    </PrivateRoute>
+                  } />
+                  
+                  <Route path="my-profile" element={
+                    <PrivateRoute>
+                      <MyProfile />
+                    </PrivateRoute>
+                  } />
+                  
+                  {/* Обработка неизвестных маршрутов */}
+                  <Route path="*" element={<Navigate to="/404" replace />} />
+                </Route>
+              </Routes>
+            </Suspense>
+          </MetadataProvider>
+        </NotificationProvider>
       </FilterProvider>
     </AuthProvider>
   );

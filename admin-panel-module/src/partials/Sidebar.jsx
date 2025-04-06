@@ -5,7 +5,7 @@ import IconType3 from "../components/icons/type_3.png";
 
 import SidebarLinkGroup from "./SidebarLinkGroup";
 
-function Sidebar({ sidebarOpen, setSidebarOpen, variant = "default" }) {
+function Sidebar({ sidebarOpen, setSidebarOpen, variant = "default", role }) {
   const location = useLocation();
   const { pathname } = location;
 
@@ -946,7 +946,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, variant = "default" }) {
               >
                 <NavLink
                   end
-                  to="404"
+                  to="/metadata"
                   className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${
                     pathname.includes("campaigns")
                       ? ""
@@ -968,7 +968,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, variant = "default" }) {
                       <path d="M6.649 1.018a1 1 0 0 1 .793 1.171L6.997 4.5h3.464l.517-2.689a1 1 0 1 1 1.964.378L12.498 4.5h2.422a1 1 0 0 1 0 2h-2.807l-.77 4h2.117a1 1 0 1 1 0 2h-2.501l-.517 2.689a1 1 0 1 1-1.964-.378l.444-2.311H5.46l-.517 2.689a1 1 0 1 1-1.964-.378l.444-2.311H1a1 1 0 1 1 0-2h2.807l.77-4H2.46a1 1 0 0 1 0-2h2.5l.518-2.689a1 1 0 0 1 1.17-.793ZM9.307 10.5l.77-4H6.612l-.77 4h3.464Z" />
                     </svg>
                     <span className="text-sm font-medium ml-4 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                      CRM дашборд
+                      Метаданные
                     </span>
                   </div>
                 </NavLink>
