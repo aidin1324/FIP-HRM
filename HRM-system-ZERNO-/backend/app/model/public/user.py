@@ -16,7 +16,7 @@ class User(Base):
     
     role = relationship('Role', back_populates='users')
     registration_requests = relationship('RegistrationRequest', back_populates='admin', uselist=False)
-    scores = relationship('WaiterScore', back_populates='user')
+    scores = relationship('WaiterScore', back_populates='user', cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<User {self.email}>"
