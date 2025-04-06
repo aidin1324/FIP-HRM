@@ -14,7 +14,7 @@ function Users() {
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [authReady, setAuthReady] = useState(true); // Всегда считаем готовым
+    const [authReady, setAuthReady] = useState(true); 
     const [refreshKey, setRefreshKey] = useState(0);
 
     const [notification, setNotification] = useState({
@@ -56,18 +56,15 @@ function Users() {
     }, [auth]);
 
     const canEditUser = useCallback((user) => {
-        // Если данные о пользователе или авторизации еще не загрузились,
-        // разрешаем редактирование для визуального отображения кнопок
         if (!auth || !user || !user.role) return true;
         
         const userRole = user.role.toLowerCase();
-        const currentUserRole = getCurrentUserRole() || 'admin'; // В случае ошибки, считаем пользователя админом
+        const currentUserRole = getCurrentUserRole() || 'admin'; 
         
         // Проверка на себя
         const isCurrentUser = String(user.id) === String(auth?.user_id || auth?.id || auth?.user?.id || '');
         if (isCurrentUser) return false;
-        
-        // Простая проверка прав, с приоритетом в сторону разрешения
+
         if (currentUserRole === 'администратор' || currentUserRole === 'админ' || currentUserRole === 'admin') {
             return userRole !== 'администратор' && userRole !== 'админ' && userRole !== 'admin';
         }
@@ -81,18 +78,15 @@ function Users() {
     }, [auth, getCurrentUserRole]);
 
     const canDeleteUser = useCallback((user) => {
-        // Если данные о пользователе или авторизации еще не загрузились,
-        // разрешаем удаление для визуального отображения кнопок
         if (!auth || !user || !user.role) return true;
         
         const userRole = user.role.toLowerCase();
-        const currentUserRole = getCurrentUserRole() || 'admin'; // В случае ошибки, считаем пользователя админом
+        const currentUserRole = getCurrentUserRole() || 'admin'; 
         
         // Проверка на себя
         const isCurrentUser = String(user.id) === String(auth?.user_id || auth?.id || auth?.user?.id || '');
         if (isCurrentUser) return false;
-        
-        // Простая проверка прав, с приоритетом в сторону разрешения
+
         if (currentUserRole === 'администратор' || currentUserRole === 'админ' || currentUserRole === 'admin') {
             return userRole !== 'администратор' && userRole !== 'админ' && userRole !== 'admin';
         }
@@ -152,7 +146,6 @@ function Users() {
     };
 
     useEffect(() => {
-        // Делаем только одно обновление при монтировании компонента с небольшой задержкой
         const timer = setTimeout(() => {
             forceRefresh();
         }, 100);
@@ -175,9 +168,7 @@ function Users() {
     useEffect(() => {
         if (users.length > 0) {
             const timer = setTimeout(() => {
-                // Это триггерит перерисовку кнопок
                 setAuthReady(prevAuthReady => {
-                    // Изменяем состояние даже если оно уже true
                     return true;
                 });
             }, 200);
@@ -699,7 +690,7 @@ function Users() {
                                         type="text"
                                         name="first_name"
                                         defaultValue={editModal.userData?.first_name || ''}
-                                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md"
+                                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                         required
                                     />
                                 </div>
@@ -711,7 +702,7 @@ function Users() {
                                         type="text"
                                         name="second_name"
                                         defaultValue={editModal.userData?.second_name || ''}
-                                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md"
+                                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                         required
                                     />
                                 </div>
@@ -723,7 +714,7 @@ function Users() {
                                         type="email"
                                         name="email"
                                         defaultValue={editModal.userData?.email || ''}
-                                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md"
+                                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                         required
                                     />
                                 </div>
@@ -734,7 +725,7 @@ function Users() {
                                     <select
                                         name="role_id"
                                         defaultValue={editModal.userData?.role_id || ''}
-                                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md"
+                                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                         required
                                     >
                                         {Object.entries(roles).map(([id, role]) => (
