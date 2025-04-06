@@ -82,24 +82,27 @@ function DashboardCard01() {
 
   const processDataForChart = useMemo(() => {
     const processDailyData = (data) => {
+      // Улучшенная фильтрация - убедимся, что waiter_score существует
       const validFeedbacks = data
-        .filter((feedback) => feedback.waiter_score?.score !== null)
+        .filter((feedback) => feedback.waiter_score && feedback.waiter_score.score !== null)
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
       const labels = validFeedbacks.map((feedback) =>
         new Date(feedback.created_at).toLocaleDateString("ru-RU")
       );
 
+      // Добавляем защиту от null с опциональной цепочкой и запасным значением
       const values = validFeedbacks.map(
-        (feedback) => feedback.waiter_score.score
+        (feedback) => feedback.waiter_score?.score || 0
       );
 
       return { labels, values };
     };
 
     const processMonthlyData = (data) => {
+      // Улучшенная фильтрация для месячных данных
       const validFeedbacks = data.filter(
-        (feedback) => feedback.waiter_score?.score !== null
+        (feedback) => feedback.waiter_score && feedback.waiter_score.score !== null
       );
 
       const monthlyRatings = validFeedbacks.reduce((acc, feedback) => {
@@ -118,7 +121,8 @@ function DashboardCard01() {
           };
         }
 
-        acc[monthKey].totalScore += feedback.waiter_score.score;
+        // Добавляем защиту на всякий случай
+        acc[monthKey].totalScore += feedback.waiter_score?.score || 0;
         acc[monthKey].count += 1;
 
         return acc;
@@ -175,14 +179,15 @@ function DashboardCard01() {
 
     if (!dataToUse.length) return "N/A";
 
+    // Улучшенная фильтрация
     const validFeedbacks = dataToUse.filter(
-      (feedback) => feedback.waiter_score?.score !== null
+      (feedback) => feedback.waiter_score && feedback.waiter_score.score !== null
     );
 
     if (!validFeedbacks.length) return "N/A";
 
     const sum = validFeedbacks.reduce(
-      (total, feedback) => total + feedback.waiter_score.score,
+      (total, feedback) => total + (feedback.waiter_score?.score || 0),
       0
     );
 
@@ -192,8 +197,9 @@ function DashboardCard01() {
   const totalEntries = useMemo(() => {
     const dataToUse = feedbackData.length > 0 ? feedbackData : feedbacks;
 
-    return dataToUse.filter((feedback) => feedback.waiter_score?.score !== null)
-      .length;
+    return dataToUse.filter(
+      (feedback) => feedback.waiter_score && feedback.waiter_score.score !== null
+    ).length;
   }, [feedbacks, feedbackData]);
 
   return (

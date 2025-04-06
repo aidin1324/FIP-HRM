@@ -1,62 +1,89 @@
 const API_CONFIG = {
   development: {
-    baseURL: 'http://localhost:8000',
+    baseURL: "http://localhost:8000",
   },
   production: {
-    baseURL: 'https://api.your-production-domain.com', 
+    baseURL: "https://api.your-production-domain.com",
   },
   test: {
-    baseURL: 'http://localhost:8000',
-  }
+    baseURL: "http://localhost:8000",
+  },
 };
 
-const ENV = process.env.NODE_ENV || 'development';
+const ENV = process.env.NODE_ENV || "development";
 const BASE_URL = API_CONFIG[ENV].baseURL;
 
 const buildUrl = (endpoint) => `${BASE_URL}${endpoint}`;
 
 const API = {
   auth: {
-    login: buildUrl('/auth/login'),
-    register: buildUrl('/registration_requests/register'),
+    login: buildUrl("/auth/login"),
+    register: buildUrl("/registration_requests/register"),
   },
-  
+
   users: {
-    getAll: buildUrl('/users/get_user_with_pagination'),
+    getAll: buildUrl("/users/get_user_with_pagination"),
     getById: (id) => buildUrl(`/users/get_user/${id}`),
     update: (id) => buildUrl(`/users/update_user/${id}`),
+    delete: (id) => buildUrl(`/users/delete_user/${id}`),
   },
-  
+
   registrationRequests: {
-    getAll: buildUrl('/registration_requests/get_all'),
-    updateStatus: buildUrl('/registration_requests/status'),
+    getAll: buildUrl("/registration_requests/get_all"),
+    updateStatus: buildUrl("/registration_requests/status"),
   },
-  
+
   roles: {
-    getAll: buildUrl('/roles/get_all'),
+    getAll: buildUrl("/roles/get_all"),
   },
-  
+
   feedbacks: {
-    getAll: buildUrl('/feedbacks/get_all_feedbacks'),
-    getCustomerWaiterPaginated: buildUrl('/comments/get-customer-waiter-feedbacks-paginated'),
+    getAll: buildUrl("/feedbacks/get_all_feedbacks"),
+    getCustomerWaiterPaginated: buildUrl(
+      "/comments/get-customer-waiter-feedbacks-paginated"
+    ),
   },
-  
+
+  categories: {
+    getAll: buildUrl("/categories/category"),
+    create: buildUrl("/categories/category"),
+    getById: (id) => buildUrl(`/categories/category/${id}`),
+    update: (id) => buildUrl(`/categories/category/${id}`),
+    delete: (id) => buildUrl(`/categories/category/${id}`),
+  },
+
+  feedbackType: {
+    getAll: buildUrl("/feedback_type/feedback_type"),
+    create: buildUrl("/feedback_type/feedback_type"),
+    getById: (id) => buildUrl(`/feedback_type/feedback_type/${id}`),
+    update: (id) => buildUrl(`/feedback_type/feedback_type/${id}`),
+    delete: (id) => buildUrl(`/feedback_type/feedback_type/${id}`),
+  },
+
+  tags: {
+    getAll: buildUrl("/tags/tag"),
+    create: buildUrl("/tags/tag"),
+    getById: (id) => buildUrl(`/tags/tag/${id}`),
+    update: (id) => buildUrl(`/tags/tag/${id}`),
+    delete: (id) => buildUrl(`/tags/tag/${id}`),
+  },
+
   statistics: {
     getUserStats: (id) => buildUrl(`/stats/get_stats/${id}`),
     getUserTagsStats: (id) => buildUrl(`/stats/get_tags_stats/${id}`),
-  }
+  },
 };
 
 export const CACHE_CONFIG = {
-  '/roles/get_all': { maxAge: 3600000 }, 
+  "/roles/get_all": { maxAge: 3600000 },
 
-  '/users/get_user_with_pagination': { maxAge: 300000 },
+  "/users/get_user_with_pagination": { maxAge: 300000 },
 
-  '/feedbacks/get_all_feedbacks': { maxAge: 60000 }, 
+  "/feedbacks/get_all_feedbacks": { maxAge: 60000 },
 
-  '/users/get_user/': { maxAge: 300000 }, 
+  "/users/get_user/": { maxAge: 300000 },
 
-  '/auth/login': false
+  "/auth/login": false,
 };
 
 export const auth_login_path = API.auth.login;
@@ -70,6 +97,7 @@ export const get_all_feedbacks = API.feedbacks.getAll;
 export const get_user_profile_path = API.users.getById;
 export const get_stats_dashboad_path = API.statistics.getUserStats;
 export const get_user_tags_stat_path = API.statistics.getUserTagsStats;
-export const get_customer_comments_path_with_param = API.feedbacks.getCustomerWaiterPaginated;
+export const get_customer_comments_path_with_param =
+  API.feedbacks.getCustomerWaiterPaginated;
 
 export default API;
