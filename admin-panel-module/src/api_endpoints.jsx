@@ -53,11 +53,11 @@ const API = {
   },
 
   feedbackType: {
-    getAll: buildUrl("/feedback_types/feedback_type"),
-    create: buildUrl("/feedback_types/feedback_type"),
-    getById: (id) => buildUrl(`/feedback_types/feedback_type/${id}`),
-    update: (id) => buildUrl(`/feedback_types/feedback_type/${id}`),
-    delete: (id) => buildUrl(`/feedback_types/feedback_type/${id}`),
+    getAll: buildUrl("/feedback_type/feedback_type"),
+    create: buildUrl("/feedback_type/feedback_type"),
+    getById: (id) => buildUrl(`/feedback_type/feedback_type/${id}`),
+    update: (id) => buildUrl(`/feedback_type/feedback_type/${id}`),
+    delete: (id) => buildUrl(`/feedback_type/feedback_type/${id}`),
   },
 
   tags: {
