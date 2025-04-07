@@ -7,7 +7,7 @@ import {
   get_user_tags_stat_path,
   get_customer_comments_path_with_param
 } from '../api_endpoints';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { RoleContext } from '../contexts/RoleContext';
 import { AuthContext } from '../contexts/AuthContext'; 
 import Loading from '../components/Loading';
@@ -493,15 +493,17 @@ function Profile({ currentUser = false }) {
                 Это ваш личный профиль
               </span>
             </div>
-            <button 
-              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white text-sm font-medium rounded-md shadow-sm transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:ring-violet-400 focus:outline-none"
-              onClick={() => setShowEditModal(true)}
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-              Редактировать
-            </button>
+            <div className="flex items-center gap-4">
+              <button 
+                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white text-sm font-medium rounded-md shadow-sm transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:ring-violet-400 focus:outline-none"
+                onClick={() => setShowEditModal(true)}
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                Редактировать
+              </button>
+            </div>
           </div>
         </div>
       )}

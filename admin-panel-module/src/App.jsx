@@ -22,6 +22,8 @@ const AfterRegister = React.lazy(() => import("./pages/AfterRegister"));
 const Contacts = React.lazy(() => import("./pages/Contacts"));
 const PageNotFound = React.lazy(() => import("./pages/404"));
 const MyProfile = React.lazy(() => import("./pages/MyProfile"));
+const ResetPassword = React.lazy(() => import("./pages/ResetPassword"));
+const ResetPasswordByToken = React.lazy(() => import("./pages/ResetPasswordByToken"));
 
 function App() {
   const location = useLocation();
@@ -43,6 +45,10 @@ function App() {
             <Route path="/after-register" element={<AfterRegister />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/404" element={<PageNotFound />} />
+
+            {/* Маршруты для сброса пароля */}
+            <Route path="/reset-password" element={<ResetPasswordByToken />} /> {/* Для сброса пароля по токену */}
+            <Route path="/forgot-password" element={<ResetPassword />} /> {/* Для запроса сброса пароля */}
             
             {/* Защищенные маршруты внутри Layout */}
             <Route path="/" element={<Layout />}>

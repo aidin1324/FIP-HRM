@@ -158,7 +158,7 @@ function Login() {
             </label>
             <div className="text-sm">
               <a
-                href="#"
+                href="/forgot-password"
                 className="font-medium text-violet-500 hover:text-violet-600 dark:hover:text-violet-400"
               >
                 Забыли пароль?

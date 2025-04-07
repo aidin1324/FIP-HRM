@@ -142,4 +142,23 @@ class UserService:
                 return {"detail": "User deleted"}
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e)) 
+
+    async def update_password(self, user_id: int, hashed_password: str):
+        """
+        Update user password
+
+        Args:
+            user_id (int): User ID
+            hashed_password (str): New hashed password
+        """
+        try:
+            user = await self.user_repo.get_user_by_id(user_id)
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
+
+            user.hashed_password = hashed_password
+            await self.user_repo.update_user(user, UserUpdate())
+            return {"message": "Password updated successfully"}
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
     

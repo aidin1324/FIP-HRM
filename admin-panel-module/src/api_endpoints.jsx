@@ -19,6 +19,8 @@ const API = {
   auth: {
     login: buildUrl("/auth/login"),
     register: buildUrl("/registration_requests/register"),
+    forgotPassword: buildUrl("/auth/forgot-password"),
+    resetPassword: buildUrl("/auth/reset-password"),
   },
 
   users: {
@@ -86,8 +88,15 @@ export const CACHE_CONFIG = {
   "/auth/login": false,
 };
 
+// Существующие экспорты
 export const auth_login_path = API.auth.login;
 export const send_register_request_path = API.auth.register;
+
+// Новые экспорты для работы с паролями
+export const forgot_password_path = API.auth.forgotPassword;
+export const reset_password_path = API.auth.resetPassword;
+
+// Остальные экспорты
 export const get_request_path = API.registrationRequests.getAll;
 export const approve_request_path = API.registrationRequests.updateStatus;
 export const get_user_path = API.users.getAll;
