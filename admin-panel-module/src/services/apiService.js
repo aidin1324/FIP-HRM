@@ -144,16 +144,34 @@ export const apiService = {
   }
 };
 
-export const prefetchCommonData = () => {
-  apiService.get(get_roles_path, {}, { cache: true, maxAge: 3600000 });
-
-  const lastFetch = localStorage.getItem('lastFetch_users');
-  const now = Date.now();
+export const prefetchCommonData = (token) => {
+  const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
   
-  if (!lastFetch || now - JSON.parse(lastFetch) > 300000) { 
-    apiService.get(get_user_path, { limit: 10 })
-      .then(() => localStorage.setItem('lastFetch_users', JSON.stringify(now)));
-  }
+  // Создаем набор запросов для выполнения параллельно
+  const requests = [
+    // Роли пользователей (небольшой статичный список)
+    fetch(get_roles_path, { headers }),
+    
+    // Базовые данные пользователей (первая страница)
+    fetch(`${get_user_path}?limit=10`, { headers }),
+    
+    // Метаданные приложения (если есть)
+    // fetch(`/api/metadata`, { headers }),
+  ];
+
+  // Выполнить все запросы параллельно
+  return Promise.allSettled(requests).then(results => {
+    // Сохранить результаты в кэш, если нужно
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled' && result.value.ok) {
+        const url = requests[index].url;
+        // Можно добавить кэширование данных здесь
+        localStorage.setItem(`preloaded_${url}`, Date.now());
+      }
+    });
+    
+    return results;
+  });
 };
 
 export const enableApiMonitoring = () => {

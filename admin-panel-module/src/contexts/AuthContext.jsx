@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const login = (access_token) => {
+  const login = async (access_token) => {
     if (!validateToken(access_token)) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Недействительный токен');
@@ -74,17 +74,30 @@ export const AuthProvider = ({ children }) => {
     Cookies.set('access_token', access_token, { expires: 7, secure: true, sameSite: 'strict' });
     try {
       const decoded = jwt.jwtDecode(access_token);
+      
+      // Устанавливаем данные пользователя
       setAuth({
         access_token,
         user: {
           id: decoded.id,
           email: decoded.email,
-          roles: decoded.roles,
+          roles: decoded.roles || [decoded.role],
         },
       });
+
+      // Предварительная загрузка данных при логине
+      try {
+        await prefetchCommonData(access_token);
+      } catch (err) {
+        console.warn('Error prefetching data:', err);
+        // Продолжаем несмотря на ошибку предзагрузки
+      }
+      
+      return true;
     } catch (error) {
       console.error('Ошибка при декодировании токена:', error);
       logout();
+      return false;
     }
   };
 

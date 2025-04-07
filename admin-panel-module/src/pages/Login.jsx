@@ -16,6 +16,7 @@ function Login() {
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [blockTime, setBlockTime] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isPreloading, setIsPreloading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,8 +39,25 @@ function Login() {
   
       if (response.ok) {
         login(data.access_token);
-        navigate("/dashboard");
-        setLoginAttempts(0);
+        setIsPreloading(true);
+        
+        try {
+          await Promise.allSettled([
+            fetch(get_roles_path).then(res => {
+              if (res.ok) return res.json();
+              return Promise.reject('Failed to fetch roles');
+            }),
+            fetch(get_user_path + '?limit=10').then(res => {
+              if (res.ok) return res.json();
+              return Promise.reject('Failed to fetch users');
+            })
+          ]);
+        } catch (preloadErr) {
+          console.warn('Предварительная загрузка данных: ', preloadErr);
+        } finally {
+          navigate("/dashboard");
+          setLoginAttempts(0);
+        }
       } else {
         setError(data.message || "Неправильный email или пароль");
       }
@@ -60,6 +78,7 @@ function Login() {
       }
     } finally {
       setLoading(false);
+      setIsPreloading(false);
     }
   };
 
@@ -150,10 +169,10 @@ function Login() {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || isPreloading}
               className="btn w-full flex justify-center bg-violet-500 hover:bg-violet-600 text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-200"
             >
-              {loading ? "Вход..." : "Войти"}
+              {loading ? "Вход..." : isPreloading ? "Загрузка данных..." : "Войти"}
             </button>
           </div>
 

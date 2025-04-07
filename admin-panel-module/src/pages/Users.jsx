@@ -27,7 +27,9 @@ function Users() {
         isOpen: false,
         userId: null,
         userName: '',
-        loading: false
+        userRole: '',
+        loading: false,
+        isAdminDelete: false
     });
 
     const [editModal, setEditModal] = useState({
@@ -42,69 +44,13 @@ function Users() {
         setRefreshKey(prev => prev + 1);
     }, []);
 
-    const getCurrentUserRole = useCallback(() => {
-        if (!auth) return null;
-        
-        if (auth.role) return auth.role.toLowerCase();
-        if (auth.user?.role) return auth.user.role.toLowerCase();
-        if (Array.isArray(auth.user?.roles) && auth.user.roles.length > 0) 
-            return auth.user.roles[0].toLowerCase();
-        if (typeof auth.user?.roles === 'string') 
-            return auth.user.roles.toLowerCase();
-        
-        return null;
-    }, [auth]);
-
-    const canEditUser = useCallback((user) => {
-        if (!auth || !user || !user.role) return true;
-        
-        const userRole = user.role.toLowerCase();
-        const currentUserRole = getCurrentUserRole() || 'admin'; 
-        
-        // Проверка на себя
-        const isCurrentUser = String(user.id) === String(auth?.user_id || auth?.id || auth?.user?.id || '');
-        if (isCurrentUser) return false;
-
-        if (currentUserRole === 'администратор' || currentUserRole === 'админ' || currentUserRole === 'admin') {
-            return userRole !== 'администратор' && userRole !== 'админ' && userRole !== 'admin';
-        }
-        
-        if (currentUserRole === 'manager' || currentUserRole === 'менеджер') {
-            return !(userRole === 'администратор' || userRole === 'админ' || userRole === 'admin' || 
-                    userRole === 'manager' || userRole === 'менеджер');
-        }
-        
-        return false;
-    }, [auth, getCurrentUserRole]);
-
-    const canDeleteUser = useCallback((user) => {
-        if (!auth || !user || !user.role) return true;
-        
-        const userRole = user.role.toLowerCase();
-        const currentUserRole = getCurrentUserRole() || 'admin'; 
-        
-        // Проверка на себя
-        const isCurrentUser = String(user.id) === String(auth?.user_id || auth?.id || auth?.user?.id || '');
-        if (isCurrentUser) return false;
-
-        if (currentUserRole === 'администратор' || currentUserRole === 'админ' || currentUserRole === 'admin') {
-            return userRole !== 'администратор' && userRole !== 'админ' && userRole !== 'admin';
-        }
-        
-        if (currentUserRole === 'manager' || currentUserRole === 'менеджер') {
-            return !(userRole === 'администратор' || userRole === 'админ' || userRole === 'admin' || 
-                    userRole === 'manager' || userRole === 'менеджер');
-        }
-        
-        return false;
-    }, [auth, getCurrentUserRole]);
-
     const fetchUsers = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
             const url = new URL(get_user_path);
             url.searchParams.append('limit', 1000);
+            url.searchParams.append('_', Date.now()); // Добавляем timestamp для предотвращения кэширования
 
             if (searchTerm) {
                 url.searchParams.append('search', searchTerm);
@@ -141,6 +87,90 @@ function Users() {
         }
     }, [searchTerm, selectedRole, roles]);
 
+    const forceUpdateUserList = useCallback(async () => {
+        await fetchUsers();  // Полное обновление списка пользователей
+    }, [fetchUsers]);
+
+    const getCurrentUserRole = useCallback(() => {
+        if (!auth) return null;
+        
+        if (auth.role) return auth.role.toLowerCase();
+        if (auth.user?.role) return auth.user.role.toLowerCase();
+        if (Array.isArray(auth.user?.roles) && auth.user.roles.length > 0) 
+            return auth.user.roles[0].toLowerCase();
+        if (typeof auth.user?.roles === 'string') 
+            return auth.user.roles.toLowerCase();
+        
+        return null;
+    }, [auth]);
+
+    const canEditUser = useCallback((user) => {
+        if (!auth || !user || !user.role) return false; // По умолчанию запрещаем доступ
+        
+        // Нормализуем роли для консистентного сравнения
+        const normalizeRole = (role) => {
+            if (!role) return '';
+            role = String(role).toLowerCase();
+            // Группируем варианты названий ролей
+            if (['admin', 'администратор', 'админ'].includes(role)) return 'admin';
+            if (['manager', 'менеджер'].includes(role)) return 'manager';
+            if (['user', 'пользователь', 'официант', 'waiter'].includes(role)) return 'user';
+            return role;
+        };
+        
+        const userRole = normalizeRole(user.role);
+        const currentUserRole = normalizeRole(getCurrentUserRole());
+        
+        // Проверка на редактирование самого себя
+        const isCurrentUser = String(user.id) === String(auth?.user_id || auth?.id || auth?.user?.id || '');
+        if (isCurrentUser) return false; // Запрещаем редактировать самого себя
+        
+        // Админ может редактировать всех, включая других админов
+        if (currentUserRole === 'admin') {
+            return true;
+        }
+        
+        // Менеджер может редактировать только пользователей (не менеджеров и не админов)
+        if (currentUserRole === 'manager') {
+            return userRole === 'user';
+        }
+        
+        // Все остальные не могут редактировать никого
+        return false;
+    }, [auth, getCurrentUserRole]);
+
+    const canDeleteUser = useCallback((user) => {
+        if (!auth || !user || !user.role) return false;
+        
+        const normalizeRole = (role) => {
+            if (!role) return '';
+            role = String(role).toLowerCase();
+            if (['admin', 'администратор', 'админ'].includes(role)) return 'admin';
+            if (['manager', 'менеджер'].includes(role)) return 'manager';
+            if (['user', 'пользователь', 'официант', 'waiter'].includes(role)) return 'user';
+            return role;
+        };
+        
+        const userRole = normalizeRole(user.role);
+        const currentUserRole = normalizeRole(getCurrentUserRole());
+        
+        // Запрещаем удалять самого себя
+        const isCurrentUser = String(user.id) === String(auth?.user_id || auth?.id || auth?.user?.id || '');
+        if (isCurrentUser) return false;
+
+        // Админ может удалять всех, включая других админов
+        if (currentUserRole === 'admin') {
+            return true;
+        }
+        
+        // Менеджер может удалять только пользователей
+        if (currentUserRole === 'manager') {
+            return userRole === 'user';
+        }
+        
+        return false;
+    }, [auth, getCurrentUserRole]);
+
     const capitalizeFirstLetter = (string) => {
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     };
@@ -155,7 +185,20 @@ function Users() {
 
     useEffect(() => {
         if (!rolesLoading && !rolesError) {
-            fetchUsers();
+            // Проверяем, были ли данные предварительно загружены недавно
+            const lastPreload = localStorage.getItem('preloaded_users');
+            const isRecentlyPreloaded = lastPreload && (Date.now() - parseInt(lastPreload)) < 5000; // 5 секунд
+            
+            if (!isRecentlyPreloaded) {
+                fetchUsers();
+            } else {
+                // Если данные были недавно загружены, добавим небольшую задержку
+                // чтобы не перезагружать сразу же после предзагрузки
+                const timer = setTimeout(() => {
+                    fetchUsers();
+                }, 1000);
+                return () => clearTimeout(timer);
+            }
         }
     }, [rolesLoading, rolesError, fetchUsers]);
 
@@ -208,7 +251,7 @@ function Users() {
                 throw new Error('Failed to update user status');
             }
 
-            setTimeout(() => forceRefresh(), 300);
+            await forceUpdateUserList();
 
             setNotification({
                 show: true,
@@ -231,7 +274,7 @@ function Users() {
                 setNotification(prev => ({ ...prev, show: false }));
             }, 3000);
         }
-    }, [auth, forceRefresh, users]);
+    }, [auth, forceUpdateUserList, users]);
 
     const filteredUsers = useMemo(() => {
         return users.filter(user => {
@@ -252,43 +295,59 @@ function Users() {
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-    const confirmDelete = useCallback((userId, userName) => {
-        const user = users.find((u) => u.id === userId);
-        if (user && canDeleteUser(user)) {
-            setDeleteModal({
-                isOpen: true,
-                userId,
-                userName,
-                loading: false,
-            });
-        } else {
-            setNotification({
-                show: true,
-                message: 'У вас нет прав на удаление этого пользователя',
-                type: 'warning',
-            });
-            setTimeout(() => setNotification((prev) => ({ ...prev, show: false })), 3000);
-        }
-    }, [users, canDeleteUser]);
+    const confirmDelete = useCallback((user) => {
+        // Принудительно обновляем список перед проверкой прав
+        forceUpdateUserList().then(() => {
+            if (user && canDeleteUser(user)) {
+                // Определяем, является ли пользователь админом
+                const normalizeRole = (role) => {
+                    if (!role) return '';
+                    role = String(role).toLowerCase();
+                    if (['admin', 'администратор', 'админ'].includes(role)) return 'admin';
+                    return role;
+                };
+                
+                const isAdminUser = normalizeRole(user.role) === 'admin';
+                
+                setDeleteModal({
+                    isOpen: true,
+                    userId: user.id,
+                    userName: `${user.first_name || ''} ${user.second_name || ''}`.trim() || user.email || 'Пользователь',
+                    userRole: user.role || '',
+                    loading: false,
+                    isAdminDelete: isAdminUser
+                });
+            } else {
+                setNotification({
+                    show: true,
+                    message: 'У вас нет прав на удаление этого пользователя',
+                    type: 'warning',
+                });
+                setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 3000);
+            }
+        });
+    }, [canDeleteUser, forceUpdateUserList]);
 
     const cancelDelete = useCallback(() => {
         setDeleteModal({
             isOpen: false,
             userId: null,
             userName: '',
+            userRole: '',
             loading: false,
+            isAdminDelete: false
         });
     }, []);
 
     const handleDeleteUser = useCallback(async () => {
         try {
             setDeleteModal(prev => ({ ...prev, loading: true }));
-            
+
             if (!auth || !auth.access_token) {
                 throw new Error('Ошибка авторизации. Пожалуйста, войдите снова.');
             }
-            
-            const response = await fetch(API.users.delete(deleteModal.userId), {
+
+            const response = await fetch(`${API.users.delete(deleteModal.userId)}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${auth.access_token}`,
@@ -297,62 +356,61 @@ function Users() {
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                let errorMessage;
-                try {
-                    const errorData = JSON.parse(errorText);
-                    errorMessage = errorData.detail || errorData.message || `Ошибка ${response.status}`;
-                } catch {
-                    errorMessage = `Ошибка ${response.status}: ${errorText || response.statusText}`;
-                }
-                throw new Error(errorMessage);
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.message || 'Ошибка при удалении пользователя');
             }
 
-            setUsers(prevUsers => prevUsers.filter(user => user.id !== deleteModal.userId));
-            
+            // После успешного удаления - принудительно перезагружаем список пользователей
+            await forceUpdateUserList();
+
+            cancelDelete();
+
             setNotification({
                 show: true,
-                message: 'Пользователь успешно удален',
+                message: `Пользователь ${deleteModal.userName} успешно удален`,
                 type: 'success'
             });
-            
+
             setTimeout(() => {
                 setNotification(prev => ({ ...prev, show: false }));
             }, 3000);
+
         } catch (error) {
+            console.error('Ошибка при удалении пользователя:', error);
             setNotification({
                 show: true,
-                message: `Ошибка при удалении пользователя: ${error.message}`,
+                message: error.message || 'Произошла ошибка при удалении пользователя',
                 type: 'error'
             });
-            
             setTimeout(() => {
                 setNotification(prev => ({ ...prev, show: false }));
-            }, 5000);
+            }, 3000);
         } finally {
-            cancelDelete();
+            setDeleteModal(prev => ({ ...prev, loading: false }));
         }
-    }, [auth, deleteModal.userId, cancelDelete]);
+    }, [auth, deleteModal.userId, deleteModal.userName, cancelDelete, forceUpdateUserList]);
 
     const openEditModal = useCallback((user) => {
-        const canEdit = canEditUser(user);
-        if (canEdit) {
-            setEditModal({
-                isOpen: true,
-                userId: user.id,
-                userData: user,
-                loading: false,
-                error: null
-            });
-        } else {
-            setNotification({
-                show: true,
-                message: 'У вас нет прав на редактирование этого пользователя',
-                type: 'warning'
-            });
-            setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 3000);
-        }
-    }, [canEditUser]);
+        forceUpdateUserList().then(() => {
+            const canEdit = canEditUser(user);
+            if (canEdit) {
+                setEditModal({
+                    isOpen: true,
+                    userId: user.id,
+                    userData: user,
+                    loading: false,
+                    error: null
+                });
+            } else {
+                setNotification({
+                    show: true,
+                    message: 'У вас нет прав на редактирование этого пользователя',
+                    type: 'warning'
+                });
+                setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 3000);
+            }
+        });
+    }, [canEditUser, forceUpdateUserList]);
 
     const closeEditModal = useCallback(() => {
         setEditModal({
@@ -417,6 +475,8 @@ function Users() {
                     } : user
                 )
             );
+
+            await forceUpdateUserList();
             
             closeEditModal();
             
@@ -437,7 +497,106 @@ function Users() {
                 error: error.message 
             }));
         }
-    }, [auth, editModal.userId, roles, closeEditModal]);
+    }, [auth, editModal.userId, roles, closeEditModal, forceUpdateUserList]);
+
+    const DeleteConfirmModal = ({ deleteModal, handleDeleteUser, cancelDelete }) => {
+        const [confirmText, setConfirmText] = useState('');
+        const isAdmin = deleteModal.isAdminDelete;
+        
+        // Определяем требуемый текст подтверждения - имя и фамилия администратора
+        const requiredText = isAdmin 
+            ? `${deleteModal.userName}`.trim() 
+            : "";
+        
+        const isConfirmed = isAdmin ? confirmText === requiredText : true;
+        
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+                {/* Улучшенный фон с размытием */}
+                <div className="fixed inset-0 backdrop-blur-sm bg-black/40 dark:bg-black/60 transition-opacity" aria-hidden="true"></div>
+                
+                {/* Контейнер модального окна */}
+                <div className="relative w-full max-w-md p-6 mx-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all">
+                    {/* Заголовок */}
+                    <div className="flex items-start">
+                        <div className="flex-shrink-0 bg-red-100 dark:bg-red-900/30 p-2 rounded-full">
+                            <svg className="h-6 w-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div className="ml-4">
+                            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                {isAdmin ? "Удаление администратора" : "Удаление пользователя"}
+                            </h3>
+                            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                Вы уверены, что хотите удалить пользователя{" "}
+                                <span className="font-semibold">
+                                    {deleteModal.userName}
+                                </span>{" "}
+                                ({deleteModal.userRole})?
+                            </p>
+                            
+                            {isAdmin && (
+                                <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-r-md">
+                                    <p className="text-sm text-red-600 dark:text-red-400">
+                                        <strong>Внимание!</strong> Удаление пользователя с правами администратора может повлиять на работу системы.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    
+                    {/* Поле подтверждения для админа */}
+                    {isAdmin && (
+                        <div className="mt-5">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Для подтверждения введите полное имя администратора: <span className="font-semibold">{requiredText}</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={confirmText}
+                                onChange={(e) => setConfirmText(e.target.value)}
+                                className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                placeholder="Введите имя и фамилию"
+                                autoFocus
+                            />
+                        </div>
+                    )}
+                    
+                    {/* Кнопки */}
+                    <div className="mt-6 flex justify-end space-x-3">
+                        <button
+                            type="button"
+                            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
+                            onClick={cancelDelete}
+                            disabled={deleteModal.loading}
+                        >
+                            Отмена
+                        </button>
+                        <button
+                            type="button"
+                            className={`px-4 py-2 rounded-md text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                                isConfirmed 
+                                    ? "bg-red-600 hover:bg-red-700 focus:ring-red-500" 
+                                    : "bg-red-400 cursor-not-allowed"}`}
+                            onClick={handleDeleteUser}
+                            disabled={!isConfirmed || deleteModal.loading}
+                        >
+                            {deleteModal.loading ? (
+                                <div className="flex items-center">
+                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Удаление...
+                                </div>
+                            ) : "Удалить"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className="flex flex-col h-screen w-full bg-gray-50 dark:bg-gray-900">
@@ -541,7 +700,7 @@ function Users() {
                                                             </svg>
                                                         </button>
                                                         <button 
-                                                            onClick={() => confirmDelete(user.id, user.fullName)}
+                                                            onClick={() => confirmDelete(user)}
                                                             className={`p-1 rounded-full ${canDeleteUser(user) 
                                                                 ? 'text-red-500 hover:text-red-700 hover:bg-gray-100 dark:hover:bg-gray-700' 
                                                                 : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'}`}
@@ -621,49 +780,11 @@ function Users() {
             )}
 
             {deleteModal.isOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                            Подтверждение удаления
-                        </h3>
-                        <p className="text-gray-700 dark:text-gray-300 mb-6">
-                            Вы уверены, что хотите удалить пользователя <span className="font-semibold">{deleteModal.userName}</span>? 
-                            <br></br>
-                            Это действие невозможно отменить.
-                        </p>
-                        <div className="flex justify-end space-x-3">
-                            <button
-                                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors"
-                                onClick={cancelDelete}
-                                disabled={deleteModal.loading}
-                            >
-                                Отмена
-                            </button>
-                            <button
-                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors flex items-center"
-                                onClick={handleDeleteUser}
-                                disabled={deleteModal.loading}
-                            >
-                                {deleteModal.loading ? (
-                                    <>
-                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Удаление...
-                                    </>
-                                ) : (
-                                    <>
-                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                        Удалить
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <DeleteConfirmModal 
+                    deleteModal={deleteModal} 
+                    handleDeleteUser={handleDeleteUser} 
+                    cancelDelete={cancelDelete} 
+                />
             )}
 
             {editModal.isOpen && (
@@ -718,24 +839,43 @@ function Users() {
                                         required
                                     />
                                 </div>
+                                {/* Выбор роли с проверкой доступа для менеджеров */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Роль
                                     </label>
-                                    <select
-                                        name="role_id"
-                                        defaultValue={editModal.userData?.role_id || ''}
-                                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                                        required
-                                    >
-                                        {Object.entries(roles).map(([id, role]) => (
-                                            <option key={id} value={id}>
-                                                {role === "admin" ? "Админ" : 
-                                                 role === "manager" ? "Менеджер" : 
-                                                 role === "user" ? "Пользователь" : role}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    {getCurrentUserRole() === 'admin' || 
+                                     getCurrentUserRole() === 'администратор' || 
+                                     getCurrentUserRole() === 'админ' ? (
+                                        <select
+                                            name="role_id"
+                                            defaultValue={editModal.userData?.role_id || ''}
+                                            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                            required
+                                        >
+                                            {Object.entries(roles).map(([id, role]) => (
+                                                <option key={id} value={id}>
+                                                    {role === "admin" ? "Админ" : 
+                                                     role === "manager" ? "Менеджер" : 
+                                                     role === "user" ? "Пользователь" : role}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <>
+                                            <input 
+                                                type="hidden" 
+                                                name="role_id" 
+                                                value={editModal.userData?.role_id || ''} 
+                                            />
+                                            <div className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400">
+                                                {roles[editModal.userData?.role_id] === "admin" ? "Админ" : 
+                                                 roles[editModal.userData?.role_id] === "manager" ? "Менеджер" : 
+                                                 roles[editModal.userData?.role_id] === "user" ? "Пользователь" : 
+                                                 roles[editModal.userData?.role_id] || "Неизвестная роль"}
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="inline-flex relative items-center cursor-pointer">
