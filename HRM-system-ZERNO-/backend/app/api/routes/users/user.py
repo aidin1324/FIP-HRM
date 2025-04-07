@@ -102,3 +102,4 @@ async def delete_user(
 ) -> dict:
     await user_service.delete_user(user_id)
     return {"status": "User deleted successfully"}
+

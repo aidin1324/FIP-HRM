@@ -8,3 +8,4 @@ from .public.rating import Rating
 from .public.role import Role
 from .public .user import User
 from .public.registration_request import RegistrationRequest
+from .public.password_reset import PasswordReset

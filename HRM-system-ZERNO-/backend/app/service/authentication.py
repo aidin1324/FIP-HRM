@@ -1,8 +1,15 @@
+from datetime import datetime, timedelta
+import secrets
+import string
 from fastapi import HTTPException
+
+from app.repository.public.password_reset import PasswordResetRepository
+from app.schema.users.reset_password import PasswordResetConfirm, PasswordResetRequest
+from app.service.public.password_reset import EmailService
 from .public.user import UserService
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .utils.utils import create_access_token, verify_password, jwt_decode
+from .utils.utils import create_access_token, verify_password, jwt_decode, pwd_context
 from app.model import User
 from app.schema.authentication import TokenResponse
 from app.service.public.role import RoleService
@@ -78,6 +85,81 @@ class AuthenticationService:
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
     
+    
+    async def generate_password_reset_token(self, request: PasswordResetRequest):
+        """
+        Generate a password reset token and send email
+        
+        Args:
+            request (PasswordResetRequest): Email for password reset
+        """
+        try:
+            user = await self.user_service.get_user_by_email(request.email)
+            if not user:
+                # Для безопасности не сообщаем что пользователь не найден
+                return {"message": "Если email зарегистрирован, инструкции по сбросу пароля отправлены"}
+            
+            # Генерация токена
+            alphabet = string.ascii_letters + string.digits
+            token = ''.join(secrets.choice(alphabet) for _ in range(64))
+            
+            # Срок действия токена - 1 час
+            expires_at = datetime.utcnow() + timedelta(hours=1)
+            
+            # Создаем репозиторий для работы с токенами сброса пароля
+            reset_repo = PasswordResetRepository(self.session)
+            
+            # Сохраняем токен в базе данных
+            await reset_repo.create_reset_token(user.id, token, expires_at)
+            
+            # Отправляем email
+            await EmailService.send_password_reset_email(
+                user.email, 
+                token, 
+                f"{user.first_name} {user.second_name}"
+            )
+            
+            return {"message": "Если email зарегистрирован, инструкции по сбросу пароля отправлены"}
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+    
+    async def reset_password(self, request: PasswordResetConfirm):
+        """
+        Reset password using token
+        
+        Args:
+            request (PasswordResetConfirm): Token and new password
+        """
+        try:
+            reset_repo = PasswordResetRepository(self.session)
+            
+            # Получаем токен из базы данных
+            reset_token = await reset_repo.get_reset_token(request.token)
+            
+            if not reset_token:
+                raise HTTPException(status_code=400, detail="Недействительный токен сброса пароля")
+            
+            if reset_token.expires_at < datetime.utcnow():
+                # Удаляем просроченный токен
+                await reset_repo.delete_token(request.token)
+                raise HTTPException(status_code=400, detail="Срок действия токена истек")
+            
+            # Получаем пользователя
+            user = await self.user_service.get_user_by_id(reset_token.user_id)
+            
+            # Хешируем новый пароль
+            hashed_password = pwd_context.hash(request.new_password)
+            
+            # Обновляем пароль
+            await self.user_service.update_password(user.id, hashed_password)
+            
+            # Удаляем использованный токен
+            await reset_repo.delete_token(request.token)
+            
+            return {"message": "Ваш пароль успешно обновлен"}
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        
     async def get_user_role(self, token: str):
         """
         get the role of the user

@@ -9,7 +9,7 @@ from app.api.routes.main import router as api_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # on startup
-    await create_all()
+    # await create_all()
     try:
         yield
     finally:
