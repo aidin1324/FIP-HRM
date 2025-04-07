@@ -331,6 +331,10 @@ function Requests() {
           </div>
         )}
 
+        {!loading && hasRequests && (
+          <div className="h-36 md:h-24"></div>
+        )}
+
         {!loading && !hasRequests && (
           <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
             <svg 
