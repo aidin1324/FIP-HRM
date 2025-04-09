@@ -1,117 +1,156 @@
-// src/contexts/AuthContext.jsx
-import React, { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import * as jwt from 'jwt-decode';
-import { prefetchCommonData } from '../services/apiService';
-
-export const AuthContext = createContext();
+import { jwtDecode } from 'jwt-decode';
+import { apiClient } from '../services/apiClient';
 
 export const validateToken = (token) => {
-  if (!token || typeof token !== 'string') return false;
-  
   try {
-    const decoded = jwt.jwtDecode(token);
-
-    if (!decoded.id || !decoded.exp) return false;
-
-    if (decoded.exp < Date.now() / 1000) return false;
+    if (!token) return false;
     
-    return true;
-  } catch {
+    const decoded = jwtDecode(token);
+    // Проверка срока действия токена
+    return decoded.exp * 1000 > Date.now();
+  } catch (error) {
+    console.error('Ошибка при проверке токена:', error);
     return false;
   }
 };
 
+export const AuthContext = createContext();
+
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({
     access_token: null,
+    refresh_token: null,
     user: null,
   });
-
   const [loading, setLoading] = useState(true);
 
-  const isAccessTokenExpired = (token) => {
-    try {
-      const { exp } = jwt.jwtDecode(token);
-      return exp < Date.now() / 1000;
-    } catch (e) {
-      return true;
-    }
-  };
-
   useEffect(() => {
-    const initializeAuth = () => {
-      const access_token = Cookies.get('access_token');
+    const initAuth = async () => {
+      const accessToken = Cookies.get('access_token');
+      const refreshToken = Cookies.get('refresh_token');
 
-      if (access_token && typeof access_token === 'string' && !isAccessTokenExpired(access_token)) {
+      if (accessToken) {
         try {
-          const decoded = jwt.jwtDecode(access_token);
-          setAuth({
-            access_token,
-            user: {
-              id: decoded.id,
-              email: decoded.email,
-              roles: decoded.roles || [decoded.role] 
+          const decoded = jwtDecode(accessToken);
+
+          if (decoded.exp * 1000 > Date.now()) {
+            setAuth({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+              user: {
+                id: decoded.id,
+                email: decoded.email,
+                roles: Array.isArray(decoded.roles) ? decoded.roles : [decoded.role],
+              },
+            });
+          } else {
+            if (refreshToken) {
+              await refreshAccessToken(refreshToken);
+            } else {
+              logout();
             }
-          });
+          }
         } catch (error) {
-          console.error('Ошибка при декодировании токена:', error);
+          console.error('Ошибка при проверке токена:', error);
+          logout();
         }
       }
+      
       setLoading(false);
     };
 
-    initializeAuth();
+    initAuth();
   }, []);
 
-  const login = async (access_token) => {
-    if (!validateToken(access_token)) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Недействительный токен');
-      }
-      return;
-    }
-
-    Cookies.set('access_token', access_token, { expires: 7, secure: true, sameSite: 'strict' });
+  const refreshAccessToken = async (refreshToken) => {
     try {
-      const decoded = jwt.jwtDecode(access_token);
+      const response = await apiClient.post('/auth/refresh', { refresh_token: refreshToken });
       
-      // Устанавливаем данные пользователя
-      setAuth({
-        access_token,
-        user: {
-          id: decoded.id,
-          email: decoded.email,
-          roles: decoded.roles || [decoded.role],
-        },
-      });
+      if (response && response.access_token) {
+        const decoded = jwtDecode(response.access_token);
 
-      // Предварительная загрузка данных при логине
-      try {
-        await prefetchCommonData(access_token);
-      } catch (err) {
-        console.warn('Error prefetching data:', err);
-        // Продолжаем несмотря на ошибку предзагрузки
+        Cookies.set('access_token', response.access_token, { 
+          expires: 1,
+          secure: true,
+          sameSite: 'strict'
+        });
+        
+        if (response.refresh_token) {
+          Cookies.set('refresh_token', response.refresh_token, { 
+            expires: 7,
+            secure: true,
+            sameSite: 'strict'
+          });
+        }
+        
+        setAuth({
+          access_token: response.access_token,
+          refresh_token: response.refresh_token || refreshToken,
+          user: {
+            id: decoded.id,
+            email: decoded.email,
+            roles: Array.isArray(decoded.roles) ? decoded.roles : [decoded.role],
+          },
+        });
+        
+        return true;
       }
       
-      return true;
+      return false;
     } catch (error) {
-      console.error('Ошибка при декодировании токена:', error);
+      console.error('Ошибка при обновлении токена:', error);
       logout();
       return false;
     }
   };
 
+  const login = async (accessToken, refreshToken) => {
+    try {
+      const decoded = jwtDecode(accessToken);
+
+      Cookies.set('access_token', accessToken, { 
+        expires: 1, 
+        secure: true,
+        sameSite: 'strict',
+      });
+      
+      if (refreshToken) {
+        Cookies.set('refresh_token', refreshToken, { 
+          expires: 7,
+          secure: true,
+          sameSite: 'strict'
+        });
+      }
+      
+      setAuth({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        user: {
+          id: decoded.id,
+          email: decoded.email,
+          roles: Array.isArray(decoded.roles) ? decoded.roles : [decoded.role],
+        },
+      });
+    } catch (error) {
+      console.error('Ошибка при входе:', error);
+      throw error;
+    }
+  };
+
   const logout = () => {
     Cookies.remove('access_token');
+    Cookies.remove('refresh_token');
     setAuth({
       access_token: null,
+      refresh_token: null,
       user: null,
     });
   };
 
   return (
-    <AuthContext.Provider value={{ auth, login, logout, loading }}>
+    <AuthContext.Provider value={{ auth, login, logout, loading, refreshAccessToken }}>
       {children}
     </AuthContext.Provider>
   );

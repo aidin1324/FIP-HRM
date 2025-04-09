@@ -1,6 +1,11 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { get_roles_path } from '../api_endpoints';
-export const RoleContext = createContext();
+
+export const RoleContext = createContext({
+  roles: {},
+  loading: true,
+  error: null
+});
 
 export const RoleProvider = ({ children }) => {
     const [roles, setRoles] = useState({});

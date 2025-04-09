@@ -1,124 +1,131 @@
-import axios from 'axios';
+import Cookies from 'js-cookie';
 
-const cacheManager = {
-  storage: new Map(), 
-  get(key) {
-    if (!this.storage.has(key)) return null;
-    
-    const item = this.storage.get(key);
-    if (item.expires && item.expires < Date.now()) {
-      this.storage.delete(key);
-      return null;
-    }
-    return item.data;
-  },
-
-  set(key, data, maxAge) {
-    this.storage.set(key, {
-      data,
-      expires: maxAge ? Date.now() + maxAge : null
-    });
-
-    if (this.storage.size > 100) this.cleanup();
-  },
-
-  cleanup() {
-    const MAX_CACHE_SIZE = 15 * 1024 * 1024; 
-    if (this.getSize() > MAX_CACHE_SIZE) {
-      this.clear();
-      return;
-    }
-    const now = Date.now();
-    for (const [key, value] of this.storage.entries()) {
-      if (value.expires && value.expires < now) {
-        this.storage.delete(key);
-      }
-    }
-  },
-  
-  remove(key) {
-    this.storage.delete(key);
-  },
-
-  clear() {
-    this.storage.clear();
-  },
-
-  getSize() {
-    let size = 0;
-    for (const [_, value] of this.storage.entries()) {
-      size += JSON.stringify(value.data).length;
-    }
-    return size;
+export class ApiClient {
+  constructor(baseURL) {
+    this.baseURL = baseURL;
   }
-};
 
-const client = axios.create({
-  baseURL: process.env.NODE_ENV === 'production' 
-    ? 'https://api.your-production-domain.com' 
-    : 'http://localhost:8000',
-  timeout: 15000, 
-  headers: {
-    'Content-Type': 'application/json',
-  }
-});
-
-client.interceptors.request.use(
-  config => {
+  async fetchCsrfToken() {
     try {
-      const auth = localStorage.getItem('auth');
-      if (auth) {
-        const token = JSON.parse(auth).access_token;
-        if (token) {
-          config.headers['Authorization'] = `Bearer ${token}`;
-        }
+      const response = await fetch(`${this.baseURL}/auth/csrf-token`, {
+        credentials: 'include' 
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch CSRF token');
       }
-    } catch (e) {
-      console.warn('Ошибка при добавлении токена:', e);
-    }
-
-    config.headers['Accept-Encoding'] = 'gzip, deflate, br';
-    
-    return config;
-  },
-  error => Promise.reject(error)
-);
-
-client.interceptors.response.use(
-  response => {
-    if (response.config.method === 'get' && response.config.cache !== false) {
-      const cacheKey = `${response.config.url}|${JSON.stringify(response.config.params || {})}`;
-      const maxAge = response.config.cacheMaxAge || 60000;
-
-      cacheManager.set(cacheKey, response.data, maxAge);
-    }
-    
-    return response;
-  },
-  error => {
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem('auth');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
-
-const originalGet = client.get;
-client.get = function(url, config = {}) {
-  if (config.cache !== false) {
-    const cacheKey = `${url}|${JSON.stringify(config.params || {})}`;
-    const cachedData = cacheManager.get(cacheKey);
-    
-    if (cachedData) {
-      return Promise.resolve({ data: cachedData, status: 200, cached: true });
+      
+      const data = await response.json();
+      return data.csrf_token;
+    } catch (error) {
+      console.error('Error fetching CSRF token:', error);
+      throw error;
     }
   }
 
-  return originalGet(url, config);
+  async request(endpoint, options = {}) {
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method)) {
+      try {
+        const csrfToken = await this.fetchCsrfToken();
+        options.headers = {
+          ...options.headers,
+          'X-CSRF-Token': csrfToken
+        };
+      } catch (error) {
+        console.error('Не удалось получить CSRF токен:', error);
+      }
+    }
+
+    const url = `${this.baseURL}${endpoint}`;
+
+    const token = Cookies.get('access_token');
+
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const config = {
+      ...options,
+      headers,
+    };
+    
+    try {
+      const response = await fetch(url, config);
+
+      if (response.status === 401) {
+        Cookies.remove('access_token');
+        window.location.href = '/login';
+        return Promise.reject(new Error('Сессия истекла. Пожалуйста, войдите снова.'));
+      }
+
+      if (!response.ok) {
+        const contentType = response.headers.get('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+          const error = await response.json();
+          return Promise.reject(new Error(error.message || 'Произошла ошибка'));
+        }
+        return Promise.reject(new Error(`HTTP ошибка! Статус: ${response.status}`));
+      }
+
+      if (response.status === 204) {
+        return null;
+      }
+
+      const contentType = response.headers.get('Content-Type');
+      if (contentType && contentType.includes('application/json')) {
+        return response.json();
+      }
+      
+      return response.text();
+    } catch (error) {
+      console.error('API запрос не выполнен:', error);
+      throw error;
+    }
+  }
+
+  get(endpoint, options = {}) {
+    return this.request(endpoint, { ...options, method: 'GET' });
+  }
+  
+  post(endpoint, data, options = {}) {
+    return this.request(endpoint, {
+      ...options,
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+  
+  put(endpoint, data, options = {}) {
+    return this.request(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+  
+  patch(endpoint, data, options = {}) {
+    return this.request(endpoint, {
+      ...options,
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+  
+  delete(endpoint, options = {}) {
+    return this.request(endpoint, { ...options, method: 'DELETE' });
+  }
+}
+
+const ENV = process.env.NODE_ENV || 'development';
+const API_CONFIG = {
+  development: { baseURL: "http://localhost:8000" },
+  production: { baseURL: "https://api.your-production-domain.com" },
+  test: { baseURL: "http://localhost:8000" },
 };
 
-client.clearCache = cacheManager.clear.bind(cacheManager);
-client.removeFromCache = cacheManager.remove.bind(cacheManager);
-
-export default client;
+export const apiClient = new ApiClient(API_CONFIG[ENV].baseURL);

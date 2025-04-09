@@ -5,7 +5,20 @@ import { get_user_path } from '../api_endpoints';
 import API from '../api_endpoints';
 
 function Users() {
-    const { roles, loading: rolesLoading, error: rolesError } = useContext(RoleContext);
+    const roleContext = useContext(RoleContext);
+
+    if (!roleContext) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <div className="text-center p-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500 mx-auto mb-4"></div>
+                    <p className="text-gray-600 dark:text-gray-300">Загрузка данных о ролях...</p>
+                </div>
+            </div>
+        );
+    }
+    
+    const { roles, loading: rolesLoading, error: rolesError } = roleContext;
     const { auth } = useContext(AuthContext); 
     const [users, setUsers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');

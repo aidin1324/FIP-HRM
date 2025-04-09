@@ -2,10 +2,12 @@
 import React, { useContext, useMemo } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { AuthContext, validateToken } from '../contexts/AuthContext';
+import { RoleContext } from '../contexts/RoleContext';
 import Loading from './Loading';
 
 const PrivateRoute = ({ children, role = [] }) => {
-  const { auth, loading } = useContext(AuthContext);
+  const { auth, loading: authLoading } = useContext(AuthContext);
+  const { loading: rolesLoading } = useContext(RoleContext) || { loading: false };
   const location = useLocation();
   const requiredRoles = Array.isArray(role) ? role : [role];
 
@@ -29,7 +31,7 @@ const PrivateRoute = ({ children, role = [] }) => {
     }
   }, [auth.access_token]);
 
-  if (loading) {
+  if (authLoading || rolesLoading) {
     return <Loading />;
   }
 
