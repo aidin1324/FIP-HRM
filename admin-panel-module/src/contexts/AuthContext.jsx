@@ -2,6 +2,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import * as jwt from 'jwt-decode';
+import { prefetchCommonData } from '../services/apiService';
 
 export const AuthContext = createContext();
 
