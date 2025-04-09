@@ -2,21 +2,16 @@ import React, { useState, useCallback, useMemo, memo, lazy, Suspense } from 'rea
 import ThemeToggle from '../components/ThemeToggle';
 import UserMenu from '../components/DropdownProfile';
 
-// Используем ленивую загрузку для тяжелых компонентов
-const Help = lazy(() => import('../components/DropdownHelp'));
-
-// Простой компонент-заглушка для Suspense
 const DropdownPlaceholder = () => (
   <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700/50 animate-pulse"></div>
 );
 
-// Мемоизированный Header компонент
 const Header = memo(function Header({
   sidebarOpen,
   setSidebarOpen,
   variant = 'default',
 }) {
-  // Мемоизация классов для предотвращения повторных вычислений
+
   const headerClasses = useMemo(() => {
     const baseClasses = "sticky top-0 before:absolute before:inset-0 before:backdrop-blur-md max-lg:before:bg-white/90 dark:max-lg:before:bg-gray-800/90 before:-z-10 z-30";
     
@@ -41,15 +36,11 @@ const Header = memo(function Header({
       ? 'flex items-center justify-between h-16' 
       : 'flex items-center justify-between h-16 lg:border-b border-gray-200 dark:border-gray-700/60';
   }, [variant]);
-  
-  // Мемоизированный обработчик для кнопки сайдбара
+
   const handleSidebarToggle = useCallback((e) => { 
     e.stopPropagation(); 
     setSidebarOpen(!sidebarOpen); 
   }, [sidebarOpen, setSidebarOpen]);
-  
-  // Определяем, какие компоненты показывать
-  const showHelp = true; // В реальном приложении может зависеть от настроек или прав пользователя
 
   return (
     <header className={headerClasses}>
@@ -75,11 +66,6 @@ const Header = memo(function Header({
 
           {/* Header: Right side */}
           <div className="flex items-center space-x-3">
-            {showHelp && (
-              <Suspense fallback={<DropdownPlaceholder />}>
-                <Help align="right" />
-              </Suspense>
-            )}
             <ThemeToggle />
             {/*  Divider */}
             <hr className="w-px h-6 bg-gray-200 dark:bg-gray-700/60 border-none" />

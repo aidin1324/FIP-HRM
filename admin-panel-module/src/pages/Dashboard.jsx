@@ -126,6 +126,9 @@ const Dashboard = React.memo(() => {
             </div>
 
             {renderContent()}
+
+            {/* Добавляем отступ внизу */}
+            <div className="h-36"></div>
           </div>
         </main>
       </div>

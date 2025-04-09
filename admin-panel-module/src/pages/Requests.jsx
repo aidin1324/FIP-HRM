@@ -29,7 +29,7 @@ const RequestCard = React.memo(({ request, onAccept, onDecline, isLoading }) => 
         <div className="flex gap-2 w-full md:w-auto">
           <button
             onClick={() => onAccept(request.id)}
-            className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-md hover:from-green-600 hover:to-green-700 transition-all duration-200 text-sm flex-1 md:flex-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            className="px-3 py-1.5 bg-violet-600 text-white rounded-md hover:bg-violet-700 transition-all duration-200 text-sm flex-1 md:flex-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-sm"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -46,7 +46,7 @@ const RequestCard = React.memo(({ request, onAccept, onDecline, isLoading }) => 
           </button>
           <button
             onClick={() => onDecline(request.id)}
-            className="px-3 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-md hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm flex-1 md:flex-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            className="px-3 py-1.5 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-all duration-200 text-sm flex-1 md:flex-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-sm"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -255,32 +255,46 @@ function Requests() {
 
       {notification.show && (
         <div 
-          className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 max-w-sm w-full"
+          className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 max-w-sm w-full animate-fade-in"
         >
           <div 
-            className={`mx-4 rounded-md shadow-sm ${
+            className={`mx-4 rounded-lg shadow-lg border ${
               notification.type === 'success' 
-                ? 'bg-green-100 dark:bg-green-800' 
-                : 'bg-red-100 dark:bg-red-800'
+                ? 'bg-white dark:bg-gray-800 border-violet-200 dark:border-violet-800' 
+                : 'bg-white dark:bg-gray-800 border-red-200 dark:border-red-800'
             }`}
           >
-            <div className="flex items-center px-4 py-3">
-              {notification.type === 'success' ? (
-                <svg className="w-5 h-5 text-green-600 dark:text-green-200 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5 text-red-600 dark:text-red-200 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex items-center">
+                {notification.type === 'success' ? (
+                  <div className="mr-3 flex-shrink-0 w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                ) : (
+                  <div className="mr-3 flex-shrink-0 w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                )}
+                <p className={`text-sm font-medium ${
+                  notification.type === 'success' 
+                    ? 'text-gray-800 dark:text-gray-100' 
+                    : 'text-gray-800 dark:text-gray-100'
+                }`}>
+                  {notification.message}
+                </p>
+              </div>
+              <button 
+                onClick={() => setNotification(prev => ({ ...prev, show: false }))}
+                className="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              )}
-              <p className={`text-sm font-medium ${
-                notification.type === 'success' 
-                  ? 'text-green-800 dark:text-green-100' 
-                  : 'text-red-800 dark:text-red-100'
-              }`}>
-                {notification.message}
-              </p>
+              </button>
             </div>
           </div>
         </div>
