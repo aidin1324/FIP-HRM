@@ -1,4 +1,3 @@
-// filepath: /src/contexts/RoleContext.jsx
 import React, { createContext, useState, useEffect } from 'react';
 import { get_roles_path } from '../api_endpoints';
 export const RoleContext = createContext();
