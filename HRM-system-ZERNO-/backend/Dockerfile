@@ -30,4 +30,4 @@ COPY . .
 EXPOSE 8000
 
 # Выполняем миграции и запускаем приложение через Poetry
-CMD ["bash", "-c", "cd app && poetry run alembic upgrade head && poetry run uvicorn main:app --host 0.0.0.0 --port 8000"]
+CMD ["bash", "-c", "cd app && poetry run alembic upgrade head && poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000"]
