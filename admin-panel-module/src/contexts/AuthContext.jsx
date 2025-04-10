@@ -16,7 +16,17 @@ export const validateToken = (token) => {
   }
 };
 
-export const AuthContext = createContext();
+export const AuthContext = createContext({
+  auth: {
+    access_token: null,
+    refresh_token: null,
+    user: null,
+  },
+  loading: true,
+  login: () => Promise.resolve(),
+  logout: () => {},
+  refreshAccessToken: () => Promise.resolve(false)
+});
 
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({

@@ -6,20 +6,21 @@ import API from '../api_endpoints';
 
 function Users() {
     const roleContext = useContext(RoleContext);
+    const authContext = useContext(AuthContext);
 
-    if (!roleContext) {
+    if (!roleContext || !authContext) {
         return (
             <div className="flex items-center justify-center h-full">
                 <div className="text-center p-8">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500 mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-300">Загрузка данных о ролях...</p>
+                    <p className="text-gray-600 dark:text-gray-300">Загрузка данных...</p>
                 </div>
             </div>
         );
     }
     
     const { roles, loading: rolesLoading, error: rolesError } = roleContext;
-    const { auth } = useContext(AuthContext); 
+    const { auth } = authContext;
     const [users, setUsers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedRole, setSelectedRole] = useState('');

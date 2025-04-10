@@ -2,11 +2,7 @@ import React, { useEffect, Suspense } from "react";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { FilterProvider } from "./contexts/FilterContext";
-
-// Добавьте импорт стилей Ant Design здесь
-import "antd/dist/reset.css"; // Для Ant Design v5+
-// или используйте это для более старых версий:
-// import "antd/dist/antd.css"; // Для Ant Design v4
+import { RoleProvider } from "./contexts/RoleContext";
 
 import "./css/style.css";
 import "./charts/ChartjsConfig";
@@ -42,81 +38,83 @@ function App() {
 
   return (
     <AuthProvider>
-      <FilterProvider>
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            {/* Публичные маршруты */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/after-register" element={<AfterRegister />} />
-            <Route path="/unauthorized" element={<Unauthorized />} />
-            <Route path="/404" element={<PageNotFound />} />
+      <RoleProvider>
+        <FilterProvider>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              {/* Публичные маршруты */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/after-register" element={<AfterRegister />} />
+              <Route path="/unauthorized" element={<Unauthorized />} />
+              <Route path="/404" element={<PageNotFound />} />
 
-            {/* Маршруты для сброса пароля */}
-            <Route path="/reset-password" element={<ResetPasswordByToken />} /> {/* Для сброса пароля по токену */}
-            <Route path="/forgot-password" element={<ResetPassword />} /> {/* Для запроса сброса пароля */}
-            
-            {/* Защищенные маршруты внутри Layout */}
-            <Route path="/" element={<Layout />}>
-              {/* Редирект с главной на дашборд */}
-              <Route index element={<Navigate to="/dashboard" replace />} />
+              {/* Маршруты для сброса пароля */}
+              <Route path="/reset-password" element={<ResetPasswordByToken />} /> {/* Для сброса пароля по токену */}
+              <Route path="/forgot-password" element={<ResetPassword />} /> {/* Для запроса сброса пароля */}
               
-              {/* Маршруты для администраторов и менеджеров */}
+              {/* Защищенные маршруты внутри Layout */}
+              <Route path="/" element={<Layout />}>
+                {/* Редирект с главной на дашборд */}
+              <Route index element={<Navigate to="/dashboard" replace />} />
+                
+                {/* Маршруты для администраторов и менеджеров */}
               <Route path="dashboard" element={
                 <PrivateRoute role={["admin", "manager"]}>
                   <Dashboard />
                 </PrivateRoute>
               } />
               
-              <Route path="users" element={
-                <PrivateRoute role={["admin", "manager"]}>
-                  <Users />
-                </PrivateRoute>
-              } />
-              
-              <Route path="comments" element={
-                <PrivateRoute role={["admin", "manager"]}>
-                  <Comments />
-                </PrivateRoute>
-              } />
-              
-              <Route path="requests" element={
-                <PrivateRoute role={["admin", "manager"]}>
-                  <Requests />
-                </PrivateRoute>
-              } />
-              
-              <Route path="contacts" element={
-                <PrivateRoute role={["admin", "manager"]}>
-                  <Contacts />
-                </PrivateRoute>
-              } />
-              
-              <Route path="settings/telegram" element={
-                <PrivateRoute role={["admin"]}>
-                  <TelegramConfig />
-                </PrivateRoute>
-              } />
-              
-              {/* Маршруты для всех авторизованных пользователей */}
-              <Route path="profile/:id" element={
-                <PrivateRoute>
-                  <Profile />
-                </PrivateRoute>
-              } />
-              
-              <Route path="my-profile" element={
-                <PrivateRoute>
-                  <MyProfile />
-                </PrivateRoute>
-              } />
-              
-              {/* Обработка неизвестных маршрутов */}
-              <Route path="*" element={<Navigate to="/404" replace />} />
-            </Route>
-          </Routes>
-        </Suspense>
-      </FilterProvider>
+                <Route path="users" element={
+                  <PrivateRoute role={["admin", "manager"]}>
+                    <Users />
+                  </PrivateRoute>
+                } />
+                
+                <Route path="comments" element={
+                  <PrivateRoute role={["admin", "manager"]}>
+                    <Comments />
+                  </PrivateRoute>
+                } />
+                
+                <Route path="requests" element={
+                  <PrivateRoute role={["admin", "manager"]}>
+                    <Requests />
+                  </PrivateRoute>
+                } />
+                
+                <Route path="contacts" element={
+                  <PrivateRoute role={["admin", "manager"]}>
+                    <Contacts />
+                  </PrivateRoute>
+                } />
+                
+                <Route path="settings/telegram" element={
+                  <PrivateRoute role={["admin"]}>
+                    <TelegramConfig />
+                  </PrivateRoute>
+                } />
+                
+                {/* Маршруты для всех авторизованных пользователей */}
+                <Route path="profile/:id" element={
+                  <PrivateRoute>
+                    <Profile />
+                  </PrivateRoute>
+                } />
+                
+                <Route path="my-profile" element={
+                  <PrivateRoute>
+                    <MyProfile />
+                  </PrivateRoute>
+                } />
+                
+                {/* Обработка неизвестных маршрутов */}
+                <Route path="*" element={<Navigate to="/404" replace />} />
+              </Route>
+            </Routes>
+          </Suspense>
+        </FilterProvider>
+      </RoleProvider>
     </AuthProvider>
   );
 }
