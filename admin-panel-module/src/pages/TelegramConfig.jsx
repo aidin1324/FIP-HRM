@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useThemeProvider } from "../utils/ThemeContext";
-import { apiClient } from "../services/apiClient";
-import Cookies from 'js-cookie';  // Добавьте этот импорт
+import Cookies from 'js-cookie'; 
 
-// Используем относительные пути вместо полных URL
 const TELEGRAM_CONFIG_PATH = "/config_json/config/telegram_chat_ids";
 
-// Добавьте функцию для выполнения запросов без CSRF
 const makeApiRequest = async (endpoint, method = 'GET', data = null) => {
   try {
     const url = `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}${endpoint}`;
@@ -34,7 +31,6 @@ const makeApiRequest = async (endpoint, method = 'GET', data = null) => {
 };
 
 const TelegramConfig = () => {
-  // Состояние и контексты
   const { currentTheme } = useThemeProvider();
   const isDarkMode = currentTheme === "dark";
 
@@ -46,11 +42,9 @@ const TelegramConfig = () => {
     type: "",
   });
 
-  // Состояние формы добавления
   const [newChatId, setNewChatId] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
 
-  // Состояние модального окна удаления
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
     chatId: null,
@@ -58,7 +52,6 @@ const TelegramConfig = () => {
     loading: false,
   });
 
-  // Загрузка данных о чатах
   const fetchChatIds = async () => {
     setLoading(true);
     try {
@@ -72,7 +65,6 @@ const TelegramConfig = () => {
     }
   };
 
-  // Отображение уведомлений
   const showNotification = (message, type = "success") => {
     setNotification({ show: true, message, type });
     setTimeout(
@@ -81,19 +73,16 @@ const TelegramConfig = () => {
     );
   };
 
-  // Загрузка при монтировании
   useEffect(() => {
     fetchChatIds();
   }, []);
 
-  // Проверка валидации
   const validateChatId = (value) => {
     if (!value) return "ID чата обязателен";
     if (!/^-?\d+$/.test(value)) return "ID чата должен быть числом";
     return "";
   };
 
-  // Добавление нового чата
   const handleAddChatId = async (e) => {
     e.preventDefault();
 
@@ -118,9 +107,7 @@ const TelegramConfig = () => {
     }
   };
 
-  // Функция для открытия модального окна без блокировки прокрутки
   const openDeleteModal = (id, chatId) => {
-    // Убираем блокировку прокрутки при открытии модального окна
     setDeleteModal({
       isOpen: true,
       id: id,
@@ -129,7 +116,6 @@ const TelegramConfig = () => {
     });
   };
 
-  // Функция закрытия модального окна без управления прокруткой
   const closeDeleteModal = () => {
     setDeleteModal({
       isOpen: false,
@@ -139,7 +125,6 @@ const TelegramConfig = () => {
     });
   };
 
-  // Удаление чата
   const handleDeleteChatId = async () => {
     if (!deleteModal.id) return;
 
