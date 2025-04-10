@@ -14,7 +14,7 @@ const CardSkeleton = () => (
 );
 
 const Dashboard = React.memo(() => {
-  const { fetchAllFeedbacks, feedbackData, isLoading, setFilter } = useContext(FilterContext);
+  const { fetchAllFeedbacks, feedbackData, isLoading, setFilter, filter } = useContext(FilterContext);
   const [visibleCharts, setVisibleCharts] = useState({ chart1: false, chart2: false, chart3: false });
   const [dataLoaded, setDataLoaded] = useState(false);
 
@@ -119,10 +119,44 @@ const Dashboard = React.memo(() => {
       <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
         <main className="grow">
           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
-            <div className="sm:flex sm:justify-between sm:items-center mb-8">
-              <h1 className="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold mb-4 sm:mb-0">
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+              <h1 className="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold">
                 Дашборд
               </h1>
+              
+              <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm p-1.5 border border-gray-100 dark:border-gray-700">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 mr-3 pl-2">
+                  Сортировка:
+                </span>
+                <div className="flex bg-gray-100 dark:bg-gray-700/50 rounded-md">
+                  <button
+                    className={`px-4 py-2 text-sm font-medium rounded-md flex items-center transition-all duration-200 ${
+                      filter === "daily"
+                        ? "bg-gradient-to-r from-violet-500/90 to-violet-600/90 text-white shadow-md"
+                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600/50"
+                    }`}
+                    onClick={() => setFilter("daily")}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    По дням
+                  </button>
+                  <button
+                    className={`px-4 py-2 text-sm font-medium rounded-md flex items-center transition-all duration-200 ${
+                      filter === "monthly"
+                        ? "bg-gradient-to-r from-violet-500/90 to-violet-600/90 text-white shadow-md"
+                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600/50"
+                    }`}
+                    onClick={() => setFilter("monthly")}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                    </svg>
+                    По мес.
+                  </button>
+                </div>
+              </div>
             </div>
 
             {renderContent()}

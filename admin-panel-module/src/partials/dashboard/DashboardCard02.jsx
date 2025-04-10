@@ -54,9 +54,10 @@ const StatCard = memo(({
   bgColor, 
   titleColor, 
   title, 
-  children 
+  children,
+  className = '' 
 }) => (
-  <div className={`${bgColor} p-5 rounded-lg flex flex-col justify-between h-auto min-h-[110px]`}>
+  <div className={`${bgColor} p-5 rounded-lg flex flex-col justify-between h-auto min-h-[110px] ${className}`}>
     <div className={`text-sm font-semibold ${titleColor} uppercase mb-3`}>{title}</div>
     {children}
   </div>
@@ -184,32 +185,48 @@ function DashboardCard02() {
             {error}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 h-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
             <StatCard 
-              bgColor="bg-violet-50 dark:bg-violet-900/20" 
+              className="col-span-1 sm:col-span-2" 
+              bgColor="bg-gradient-to-br from-violet-50 to-blue-50 dark:from-violet-900/20 dark:to-blue-900/20" 
               titleColor="text-violet-600 dark:text-violet-300" 
-              title="Всего отзывов"
+              title="Статистика отзывов"
             >
-              <div className="flex items-end justify-center mt-auto">
-                <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.totalFeedbacks}</div>
-              </div>
-            </StatCard>
-
-            <StatCard 
-              bgColor="bg-blue-50 dark:bg-blue-900/20" 
-              titleColor="text-blue-600 dark:text-blue-300" 
-              title="Оставили контакты"
-            >
-              <div className="flex items-end justify-between mt-auto">
-                <div className="text-3xl font-bold text-gray-800 dark:text-gray-100">{stats.contactsLeft}</div>
-                <div className="text-sm text-blue-500 dark:text-blue-300">
-                  {stats.totalFeedbacks > 0 
-                    ? Math.round((stats.contactsLeft / stats.totalFeedbacks) * 100) 
-                    : 0}%
+              <div className="flex flex-col space-y-3 mt-auto">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Всего отзывов:</span>
+                  <span className="text-2xl font-bold text-gray-800 dark:text-gray-100">{stats.totalFeedbacks}</span>
+                </div>
+                
+                <div className="w-full h-px bg-gray-200 dark:bg-gray-700"></div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">С контактами:</span>
+                  <div className="flex items-center">
+                    <span className="text-2xl font-bold text-gray-800 dark:text-gray-100 mr-2">
+                      {stats.contactsLeft}
+                    </span>
+                    <span className="text-sm px-1.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300">
+                      {stats.totalFeedbacks > 0 
+                        ? Math.round((stats.contactsLeft / stats.totalFeedbacks) * 100) 
+                        : 0}%
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Прогресс-бар для визуализации */}
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-1">
+                  <div 
+                    className="bg-blue-500 h-1.5 rounded-full" 
+                    style={{ width: `${stats.totalFeedbacks > 0 
+                      ? Math.round((stats.contactsLeft / stats.totalFeedbacks) * 100) 
+                      : 0}%` }}
+                  ></div>
                 </div>
               </div>
             </StatCard>
 
+            {/* Остальные карточки остаются без изменений */}
             <StatCard 
               bgColor="bg-amber-50 dark:bg-amber-900/20" 
               titleColor="text-amber-600 dark:text-amber-300" 
