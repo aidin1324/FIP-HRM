@@ -55,36 +55,40 @@ export const FilterProvider = ({ children }) => {
   const fetchAllFeedbacks = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-
+    
+    const cachedData = localStorage.getItem('feedbackData');
+    const cachedTime = localStorage.getItem('feedbackDataTimestamp');
+    
+    // Устанавливаем 5 минут как время жизни кэша (300000 мс)
+    const CACHE_DURATION = 300000;
+    
+    if (cachedData && cachedTime && (Date.now() - Number(cachedTime)) < CACHE_DURATION) {
+      try {
+        const parsedData = JSON.parse(cachedData);
+        setFeedbackData(parsedData);
+        setIsLoading(false);
+        return parsedData;
+      } catch (e) {
+      }
+    }
+    
     try {
-      const { startDate, endDate } = getDateRangeFromPeriod(timePeriod);
-
-      let url = get_all_feedbacks;
-      const queryParams = [];
-
-      if (startDate) {
-        const formattedStartDate = formatDate(startDate);
-        queryParams.push(`start_date=${formattedStartDate}`);
-      }
-      if (endDate) {
-        const formattedEndDate = formatDate(endDate);
-        queryParams.push(`end_date=${formattedEndDate}`);
-      }
-
-      if (queryParams.length > 0) {
-        url += `?${queryParams.join("&")}`;
-      }
-      const response = await axios.get(url);
+      const response = await axios.get(get_all_feedbacks);
       setFeedbackData(response.data);
+      
+      localStorage.setItem('feedbackData', JSON.stringify(response.data));
+      localStorage.setItem('feedbackDataTimestamp', Date.now().toString());
+      
       return response.data;
-    } catch (err) {
-      setError("Не удалось загрузить данные");
+    } catch (error) {
+      setError('Не удалось загрузить данные');
+      console.error('Ошибка загрузки данных:', error);
       return [];
     } finally {
       setIsLoading(false);
     }
-  }, [timePeriod]);
-
+  }, []);
+  
   useEffect(() => {
     fetchAllFeedbacks();
   }, [timePeriod, fetchAllFeedbacks]);

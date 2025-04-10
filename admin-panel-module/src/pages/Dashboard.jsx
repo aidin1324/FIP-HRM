@@ -38,6 +38,26 @@ const Dashboard = React.memo(() => {
     loadData();
   }, [loadData]);
 
+  // Отображаем заглушки для чартов до загрузки данных
+  useEffect(() => {
+    // Предзагрузка при монтировании
+    loadData();
+    
+    // После начальной загрузки данных и рендеринга
+    // постепенно показываем чарты с задержкой
+    if (dataLoaded) {
+      const timer1 = setTimeout(() => setVisibleCharts(prev => ({...prev, chart1: true})), 100);
+      const timer2 = setTimeout(() => setVisibleCharts(prev => ({...prev, chart2: true})), 300);
+      const timer3 = setTimeout(() => setVisibleCharts(prev => ({...prev, chart3: true})), 500);
+      
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+      };
+    }
+  }, [loadData, dataLoaded]);
+
   useEffect(() => {
     const options = { root: null, rootMargin: "100px", threshold: 0.1 };
 
