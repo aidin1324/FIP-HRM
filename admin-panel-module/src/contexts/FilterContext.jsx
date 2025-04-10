@@ -74,12 +74,17 @@ export const FilterProvider = ({ children }) => {
     
     try {
       const response = await axios.get(get_all_feedbacks);
-      setFeedbackData(response.data);
       
-      localStorage.setItem('feedbackData', JSON.stringify(response.data));
-      localStorage.setItem('feedbackDataTimestamp', Date.now().toString());
-      
-      return response.data;
+      if (response && response.data) {
+        setFeedbackData(response.data);
+        
+        // Сохраняем в кэш
+        localStorage.setItem('feedbackData', JSON.stringify(response.data));
+        localStorage.setItem('feedbackDataTimestamp', Date.now().toString());
+        
+        return response.data;
+      }
+      throw new Error('Некорректные данные получены от сервера');
     } catch (error) {
       setError('Не удалось загрузить данные');
       console.error('Ошибка загрузки данных:', error);

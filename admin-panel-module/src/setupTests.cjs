@@ -45,6 +45,65 @@ Storage.prototype.setItem = jest.fn();
 Storage.prototype.removeItem = jest.fn();
 Storage.prototype.clear = jest.fn();
 
+// Правильный мок для localStorage
+let localStorageMock = (function() {
+  let store = {};
+  return {
+    getItem: jest.fn(key => store[key] || null),
+    setItem: jest.fn((key, value) => {
+      store[key] = String(value);
+    }),
+    removeItem: jest.fn(key => {
+      delete store[key];
+    }),
+    clear: jest.fn(() => {
+      store = {};
+    }),
+    length: 0,
+    key: jest.fn(() => null)
+  };
+})();
+
+// Переопределение localStorage
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+  writable: false
+});
+
+// Мок для IntersectionObserver
+class IntersectionObserverMock {
+  constructor(callback) {
+    this.callback = callback;
+    this.elements = new Set();
+    this.entries = [];
+  }
+
+  observe(element) {
+    this.elements.add(element);
+    // Имитируем пересечение элемента сразу
+    if (element && element.dataset) {
+      const entry = {
+        isIntersecting: true,
+        target: element,
+        dataset: element.dataset,
+        intersectionRatio: 1
+      };
+      this.callback([entry]);
+    }
+  }
+
+  unobserve(element) {
+    this.elements.delete(element);
+  }
+
+  disconnect() {
+    this.elements.clear();
+  }
+}
+
+// Установка мока IntersectionObserver
+global.IntersectionObserver = IntersectionObserverMock;
+
 // Добавляем полифилл для модульных тестов роутера
 window.matchMedia = window.matchMedia || (() => {
   return {
