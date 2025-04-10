@@ -1,20 +1,29 @@
-// src/components/PrivateRoute.jsx
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { AuthContext, validateToken } from '../contexts/AuthContext';
 import { RoleContext } from '../contexts/RoleContext';
 import Loading from './Loading';
 
-const PrivateRoute = ({ children, role = [] }) => {
-  const { auth, loading: authLoading } = useContext(AuthContext);
-  const { loading: rolesLoading } = useContext(RoleContext) || { loading: false };
+const PrivateRoute = ({ children, roles = [] }) => {
   const location = useLocation();
-  const requiredRoles = Array.isArray(role) ? role : [role];
+  const { auth, loading: authLoading } = useContext(AuthContext);
+  const { roles: userRoles, loading: rolesLoading } = useContext(RoleContext);
+  
+  const accessToken = auth?.access_token || null;
+
+
+  useEffect(() => {
+    if (accessToken) {
+      validateToken(accessToken);
+    }
+  }, [accessToken]);
+
+  const requiredRoles = Array.isArray(roles) ? roles : [roles];
 
   const decodedToken = useMemo(() => {
-    if (!auth.access_token) return null;
+    if (!accessToken) return null;
     try {
-      const base64Url = auth.access_token.split('.')[1];
+      const base64Url = accessToken.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(
         atob(base64)
@@ -29,20 +38,20 @@ const PrivateRoute = ({ children, role = [] }) => {
       }
       return null;
     }
-  }, [auth.access_token]);
+  }, [accessToken]);
 
   if (authLoading || rolesLoading) {
     return <Loading />;
   }
 
-  if (!auth.access_token || !validateToken(auth.access_token)) { 
+  if (!accessToken || !validateToken(accessToken)) { 
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   const userRoleFromToken = decodedToken?.role || '';
   const userRolesFromAuth = auth.user?.roles || [];
 
-  const userRoles = [...new Set([
+  const userRolesList = [...new Set([
     ...(Array.isArray(userRolesFromAuth) ? userRolesFromAuth : [userRolesFromAuth]),
     userRoleFromToken
   ])].filter(Boolean); 
@@ -53,7 +62,7 @@ const PrivateRoute = ({ children, role = [] }) => {
     'менеджер': 'manager'
   };
 
-  const normalizedUserRoles = userRoles.map(role => roleMapping[role] || role);
+  const normalizedUserRoles = userRolesList.map(role => roleMapping[role] || role);
 
   if (normalizedUserRoles.includes('waiter')) {
     if (location.pathname !== '/my-profile' && !location.pathname.startsWith('/api/')) {
