@@ -3,6 +3,11 @@ import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { FilterProvider } from "./contexts/FilterContext";
 
+// Добавьте импорт стилей Ant Design здесь
+import "antd/dist/reset.css"; // Для Ant Design v5+
+// или используйте это для более старых версий:
+// import "antd/dist/antd.css"; // Для Ant Design v4
+
 import "./css/style.css";
 import "./charts/ChartjsConfig";
 
@@ -24,6 +29,7 @@ const PageNotFound = React.lazy(() => import("./pages/404"));
 const MyProfile = React.lazy(() => import("./pages/MyProfile"));
 const ResetPassword = React.lazy(() => import("./pages/ResetPassword"));
 const ResetPasswordByToken = React.lazy(() => import("./pages/ResetPasswordByToken"));
+const TelegramConfig = React.lazy(() => import("./pages/TelegramConfig"));
 
 function App() {
   const location = useLocation();
@@ -83,6 +89,12 @@ function App() {
               <Route path="contacts" element={
                 <PrivateRoute role={["admin", "manager"]}>
                   <Contacts />
+                </PrivateRoute>
+              } />
+              
+              <Route path="settings/telegram" element={
+                <PrivateRoute role={["admin"]}>
+                  <TelegramConfig />
                 </PrivateRoute>
               } />
               

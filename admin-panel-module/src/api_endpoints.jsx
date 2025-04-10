@@ -74,6 +74,13 @@ const API = {
     getUserStats: (id) => buildUrl(`/stats/get_stats/${id}`),
     getUserTagsStats: (id) => buildUrl(`/stats/get_tags_stats/${id}`),
   },
+
+  telegramConfig: {
+    getAll: buildUrl(`/config_json/config/telegram_chat_ids`),
+    create: buildUrl(`/config_json/config/telegram_chat_ids`),
+    update: (id) => buildUrl(`/config_json/config/telegram_chat_ids/${id}`),
+    delete: (id) => buildUrl(`/config_json/config/telegram_chat_ids/${id}`),
+  },
 };
 
 export const CACHE_CONFIG = {
@@ -108,5 +115,11 @@ export const get_stats_dashboad_path = API.statistics.getUserStats;
 export const get_user_tags_stat_path = API.statistics.getUserTagsStats;
 export const get_customer_comments_path_with_param =
   API.feedbacks.getCustomerWaiterPaginated;
+
+// Экспорты для работы с Telegram-чатами
+export const get_telegram_config_path = API.telegramConfig.getAll;
+export const create_telegram_config_path = API.telegramConfig.create;
+export const update_telegram_config_path = API.telegramConfig.update;
+export const delete_telegram_config_path = API.telegramConfig.delete;
 
 export default API;
