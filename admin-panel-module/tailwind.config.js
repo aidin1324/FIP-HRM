@@ -1,7 +1,7 @@
 import plugin from "tailwindcss/plugin";
 import forms from '@tailwindcss/forms';
 
-module.exports = {
+export default {
   content: [
     './index.html',
     './src/**/*.{js,jsx,ts,tsx}',

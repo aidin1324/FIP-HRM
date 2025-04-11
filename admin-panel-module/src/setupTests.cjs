@@ -1,8 +1,9 @@
+import { TextEncoder, TextDecoder } from 'util';
+
 require('@testing-library/jest-dom');
 require('regenerator-runtime/runtime');
 
 // Настройка текстового энкодера/декодера для react-router
-const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
@@ -210,3 +211,9 @@ jest.mock('./contexts/AuthContext', () => {
   };
 }, { virtual: true });
 */
+
+export default defineConfig({
+  optimizeDeps: {
+    include: ['lodash', 'moment'], // Добавьте проблемные библиотеки
+  },
+});
