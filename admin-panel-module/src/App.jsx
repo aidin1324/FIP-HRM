@@ -10,6 +10,7 @@ import "./charts/ChartjsConfig";
 import Layout from "./pages/Layout";
 import PrivateRoute from "./components/PrivateRoute";
 import LoadingFallback from "./components/LoadingFallback";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
 const Login = React.lazy(() => import("./pages/Login"));
@@ -18,7 +19,7 @@ const Register = React.lazy(() => import("./pages/Register"));
 const Users = React.lazy(() => import("./pages/Users"));
 const Unauthorized = React.lazy(() => import("./pages/Unauthorized"));
 const Comments = React.lazy(() => import("./pages/Comments"));
-const Requests = React.lazy(() => import("./pages/Requests"));
+import Requests from "./pages/Requests";
 const AfterRegister = React.lazy(() => import("./pages/AfterRegister"));
 const Contacts = React.lazy(() => import("./pages/Contacts"));
 const PageNotFound = React.lazy(() => import("./pages/404"));
@@ -79,7 +80,9 @@ function App() {
                 
                 <Route path="requests" element={
                   <PrivateRoute role={["admin", "manager"]}>
-                    <Requests />
+                    <ErrorBoundary>
+                      <Requests />
+                    </ErrorBoundary>
                   </PrivateRoute>
                 } />
                 

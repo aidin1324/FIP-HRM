@@ -24,11 +24,29 @@ export default defineConfig({
       'react', 
       'react-dom',
       '@testing-library/react'
-    ]
-  }, 
+    ],
+    esbuildOptions: {
+      loader: { '.js': 'jsx' }
+    }
+  },
   build: {
     commonjsOptions: {
       transformMixedEsModules: true,
+    },
+    // Улучшение работы с чанками для динамических импортов
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          pages: ['./src/pages/Dashboard.jsx', './src/pages/Requests.jsx']
+        }
+      }
     }
-  } 
+  },
+  // Добавляем возможность использовать исходный код при отладке
+  server: {
+    fs: {
+      strict: false
+    }
+  }
 })
