@@ -1,12 +1,12 @@
 const API_CONFIG = {
   development: {
-    baseURL: "http://localhost:8000",
+    baseURL: "http://backend:8000",
   },
   production: {
-    baseURL: "https://api.your-production-domain.com",
+    baseURL: "https://backend:8000",
   },
   test: {
-    baseURL: "http://localhost:8000",
+    baseURL: "http://backend:8000",
   },
 };
 

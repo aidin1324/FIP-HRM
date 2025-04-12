@@ -14,6 +14,6 @@ RUN [ "npm", "run", "build" ]
 
 RUN [ "npm", "install", "-g", "serve" ]
 
-RUN [ "serve", "-s", "dist" ]
-
 EXPOSE 5000
+
+CMD [ "serve", "-s", "build", "-l", "5000" ]
