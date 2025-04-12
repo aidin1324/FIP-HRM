@@ -1,34 +1,30 @@
 version: '3.8'
 
 services:
-  landing_app:
-    container_name: landing_app
+
+  admin-panel-module:
+    container_name: admin-panel-module
     build:
-      context: ./landing_page
+      context: ./admin-panel-module
       dockerfile: Dockerfile
-      args:
-        REACT_APP_API_BASE_URL: "http://backend:8000"
     ports:
       - "3000:3000"
-    environment:
-      - REACT_APP_API_BASE_URL=http://backend:8000
-    restart: always
     networks:
       - app-network
-  evaluate_app:
-    container_name: evaluate_app
+    depends_on:
+      - backend
+
+  evaluate:
+    container_name: evaluate
     build:
-      context: ./evaluate
+      context: ./evaluate/my-app
       dockerfile: Dockerfile
-      args:
-        REACT_APP_API_BASE_URL: "http://backend:8000"
     ports:
-      - "3001:3001"
-    environment:
-      - REACT_APP_API_BASE_URL=http://backend:8000
-    restart: always
+      - "5000:5000"
     networks:
       - app-network
+    depends_on:
+      - backend
 
   backend:
     build:
@@ -36,28 +32,19 @@ services:
       dockerfile: Dockerfile
     environment:
       - CONNECTION_STRING=${CONNECTION_STRING}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALGORITHM=${ALGORITHM}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - APP_URL=${APP_URL}
     ports:
       - "8000:8000"
-    restart: always
     networks:
       - app-network
-
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - backend
-      - landing_app
-      - evaluate_app
-    restart: always
-    networks:
-      - app-network
-
-volumes:
-  db_data:
 
 networks:
   app-network:
