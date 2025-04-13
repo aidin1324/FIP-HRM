@@ -8,10 +8,9 @@ export const validateToken = (token) => {
     if (!token) return false;
     
     const decoded = jwtDecode(token);
-    // Проверка срока действия токена
+    
     return decoded.exp * 1000 > Date.now();
   } catch (error) {
-    console.error('Ошибка при проверке токена:', error);
     return false;
   }
 };
@@ -76,19 +75,32 @@ export const AuthProvider = ({ children }) => {
 
   const refreshAccessToken = async (refreshToken) => {
     try {
-      const response = await apiClient.post('/auth/refresh', { refresh_token: refreshToken });
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://backend:8000';
+      const response = await fetch(`${apiBaseUrl}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ refresh_token: refreshToken })
+      });
       
-      if (response && response.access_token) {
-        const decoded = jwtDecode(response.access_token);
+      if (!response.ok) {
+        throw new Error(`Ошибка обновления токена: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data && data.access_token) {
+        const decoded = jwtDecode(data.access_token);
 
-        Cookies.set('access_token', response.access_token, { 
+        Cookies.set('access_token', data.access_token, { 
           expires: 1,
           secure: true,
           sameSite: 'strict'
         });
         
-        if (response.refresh_token) {
-          Cookies.set('refresh_token', response.refresh_token, { 
+        if (data.refresh_token) {
+          Cookies.set('refresh_token', data.refresh_token, { 
             expires: 7,
             secure: true,
             sameSite: 'strict'
@@ -96,8 +108,8 @@ export const AuthProvider = ({ children }) => {
         }
         
         setAuth({
-          access_token: response.access_token,
-          refresh_token: response.refresh_token || refreshToken,
+          access_token: data.access_token,
+          refresh_token: data.refresh_token || refreshToken,
           user: {
             id: decoded.id,
             email: decoded.email,
@@ -110,7 +122,6 @@ export const AuthProvider = ({ children }) => {
       
       return false;
     } catch (error) {
-      console.error('Ошибка при обновлении токена:', error);
       logout();
       return false;
     }
