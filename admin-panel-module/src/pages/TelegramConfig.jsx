@@ -7,8 +7,6 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 const makeApiRequest = async (endpoint, method = 'GET', data = null) => {
   try {
-    console.log('Выполняется запрос:', `${apiBaseUrl}${endpoint}`, method);
-    
     const options = {
       method,
       headers: {
@@ -26,7 +24,6 @@ const makeApiRequest = async (endpoint, method = 'GET', data = null) => {
     
     return method === 'DELETE' ? true : await response.json();
   } catch (error) {
-    console.error("API request error:", error);
     throw error;
   }
 };
