@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import './NPS-form.css';
 import zernoLogo from '../components/img/logo.png';
 
-const GET_USER_BY_PAGINATION_AND_SORT = 'http://localhost:8000/users/get_user_with_pagination'; // Replace with your actual endpoint
-const SUBMIT_FEEDBACK = 'http://localhost:8000/feedbacks/create'; 
+const GET_USER_BY_PAGINATION_AND_SORT = 'http://165.22.213.129:8000/users/get_user_with_pagination'; // Replace with your actual endpoint
+const SUBMIT_FEEDBACK = 'http://165.22.213.129:8000/feedbacks/create'; 
 function NPSForm() {
   const navigate = useNavigate();
 

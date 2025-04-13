@@ -3,7 +3,7 @@ const API_CONFIG = {
     baseURL: "http://localhost:8000",
   },
   production: {
-    baseURL: "http://localhost:8000",
+    baseURL: "http://165.22.213.129:8000",
   },
   test: {
     baseURL: "http://localhost:8000",

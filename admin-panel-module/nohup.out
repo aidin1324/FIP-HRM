@@ -1,0 +1,22 @@
+
+> mosaic-react@0.1.0 dev
+> vite --host 0.0.0.0
+
+
+  VITE v6.2.6  ready in 491 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://165.22.213.129:5173/
+  ➜  Network: http://10.47.0.5:5173/
+  ➜  Network: http://10.122.0.2:5173/
+9:12:13 PM [vite] (client) hmr update /src/contexts/RoleContext.jsx, /src/css/style.css, /src/contexts/FilterContext.jsx, /src/components/DropdownProfile.jsx, /src/pages/Login.jsx
+9:12:15 PM [vite] (client) hmr invalidate /src/contexts/RoleContext.jsx Could not Fast Refresh ("RoleContext" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+9:12:15 PM [vite] (client) page reload src/contexts/RoleContext.jsx
+9:12:15 PM [vite] (client) hmr invalidate /src/contexts/FilterContext.jsx Could not Fast Refresh ("FilterContext" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+9:12:15 PM [vite] (client) hmr update /src/App.jsx, /src/css/style.css
+9:14:47 PM [vite] (client) hmr update /src/contexts/RoleContext.jsx, /src/css/style.css, /src/contexts/FilterContext.jsx, /src/components/DropdownProfile.jsx, /src/pages/Login.jsx
+9:14:48 PM [vite] (client) hmr invalidate /src/contexts/RoleContext.jsx Could not Fast Refresh ("RoleContext" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+9:14:48 PM [vite] (client) page reload src/contexts/RoleContext.jsx
+9:14:48 PM [vite] (client) hmr invalidate /src/contexts/FilterContext.jsx Could not Fast Refresh ("FilterContext" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+9:14:48 PM [vite] (client) hmr update /src/App.jsx, /src/css/style.css
+9:20:39 PM [vite] (client) page reload index.html

@@ -1,0 +1,382 @@
+INFO:     Started server process [13406]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [13406]
+INFO:     Started server process [13929]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno -2] Name or service not known
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Started server process [14080]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [14080]
+INFO:     Started server process [14116]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     94.143.197.130:52542 - "GET /docs HTTP/1.1" 200 OK
+INFO:     94.143.197.130:52542 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53103 - "GET / HTTP/1.1" 404 Not Found
+INFO:     94.143.197.130:53115 - "GET /docs HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53115 - "GET /openapi.json HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53345 - "GET /feedbacks/get_all_feedbacks HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53348 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53345 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53348 - "GET /feedbacks/get_all_feedbacks HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53345 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53345 - "GET /roles/get_all HTTP/1.1" 200 OK
+(trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/root/.cache/pypoetry/virtualenvs/backend-4dvpHYtk-py3.12/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53345 - "POST /auth/login HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53348 - "GET /roles/get_all HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53345 - "GET /users/get_user_with_pagination?limit=10 HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53345 - "OPTIONS /users/get_user/1 HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53348 - "OPTIONS /users/get_user/1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53348 - "GET /users/get_user/1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53374 - "GET /feedbacks/get_all_feedbacks HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53374 - "GET /feedbacks/get_all_feedbacks HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53387 - "POST /auth/login HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53387 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53388 - "GET /users/get_user_with_pagination?limit=10 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53388 - "GET /users/get_user/1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53387 - "GET /users/get_user/1 HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53394 - "OPTIONS /registration_requests/get_all HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53393 - "OPTIONS /registration_requests/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53394 - "POST /registration_requests/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53393 - "POST /registration_requests/get_all HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53419 - "OPTIONS /registration_requests/register HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53419 - "POST /registration_requests/register HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53420 - "POST /auth/login HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53420 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53428 - "GET /users/get_user_with_pagination?limit=10 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53428 - "GET /users/get_user/1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53420 - "GET /users/get_user/1 HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53437 - "OPTIONS /comments/get-customer-waiter-feedbacks-paginated?limit=5 HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53438 - "OPTIONS /comments/get-customer-waiter-feedbacks-paginated?limit=5 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53438 - "GET /comments/get-customer-waiter-feedbacks-paginated?limit=5 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53438 - "GET /feedbacks/get_all_feedbacks HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53438 - "GET /feedbacks/get_all_feedbacks HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53438 - "POST /registration_requests/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53437 - "POST /registration_requests/get_all HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53437 - "OPTIONS /registration_requests/status?request_id=1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53438 - "POST /registration_requests/status?request_id=1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53523 - "GET /users/get_user_with_pagination?limit=1000&_=1744320344353 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53524 - "GET /users/get_user_with_pagination?limit=1000&_=1744320344365 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53527 - "GET /users/get_user_with_pagination?limit=1000&_=1744320344475 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53538 - "GET /users/get_user_with_pagination?limit=1000&_=1744320355788 HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53544 - "OPTIONS /comments/get-customer-waiter-feedbacks-paginated?waiter_id=1&limit=3 HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53548 - "OPTIONS /comments/get-customer-waiter-feedbacks-paginated?waiter_id=1&limit=3 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53545 - "GET /users/get_user/1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53546 - "GET /stats/get_stats/1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53547 - "GET /stats/get_tags_stats/1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53548 - "GET /comments/get-customer-waiter-feedbacks-paginated?waiter_id=1&limit=3 HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53549 - "OPTIONS /users/update_user/1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53549 - "PATCH /users/update_user/1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53556 - "PATCH /users/update_user/1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53556 - "GET /users/get_user_with_pagination?limit=1000&_=1744320378638 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53563 - "GET /users/get_user_with_pagination?limit=1000&_=1744320378651 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53563 - "GET /users/get_user_with_pagination?limit=1000&_=1744320378755 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53577 - "GET /feedbacks/get_all_feedbacks HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53577 - "GET /feedbacks/get_all_feedbacks HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53586 - "POST /auth/login HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53586 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53587 - "GET /users/get_user_with_pagination?limit=10 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53587 - "GET /users/get_user/1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53586 - "GET /users/get_user/1 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53601 - "GET /users/get_user_with_pagination?limit=1000&_=1744320402537 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53602 - "GET /users/get_user_with_pagination?limit=1000&_=1744320402547 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53603 - "GET /users/get_user_with_pagination?limit=1000&_=1744320402655 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53605 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53605 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53605 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53605 - "GET /roles/get_all HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53618 - "OPTIONS /users/update_user/2 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53618 - "PATCH /users/update_user/2 HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53618 - "GET /users/get_user_with_pagination?limit=1000&_=1744320416099 HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53822 - "OPTIONS /users/get_user_with_pagination?role=%D0%BE%D1%84%D0%B8%D1%86%D0%B8%D0%B0%D0%BD%D1%82&cursor=0&limit=100&sort_by=first_name&ascending=true&active=true HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53822 - "GET /users/get_user_with_pagination?role=%D0%BE%D1%84%D0%B8%D1%86%D0%B8%D0%B0%D0%BD%D1%82&cursor=0&limit=100&sort_by=first_name&ascending=true&active=true HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53834 - "GET /users/get_user_with_pagination?role=%D0%BE%D1%84%D0%B8%D1%86%D0%B8%D0%B0%D0%BD%D1%82&cursor=0&limit=100&sort_by=first_name&ascending=true&active=true HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53834 - "GET /users/get_user_with_pagination?role=%D0%BE%D1%84%D0%B8%D1%86%D0%B8%D0%B0%D0%BD%D1%82&cursor=0&limit=100&sort_by=first_name&ascending=true&active=true HTTP/1.1" 200 OK
+INFO:     94.143.197.130:53865 - "OPTIONS /feedbacks/create HTTP/1.1" 200 OK
+POOL STATS
+
+Открытых соединений: 20
+Ожидающих соединений: 1
+SENDING FROM BOT:7952351484:AAHXdonU4w5SQBtpbEs0lutFaz9qRnv1q-c
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53865 - "POST /feedbacks/create HTTP/1.1" 200 OK
+Message sent successfully.
+Message sent successfully.
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53867 - "GET /feedbacks/get_all_feedbacks HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     94.143.197.130:53867 - "GET /feedbacks/get_all_feedbacks HTTP/1.1" 200 OK
+INFO:     205.210.31.203:64734 - "GET / HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.31:61684 - "GET / HTTP/1.1" 404 Not Found
+INFO:     15.235.224.227:41838 - "GET / HTTP/1.1" 404 Not Found
+CLOSING SESSION
+
+
+INFO:     212.112.104.75:50349 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     212.112.104.75:21312 - "GET /feedbacks/get_all_feedbacks HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     212.112.104.75:50349 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     212.112.104.75:21312 - "GET /feedbacks/get_all_feedbacks HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     212.112.104.75:50349 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     212.112.104.75:50349 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     212.112.104.75:50359 - "POST /auth/login HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     212.112.104.75:50359 - "GET /roles/get_all HTTP/1.1" 200 OK
+CLOSING SESSION
+
+
+INFO:     212.112.104.75:55702 - "GET /users/get_user_with_pagination?limit=10 HTTP/1.1" 200 OK
+INFO:     212.112.104.75:50476 - "GET /docs HTTP/1.1" 200 OK
+INFO:     212.112.104.75:50476 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     15.235.224.227:47636 - "GET / HTTP/1.1" 404 Not Found
+INFO:     193.210.231.47:46611 - "GET / HTTP/1.0" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     134.199.159.199:54394 - "GET / HTTP/1.1" 404 Not Found
+INFO:     134.199.159.199:54400 - "GET /login HTTP/1.1" 404 Not Found
+INFO:     5.79.219.172:35772 - "GET / HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.235:62434 - "GET / HTTP/1.1" 404 Not Found
+INFO:     216.218.206.97:32869 - "GET / HTTP/1.1" 404 Not Found
+INFO:     216.218.206.97:27211 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     216.218.206.77:19553 - "GET /?format=json HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [14116]
