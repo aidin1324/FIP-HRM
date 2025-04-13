@@ -3,10 +3,11 @@ import { useThemeProvider } from "../utils/ThemeContext";
 import Cookies from 'js-cookie'; 
 
 const TELEGRAM_CONFIG_PATH = "/config_json/config/telegram_chat_ids";
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 const makeApiRequest = async (endpoint, method = 'GET', data = null) => {
   try {
-    const url = `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}${endpoint}`;
+    console.log('Выполняется запрос:', `${apiBaseUrl}${endpoint}`, method);
     
     const options = {
       method,
@@ -17,7 +18,7 @@ const makeApiRequest = async (endpoint, method = 'GET', data = null) => {
       body: data ? JSON.stringify(data) : undefined
     };
     
-    const response = await fetch(url, options);
+    const response = await fetch(`${apiBaseUrl}${endpoint}`, options);
     
     if (!response.ok) {
       throw new Error(`Ошибка запроса: ${response.status}`);

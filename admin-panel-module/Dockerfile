@@ -12,6 +12,9 @@ RUN npm i -g serve
 
 COPY . .
 
+# Копируем Docker-специфичный .env файл
+COPY .env.docker .env
+
 RUN npm run build
 
 EXPOSE 3000
