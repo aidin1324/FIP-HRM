@@ -3,10 +3,11 @@ import { useThemeProvider } from "../utils/ThemeContext";
 import Cookies from 'js-cookie'; 
 
 const TELEGRAM_CONFIG_PATH = "/config_json/config/telegram_chat_ids";
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const apiBaseUrl = "http://165.22.213.129:8000";
 
 const makeApiRequest = async (endpoint, method = 'GET', data = null) => {
   try {
+    console.log('Токен авторизации:', Cookies.get('access_token') ? 'Существует' : 'Отсутствует');
     const options = {
       method,
       headers: {
@@ -16,6 +17,7 @@ const makeApiRequest = async (endpoint, method = 'GET', data = null) => {
       body: data ? JSON.stringify(data) : undefined
     };
     
+    console.log('Используемый API URL:', apiBaseUrl + endpoint);
     const response = await fetch(`${apiBaseUrl}${endpoint}`, options);
     
     if (!response.ok) {
