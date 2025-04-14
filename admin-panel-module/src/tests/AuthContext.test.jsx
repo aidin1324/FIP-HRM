@@ -85,13 +85,13 @@ describe('AuthContext', () => {
     
     expect(Cookies.set).toHaveBeenCalledWith('access_token', 'new-access-token', expect.objectContaining({
       expires: 1,
-      secure: true,
+      secure: false,
       sameSite: 'strict'
     }));
     
     expect(Cookies.set).toHaveBeenCalledWith('refresh_token', 'new-refresh-token', expect.objectContaining({
       expires: 7,
-      secure: true,
+      secure: false,
       sameSite: 'strict'
     }));
     

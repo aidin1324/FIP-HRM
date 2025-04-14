@@ -95,14 +95,14 @@ export const AuthProvider = ({ children }) => {
 
         Cookies.set('access_token', data.access_token, { 
           expires: 1,
-          secure: true,
+          secure: false,
           sameSite: 'strict'
         });
         
         if (data.refresh_token) {
           Cookies.set('refresh_token', data.refresh_token, { 
             expires: 7,
-            secure: true,
+            secure: false,
             sameSite: 'strict'
           });
         }
@@ -133,14 +133,14 @@ export const AuthProvider = ({ children }) => {
 
       Cookies.set('access_token', accessToken, { 
         expires: 1, 
-        secure: true,
+        secure: false,
         sameSite: 'strict',
       });
       
       if (refreshToken) {
         Cookies.set('refresh_token', refreshToken, { 
           expires: 7,
-          secure: true,
+          secure: false,
           sameSite: 'strict'
         });
       }
