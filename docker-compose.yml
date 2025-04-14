@@ -20,7 +20,7 @@ services:
       context: ./evaluate/my-app
       dockerfile: Dockerfile
     ports:
-      - "5001:5000"
+      - "5000:5000"
     networks:
       - app-network
     depends_on:
