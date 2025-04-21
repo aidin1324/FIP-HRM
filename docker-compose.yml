@@ -8,7 +8,7 @@ services:
       context: ./admin-panel-module
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "5001:3000"
     networks:
       - app-network
     depends_on:
@@ -20,11 +20,24 @@ services:
       context: ./evaluate/my-app
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "3000:5000"
     networks:
       - app-network
     depends_on:
       - backend
+
+  feedback_agent:
+    build:
+      context: ./feedback-agent
+      dockerfile: Dockerfile
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+    ports:
+      - "8001:8000"
+    networks:
+      - app-network
 
   backend:
     build:
